@@ -1,0 +1,97 @@
+{
+  "topic": "networking",
+  "title": "Network Reference",
+  "hotkey": "F1",
+  "command": "codex networking",
+  "description": "IPv4 addressing, the TCP/IP and OSI models, port states, and service banners — the foundation for everything in Act I: Network 101.",
+  "entries": [
+    {
+      "id": "ipv4-cidr",
+      "term": "IPv4 Addressing & CIDR Notation",
+      "category": "Addressing",
+      "summary": "An IPv4 address is 32 bits split into 4 octets; CIDR notation (`/24`) says how many of those bits are the fixed network portion.",
+      "body": "An IPv4 address like `10.42.0.1` is really 32 bits, written as four 8-bit octets (0-255) separated by dots. CIDR notation appends a slash and a number — e.g. `/24` — that says how many of the 32 bits are fixed as the 'network' portion. A `/24` fixes the first 3 octets (24 bits), leaving the last 8 bits (256 possible values, 254 usable host addresses after reserving the network and broadcast addresses) free to identify individual hosts on that subnet. Smaller CIDR numbers mean bigger networks: a `/16` fixes only 16 bits and leaves 65,534 usable host addresses.",
+      "example": "10.42.0.0/24\n  Network bits (fixed):  10.42.0.___  (24 bits)\n  Host bits (variable):  ___.___.___.1-254  (8 bits = 254 usable hosts)",
+      "relatedEpisodes": [1],
+      "relatedCommands": ["netmap", "ping"],
+      "seeAlso": ["osi-vs-tcpip"]
+    },
+    {
+      "id": "osi-vs-tcpip",
+      "term": "OSI 7-Layer Model vs. TCP/IP 4-Layer Model",
+      "category": "Models",
+      "summary": "OSI is the 7-layer theoretical teaching model; TCP/IP is the simpler 4-layer model that actually runs the real internet.",
+      "body": "The OSI model breaks networking into 7 conceptual layers; the TCP/IP model (what the real internet actually uses) collapses those into 4. Both describe the same reality at different resolutions — OSI is more useful for teaching and troubleshooting language, TCP/IP is more useful for understanding what's actually implemented.",
+      "example": "OSI (7 layers)         TCP/IP (4 layers)\n7. Application     ┐\n6. Presentation     ├──►  4. Application  (HTTP, DNS, SSH banners live here)\n5. Session          ┘\n4. Transport        ──►  3. Transport     (TCP/UDP, ports, the 3-way handshake)\n3. Network          ──►  2. Internet      (IP addressing, routing)\n2. Data Link        ┐\n1. Physical          ┴──►  1. Link          (Ethernet, Wi-Fi, physical wire/radio)",
+      "relatedEpisodes": [3],
+      "relatedCommands": ["inspect"],
+      "seeAlso": ["service-banners"]
+    },
+    {
+      "id": "icmp-ping",
+      "term": "ICMP & Ping (Echo Request / Echo Reply)",
+      "category": "Diagnostics",
+      "summary": "Ping sends an ICMP Echo Request and measures the Echo Reply's round-trip time and TTL to tell you a host is alive and roughly how far away it is.",
+      "body": "ICMP (Internet Control Message Protocol) is a Layer 3 protocol used for diagnostics, not general data transfer. `ping` sends an ICMP Echo Request and waits for an Echo Reply. Two numbers matter: RTT (round-trip time) tells you the network distance/latency, and TTL (Time To Live) is a hop-counter that decrements at every router the packet crosses — the starting TTL value (commonly 64 for Linux, 128 for Windows, 255 for some network gear) is a rough fingerprint of the responding host's operating system.",
+      "example": "64 bytes from 10.42.0.1: icmp_seq=1 ttl=64 time=3.82 ms\n                                    ^^^^^^      ^^^^^^^^\n                          starting TTL=64        round-trip time\n                          (likely Linux/Unix)    (network distance)",
+      "relatedEpisodes": [1],
+      "relatedCommands": ["ping", "netmap"],
+      "seeAlso": ["ipv4-cidr"]
+    },
+    {
+      "id": "tcp-handshake",
+      "term": "TCP 3-Way Handshake & Control Flags",
+      "category": "Transport",
+      "summary": "TCP connections always open with SYN, SYN-ACK, ACK — three packets, in that order, every time.",
+      "body": "TCP is connection-oriented: before any data flows, both sides perform a 3-way handshake. The client sends a SYN (synchronize) flag to propose a connection. If the port is open, the server replies with SYN-ACK (synchronize-acknowledge). The client finishes with a plain ACK (acknowledge), and the connection is established. If the port is closed, the server immediately replies with RST (reset) instead of SYN-ACK. If the port is filtered by a firewall, there's often no reply at all — which is what makes filtered ports look identical to a machine that isn't even there, unless you know to expect a RST from a genuinely closed one.",
+      "example": "Client                          Server\n  |------ SYN --------------------->|   \"I'd like to connect\"\n  |<----- SYN, ACK ------------------|   \"OK, connect\"\n  |------ ACK -------------------->|   \"Confirmed\"\n  (connection established, data can now flow)\n\nClosed port:   client SYN ──► server RST,ACK   (immediate rejection)\nFiltered port: client SYN ──► (nothing — dropped silently)",
+      "example2": "TCP control flags: SYN (start), ACK (acknowledge), RST (abort/reject), FIN (graceful close)",
+      "relatedEpisodes": [2],
+      "relatedCommands": ["portscan"],
+      "seeAlso": ["port-states", "well-known-ports"]
+    },
+    {
+      "id": "port-states",
+      "term": "Port States: Open vs. Closed vs. Filtered",
+      "category": "Transport",
+      "summary": "Open replies SYN-ACK, closed replies RST, filtered replies with nothing at all — three very different meanings behind 'no response looks the same either way.'",
+      "body": "A port scan can only ever discover one of three states. Open means a service is actively listening and completed the handshake. Closed means nothing is listening, but the host still actively rejects the connection with a RST — a fast, informative 'no.' Filtered means a firewall rule dropped the packet before it ever reached the host, giving you total silence — you can't tell from a filtered port alone whether anything is even running behind it. That silence is deliberate: firewalls are designed to make filtered ports indistinguishable from a host that doesn't exist at all.",
+      "relatedEpisodes": [2],
+      "relatedCommands": ["portscan"],
+      "seeAlso": ["tcp-handshake"]
+    },
+    {
+      "id": "well-known-ports",
+      "term": "Well-Known Ports Directory",
+      "category": "Reference Table",
+      "summary": "The standard port numbers you'll see in almost every recon phase.",
+      "body": "Ports below 1024 are 'well-known' and reserved by convention for specific standard services. Recognizing them on sight tells you what a machine is likely running before you even grab a banner.",
+      "example": "Port  Protocol         Service\n  21    TCP              FTP (File Transfer Protocol, control channel)\n  22    TCP              SSH (Secure Shell — encrypted remote access)\n  23    TCP              Telnet (unencrypted remote access — legacy/dangerous)\n  25    TCP              SMTP (outgoing email)\n  53    TCP/UDP          DNS (domain name resolution)\n  80    TCP              HTTP (unencrypted web traffic)\n  443   TCP              HTTPS (TLS-encrypted web traffic)\n  3306  TCP              MySQL (database, should never face the public internet)\n  8080  TCP              HTTP alternate (common for dev/admin panels)",
+      "relatedEpisodes": [2, 3],
+      "relatedCommands": ["portscan", "banner-grab"],
+      "seeAlso": ["port-states"]
+    },
+    {
+      "id": "service-banners",
+      "term": "Service Banners & Information Disclosure",
+      "category": "Recon",
+      "summary": "Many services announce their exact software name and version to anyone who connects — a free gift to an attacker.",
+      "body": "When you connect to many services (especially older ones), the very first thing they send back is a banner: plain text identifying the software and often the exact version number. This is convenient for legitimate administrators and a gift to attackers, because an exact version number can be looked up directly against known vulnerability databases (see the Pentest Methodology codex for CVE lookups). Modern hardened deployments deliberately suppress or genericize banners for exactly this reason.",
+      "example": "<<< HTTP/1.0 200 OK\n<<< Server: Aether-HyperLink/1.8.4 (OS: SynthOS-x86)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n           exact software, version, and OS — all free intel",
+      "relatedEpisodes": [3],
+      "relatedCommands": ["banner-grab", "inspect"],
+      "seeAlso": ["cleartext-vs-encrypted"]
+    },
+    {
+      "id": "cleartext-vs-encrypted",
+      "term": "Cleartext vs. Encrypted Protocols",
+      "category": "Confidentiality",
+      "summary": "HTTP, Telnet, and FTP send everything as readable plain text; HTTPS, SSH, and TLS wrap the same data in encryption so a sniffer only sees noise.",
+      "body": "A cleartext protocol transmits its payload — including credentials, session tokens, and application data — as plain, human-readable text across the wire. Anyone able to observe the traffic (a shared network, a compromised router, a malicious Wi-Fi hotspot) can read it directly. The encrypted counterparts of the same protocols (HTTP → HTTPS, Telnet → SSH, FTP → SFTP/FTPS) wrap the payload in TLS or an equivalent encryption layer first, so an observer only sees encrypted noise. A cleartext session cookie or password is not 'hidden' in any meaningful sense — it's simply not obviously readable at a glance until someone captures the traffic.",
+      "example": "Cleartext (HTTP):   Set-Cookie: SESSION=admin123        <- readable instantly\nEncrypted (HTTPS):  Set-Cookie: SESSION=8f3a...(TLS-wrapped)  <- unreadable without breaking TLS",
+      "relatedEpisodes": [3],
+      "relatedCommands": ["banner-grab", "inspect"],
+      "seeAlso": ["service-banners"]
+    }
+  ]
+}

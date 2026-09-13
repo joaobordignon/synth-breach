@@ -1,0 +1,115 @@
+{
+  "topic": "cryptography",
+  "title": "Crypto Reference",
+  "hotkey": "F1",
+  "command": "codex cryptography",
+  "description": "Encoding vs. encryption vs. hashing, classical and modern ciphers, and why password storage lives or dies on salting — the foundation for Act II: Cryptography.",
+  "entries": [
+    {
+      "id": "encoding-vs-encryption-vs-hashing",
+      "term": "Encoding vs. Encryption vs. Hashing",
+      "category": "Fundamentals",
+      "summary": "Encoding is reversible with no key (Base64); encryption is reversible only with a key (AES, XOR); hashing is not reversible at all (MD5, SHA-256).",
+      "body": "These three get confused constantly, but they solve completely different problems. Encoding transforms data into a different format so it can be transmitted reliably (e.g. binary data safely inside a text-based protocol) — anyone can reverse it instantly, with no secret required; it offers zero confidentiality. Encryption transforms data so that only someone holding the correct key can reverse it back to plaintext — it's designed for confidentiality. Hashing produces a fixed-length fingerprint of data that cannot be reversed back to the original at all — it's designed for integrity verification and one-way comparison (like storing passwords), not for hiding-then-retrieving a message.",
+      "example": "Encoding:   \"hello\" --base64--> \"aGVsbG8=\"   --base64 decode--> \"hello\"   (no key needed, anyone can reverse it)\nEncryption: \"hello\" --AES+key--> \"8f3a91c2\"  --AES+key decrypt--> \"hello\"   (only reversible WITH the key)\nHashing:    \"hello\" --SHA-256--> \"2cf24dba5fb0a30e...\"  (one-way — cannot be reversed to \"hello\" at all)",
+      "relatedEpisodes": [4, 6],
+      "relatedCommands": ["decode", "hash-identify"],
+      "seeAlso": ["base64-mechanics", "one-way-hashes"]
+    },
+    {
+      "id": "base64-mechanics",
+      "term": "Base64 Mechanics",
+      "category": "Encoding",
+      "summary": "Base64 repacks 8-bit bytes into 6-bit chunks using a 64-character alphabet, padding the end with `=` so the output length is always a multiple of 4.",
+      "body": "Base64 exists to safely carry arbitrary binary data through systems designed for text (early email, URLs, cookies). It takes 3 bytes (24 bits) at a time and re-slices them into four 6-bit groups, each mapped to one of 64 printable characters (A-Z, a-z, 0-9, +, /). When the input isn't a multiple of 3 bytes, `=` padding characters fill out the last group — which is why Base64 strings almost always end in `=` or `==`, and it's the single fastest tell that a string is encoded rather than encrypted or hashed.",
+      "example": "\"Man\" (3 bytes = 24 bits)\n  M=01001101  a=01100001  n=01101110\n  regrouped into 6-bit chunks: 010011 010110 000101 101110\n  mapped to Base64 alphabet:      T      W      F      u\n  Result: \"TWFu\"\n\nPadding example: \"hi\" (2 bytes) --base64--> \"aGk=\"   (one '=' pads the incomplete final group)",
+      "relatedEpisodes": [3, 4],
+      "relatedCommands": ["decode", "hexview"],
+      "seeAlso": ["encoding-vs-encryption-vs-hashing", "hex-ascii"]
+    },
+    {
+      "id": "hex-ascii",
+      "term": "Hexadecimal & ASCII Representation",
+      "category": "Encoding",
+      "summary": "Hex is just base-16 — a compact, human-typeable way to write the exact same bytes that ASCII text represents.",
+      "body": "Hexadecimal uses 16 symbols (0-9, then A-F) where each hex digit represents exactly 4 bits, so two hex digits represent one full byte (0x00-0xFF). It's commonly used to display raw binary or ASCII byte values in a form that's easier to read and type than binary, and it's reversible with a straightforward lookup table — there's no secrecy involved, only a different notation for the same underlying bytes.",
+      "example": "ASCII 'D' = decimal 68 = binary 01000100 = hex 0x44\n\nHex stream:  44 49 52 45 43 54 4f 52\nASCII:        D  I  R  E  C  T  O  R",
+      "relatedEpisodes": [4],
+      "relatedCommands": ["hexview"],
+      "seeAlso": ["base64-mechanics"]
+    },
+    {
+      "id": "caesar-cipher",
+      "term": "Classical Substitution: Caesar / ROT Ciphers",
+      "category": "Classical Ciphers",
+      "summary": "Every letter is shifted the same fixed number of positions through the alphabet — trivially broken by frequency analysis or just trying all 25 shifts.",
+      "body": "A Caesar cipher shifts every letter in the plaintext by a fixed number of positions in the alphabet (the 'key'). Because there are only 25 possible non-zero shifts for the Latin alphabet, it can be broken instantly by brute force — trying every shift and reading off which one produces recognizable words. It can also be broken via frequency analysis: in English, 'E' is the most common letter, so the most frequent letter in the ciphertext is very likely 'E' shifted by the key, which reveals the shift directly without even trying all 25.",
+      "example": "Plaintext:  THE PROJECT IS MOVING TO SUBNET GAMMA\nShift +3:   WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD   (each letter moved 3 forward)\n\nTo decrypt, shift backward by the same amount (shift -3, equivalently ROT-23).",
+      "relatedEpisodes": [5],
+      "relatedCommands": ["cipher-crack"],
+      "seeAlso": ["xor-encryption"]
+    },
+    {
+      "id": "xor-encryption",
+      "term": "Bitwise XOR Encryption",
+      "category": "Symmetric Ciphers",
+      "summary": "XOR-ing plaintext with a key produces ciphertext; XOR-ing that ciphertext with the same key again perfectly recovers the plaintext — XOR is its own inverse.",
+      "body": "XOR (exclusive OR) is a bitwise operation where each output bit is 1 only if exactly one of the two input bits is 1. Its key cryptographic property: `A XOR B XOR B = A` — applying the same key twice cancels out and returns the original value. This makes XOR the simplest possible symmetric stream cipher: `ciphertext = plaintext XOR key`, and `plaintext = ciphertext XOR key` uses the identical operation to reverse it. The catch is that a single-byte XOR key repeating across a long message is extremely weak (patterns repeat and leak through frequency analysis), which is exactly why real stream ciphers use long, non-repeating keystreams instead of one fixed byte.",
+      "example": "Plaintext byte:   01010011  (0x53)\nKey byte:         01000010  (0x42)\nXOR (encrypt):    00010001  (0x11)  <- ciphertext\n\nXOR again with the same key to decrypt:\nCiphertext:       00010001  (0x11)\nKey byte:         01000010  (0x42)\nXOR (decrypt):    01010011  (0x53)  <- back to the original plaintext",
+      "relatedEpisodes": [5],
+      "relatedCommands": ["xor-decrypt"],
+      "seeAlso": ["caesar-cipher", "symmetric-vs-asymmetric"]
+    },
+    {
+      "id": "symmetric-vs-asymmetric",
+      "term": "Symmetric vs. Asymmetric Cryptography",
+      "category": "Modern Cryptography",
+      "summary": "Symmetric crypto uses one shared key for both encrypting and decrypting; asymmetric crypto uses a mathematically linked key pair — a public key anyone can use to encrypt, and a private key only the owner holds to decrypt or sign.",
+      "body": "Symmetric algorithms (AES, and the XOR/Caesar toy ciphers above) use the same secret key on both ends — fast, but both parties need a way to share that key securely first. Asymmetric algorithms (RSA, and elliptic-curve variants) generate a mathematically linked key pair: anything encrypted with the public key can only be decrypted with the matching private key, and vice-versa for digital signatures — anything signed with a private key can be verified by anyone holding the public key, proving authorship without ever exposing the private key itself. Real-world systems (like TLS/HTTPS) typically use asymmetric crypto only to securely exchange a symmetric session key, then switch to fast symmetric encryption for the actual data — getting the security benefits of asymmetric key exchange without paying its speed cost for every byte transferred.",
+      "relatedEpisodes": [5],
+      "seeAlso": ["xor-encryption"]
+    },
+    {
+      "id": "one-way-hashes",
+      "term": "One-Way Hash Functions & the Avalanche Effect",
+      "category": "Hashing",
+      "summary": "A hash is a fixed-length fingerprint of input data — deterministic, one-way, and designed so that even a 1-bit change in the input scrambles the entire output.",
+      "body": "A cryptographic hash function (MD5, SHA-1, SHA-256) takes input of any size and produces a fixed-length output (MD5: 128 bits/32 hex characters; SHA-256: 256 bits/64 hex characters). It's deterministic (same input always produces the same hash), one-way (there is no mathematical operation to reverse a hash back to its input), and exhibits the avalanche effect — changing even a single bit of the input completely scrambles the output, with no partial-credit resemblance between the two hashes. This is why hashes are used to verify integrity (does this file match what I expect?) and to store passwords (compare hashes, never store or compare plaintext) — never to 'encrypt' something you intend to later reveal, because there's no decrypt operation for a hash. MD5 and SHA-1 are cryptographically broken for security purposes (collisions have been demonstrated) and should never be used for anything security-sensitive in a real system; SHA-256 or better is the current baseline.",
+      "example": "MD5(\"hello\") = 5d41402abc4b2a76b9719d911017c592\nMD5(\"Hello\") = 8ad8757baa8564dc136c1e07507f4a98   <- one capital letter, completely different hash",
+      "relatedEpisodes": [6],
+      "relatedCommands": ["hash-identify", "crack"],
+      "seeAlso": ["hash-collisions-rainbow-tables"]
+    },
+    {
+      "id": "hash-collisions-rainbow-tables",
+      "term": "Hash Collisions & Rainbow Tables",
+      "category": "Hashing",
+      "summary": "A collision is two different inputs producing the same hash; a rainbow table is a precomputed lookup of hashes to their known plaintext, making unsalted-hash cracking nearly instant.",
+      "body": "A hash collision occurs when two different inputs happen to produce the identical hash output — theoretically inevitable for any fixed-length hash given infinite possible inputs, but practically catastrophic when it can be deliberately engineered (as with broken algorithms like MD5). A rainbow table is a massive precomputed database mapping common plaintexts (dictionary words, common passwords, previously breached passwords) directly to their hash values. If an attacker has a target hash and a rainbow table containing it, cracking is just a lookup — no computation required, essentially instant. This is exactly why salting exists.",
+      "relatedEpisodes": [6],
+      "relatedCommands": ["hash-identify", "crack"],
+      "seeAlso": ["salting-and-kdfs"]
+    },
+    {
+      "id": "salting-and-kdfs",
+      "term": "Password Salting & Modern Key Derivation Functions",
+      "category": "Password Storage",
+      "summary": "A salt is random per-user data mixed in before hashing, defeating rainbow tables entirely; modern systems use slow, purpose-built functions like bcrypt or Argon2 instead of fast general-purpose hashes.",
+      "body": "A salt is a random value generated uniquely for each user, stored alongside (not secret from) the hash, and combined with the password before hashing: `hash(password + salt)`. Because every user's salt is different, the same password produces a completely different hash for every user, which makes precomputed rainbow tables useless — an attacker would need a separate table per salt, which defeats the entire point of precomputing anything. Beyond salting, modern systems avoid general-purpose fast hashes (MD5, SHA-256) for password storage entirely and use algorithms deliberately designed to be slow and memory-hard — bcrypt and Argon2 — so that even a successful breach of the password database makes brute-forcing every individual password computationally expensive, one guess at a time, rather than millions of guesses per second.",
+      "example": "Without salt:  hash(\"password123\") is IDENTICAL for every user who chose that password\nWith salt:     hash(\"password123\" + \"a8f3\") for user A  !=  hash(\"password123\" + \"91cd\") for user B\n               -> identical passwords now produce completely different stored hashes",
+      "relatedEpisodes": [6],
+      "relatedCommands": ["hash-identify", "crack"],
+      "seeAlso": ["hash-collisions-rainbow-tables", "dictionary-attacks"]
+    },
+    {
+      "id": "dictionary-attacks",
+      "term": "Dictionary Attacks vs. Brute Force",
+      "category": "Password Cracking",
+      "summary": "A dictionary attack tries known/likely passwords first (fast, high hit-rate against weak passwords); brute force tries every possible combination (slow, but eventually exhaustive).",
+      "body": "A dictionary attack hashes each entry in a wordlist of common or previously breached passwords (like `rockyou.txt`) and compares against the target hash — extremely fast at cracking weak, common, or reused passwords, and largely useless against genuinely random long passwords that never appear in any wordlist. Brute force instead tries every possible character combination up to a given length — guaranteed to eventually find any password, but the time required grows exponentially with password length and character-set size, making it impractical against sufficiently long random passwords even with enormous computing power.",
+      "relatedEpisodes": [6],
+      "relatedCommands": ["crack"],
+      "seeAlso": ["salting-and-kdfs"]
+    }
+  ]
+}

