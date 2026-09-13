@@ -1,0 +1,128 @@
+/* Palette tokens are injected onto :root as CSS custom properties by
+   main.tsx from src/config.ts (single source of truth). The var()
+   fallbacks below only matter for the first paint before that runs. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--synth-bg, #0d0221);
+  color: var(--neon-cyan, #01cdfe);
+  font-family: "Cascadia Code", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+  overflow: hidden;
+}
+
+.deck {
+  display: grid;
+  grid-template-rows: auto 1fr 260px;
+  height: 100vh;
+  gap: 4px;
+  padding: 4px;
+  position: relative;
+}
+
+/* CRT scanline overlay */
+.deck::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  z-index: 999;
+}
+
+.panel {
+  background: var(--synth-panel-bg, #150834);
+  border: 2px double var(--muted-lavender, #8a79a5);
+  border-radius: 2px;
+  padding: 8px 12px;
+  overflow-y: auto;
+}
+
+.glow-cyan {
+  color: var(--neon-cyan, #01cdfe);
+  text-shadow: 0 0 6px var(--neon-cyan, #01cdfe);
+}
+
+.glow-pink {
+  color: var(--neon-pink, #ff71ce);
+  text-shadow: 0 0 6px var(--neon-pink, #ff71ce);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+}
+
+.main-row {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 4px;
+  min-height: 0;
+}
+
+.terminal-pane {
+  padding: 0;
+  overflow: hidden;
+}
+
+.host-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+
+.host-list li {
+  padding: 2px 0;
+  color: var(--muted-lavender, #8a79a5);
+}
+
+.host-list li.active {
+  color: var(--neon-green, #05ffa1);
+}
+
+.host-list li.filtered {
+  color: var(--alert-red, #ff2a6d);
+}
+
+.codex-modal {
+  position: fixed;
+  inset: 5% 10%;
+  background: var(--synth-panel-bg, #150834);
+  border: 2px double var(--neon-pink, #ff71ce);
+  border-radius: 4px;
+  padding: 16px 20px;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.codex-modal h2 {
+  color: var(--neon-pink, #ff71ce);
+}
+
+.codex-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  cursor: pointer;
+  color: var(--alert-red, #ff2a6d);
+  background: none;
+  border: none;
+  font: inherit;
+}
