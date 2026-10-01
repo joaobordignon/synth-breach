@@ -1,13 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
-import { SaveProvider } from "./state/SaveContext";
 import { PALETTE } from "./config";
+import "./engine/globalCommands"; // self-registers the global command set
 import "./ui/styles.css";
 
 // Apply the palette tokens as CSS custom properties once at startup, so
-// ui/styles.css never hardcodes a hex value — src/config.ts stays the
-// single source of truth for the color system.
+// ui/styles.css never hardcodes a hex value — src/config.ts stays the single
+// source of truth for the color system.
 const root = document.documentElement;
 root.style.setProperty("--synth-bg", PALETTE.synthBg);
 root.style.setProperty("--synth-panel-bg", PALETTE.synthPanelBg);
@@ -20,8 +20,6 @@ root.style.setProperty("--muted-lavender", PALETTE.mutedLavender);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <SaveProvider>
-      <App />
-    </SaveProvider>
+    <App />
   </StrictMode>,
 );

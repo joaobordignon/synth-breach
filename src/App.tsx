@@ -4,54 +4,50 @@ import { IntelPane } from "./ui/IntelPane";
 import { TelemetryPane } from "./ui/TelemetryPane";
 import { TerminalPane } from "./ui/TerminalPane";
 import { CodexModal } from "./ui/CodexModal";
-import { episode00 } from "./chapters/episode00";
-import type { SimulatedHost } from "./engine/simulator";
-import type { EngineContext } from "./engine/parser";
+import { FxLayer } from "./ui/FxLayer";
+import { store } from "./engine/gameStore";
 import { HOTKEYS } from "./config";
-import { useSave } from "./state/SaveContext";
 
 export function App() {
-  const { profile, updateProfile } = useSave();
-  const [hosts, setHosts] = useState<SimulatedHost[]>([]);
   const [codexOpen, setCodexOpen] = useState(false);
-
-  // Only the Prologue is implemented so far — see src/chapters/*/index.ts
-  // for the Act I-IV stubs waiting on their full dialogue trees.
-  const chapter = episode00;
-
   const openCodex = useCallback(() => setCodexOpen(true), []);
   const closeCodex = useCallback(() => setCodexOpen(false), []);
 
+  // Let `codex` (the command) open the modal through the store.
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
+    store.openCodexFn = openCodex;
+    return () => {
+      store.openCodexFn = null;
+    };
+  }, [openCodex]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
       if (e.key === HOTKEYS.openCodex) {
         e.preventDefault();
-        setCodexOpen((prev) => !prev);
-      } else if (e.key === "Escape" && codexOpen) {
+        setCodexOpen((p) => !p);
+      } else if (e.key === "Escape") {
         setCodexOpen(false);
-      } else if (e.key.toLowerCase() === HOTKEYS.toggleMute && e.altKey) {
-        updateProfile({ audioMuted: !profile.audioMuted });
+      } else if (e.altKey && e.key.toLowerCase() === HOTKEYS.toggleMute) {
+        store.setMuted(!store.profile.audioMuted);
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [codexOpen, profile.audioMuted, updateProfile]);
-
-  const ctx: EngineContext = {
-    chapter,
-    onDiscoverHosts: setHosts,
-    onOpenCodex: openCodex,
-  };
+    // Capture phase: run before xterm's own textarea handlers, which would
+    // otherwise swallow Escape/F1 while the terminal is focused.
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () => window.removeEventListener("keydown", onKey, { capture: true });
+  }, []);
 
   return (
     <div className="deck">
-      <Header chapter={chapter} />
+      <Header />
       <div className="main-row">
-        <IntelPane chapter={chapter} />
-        <TelemetryPane hosts={hosts} />
+        <IntelPane />
+        <TelemetryPane />
       </div>
-      <TerminalPane ctx={ctx} />
+      <TerminalPane />
       <CodexModal open={codexOpen} onClose={closeCodex} />
+      <FxLayer />
     </div>
   );
 }
