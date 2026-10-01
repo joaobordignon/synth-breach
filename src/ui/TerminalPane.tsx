@@ -2,21 +2,19 @@ import { useEffect, useRef } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
-import { runCommand, type EngineContext } from "../engine/parser";
+import { store } from "../engine/gameStore";
+import { colorize } from "./ansi";
+import { PALETTE } from "../config";
 import { playTypingFx } from "../audio";
 
-const PROMPT = "operator@synth:~$ ";
+// The command console. xterm renders; the game store owns all logic. The one
+// subtlety here is interleaving: WARDEN logs, streamed scans, and the finale
+// countdown print asynchronously while the player may be mid-type, so the
+// output handler erases the current input line, prints, then redraws the
+// prompt + whatever was buffered.
 
-interface TerminalPaneProps {
-  ctx: EngineContext;
-}
-
-export function TerminalPane({ ctx }: TerminalPaneProps) {
+export function TerminalPane() {
   const containerRef = useRef<HTMLDivElement>(null);
-  // Kept in a ref (not state) so the xterm onData closure always sees the
-  // latest context without needing to be torn down and recreated per render.
-  const ctxRef = useRef(ctx);
-  ctxRef.current = ctx;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -25,103 +23,130 @@ export function TerminalPane({ ctx }: TerminalPaneProps) {
     const term = new Terminal({
       convertEol: true,
       cursorBlink: true,
-      fontFamily: "Cascadia Code, Fira Code, ui-monospace, monospace",
+      fontFamily: '"Cascadia Code", "Fira Code", ui-monospace, monospace',
       fontSize: 14,
       theme: {
-        background: "#150834",
-        foreground: "#01cdfe",
-        cursor: "#ff71ce",
+        background: PALETTE.synthPanelBg,
+        foreground: PALETTE.neonCyan,
+        cursor: PALETTE.neonPink,
+        selectionBackground: "rgba(255,113,206,0.3)",
       },
     });
-    const fitAddon = new FitAddon();
-    term.loadAddon(fitAddon);
+    const fit = new FitAddon();
+    term.loadAddon(fit);
     term.open(container);
-    fitAddon.fit();
-
-    term.writeln("SYNTH // BREACH — Netrunner Virtual Shell");
-    term.writeln("Type 'help' to list commands.\r\n");
-    term.write(PROMPT);
+    fit.fit();
 
     let buffer = "";
     const history: string[] = [];
     let historyIndex = -1;
+    let promptVisible = false;
+    let processing = false;
 
-    function writePrompt() {
-      term.write(`\r\n${PROMPT}`);
+    const prompt = () => store.getPrompt();
+
+    function showPrompt() {
+      term.write(prompt() + buffer);
+      promptVisible = true;
+    }
+    function clearInputLine() {
+      // Return to column 0 and clear the whole line.
+      term.write("\r\x1b[2K");
+      promptVisible = false;
     }
 
-    const disposable = term.onData((data) => {
-      switch (data) {
-        case "\r": {
-          // Enter
-          term.write("\r\n");
-          const input = buffer;
-          buffer = "";
-          if (input.trim()) {
-            history.push(input);
-            historyIndex = history.length;
-            playTypingFx();
-            const result = runCommand(input, ctxRef.current);
-            if (result.clearScreen) {
-              term.clear();
-            }
-            for (const line of result.lines) {
-              term.writeln(line);
-            }
-          }
-          writePrompt();
-          return;
-        }
-        case "": {
-          // Backspace
-          if (buffer.length > 0) {
-            buffer = buffer.slice(0, -1);
-            term.write("\b \b");
-          }
-          return;
-        }
-        case "[A": {
-          // Up arrow — history back
-          if (history.length === 0) return;
-          historyIndex = Math.max(0, historyIndex - 1);
-          replaceLine(history[historyIndex] ?? "");
-          return;
-        }
-        case "[B": {
-          // Down arrow — history forward
-          if (history.length === 0) return;
-          historyIndex = Math.min(history.length, historyIndex + 1);
-          replaceLine(history[historyIndex] ?? "");
-          return;
-        }
-        default: {
-          if (data >= " " || data === "\t") {
-            buffer += data;
-            term.write(data);
-            playTypingFx();
-          }
-        }
-      }
+    // Background / command output stream.
+    const unsub = store.onOutput((lines) => {
+      if (promptVisible) clearInputLine();
+      for (const l of lines) term.writeln(colorize(l));
+      if (!processing) showPrompt();
     });
 
     function replaceLine(next: string) {
-      // Clear the current buffer on-screen, then write the replacement.
       term.write("\b \b".repeat(buffer.length));
       buffer = next;
       term.write(buffer);
     }
 
-    const handleResize = () => fitAddon.fit();
-    window.addEventListener("resize", handleResize);
+    function tabComplete() {
+      const token = buffer.split(/\s+/)[0];
+      if (buffer.includes(" ") || !token) return;
+      const matches = store.commandNames().filter((c) => c.startsWith(token));
+      if (matches.length === 1) {
+        const add = matches[0].slice(buffer.length);
+        buffer += add;
+        term.write(add);
+      } else if (matches.length > 1) {
+        clearInputLine();
+        term.writeln(colorize({ text: "  " + matches.join("   "), kind: "dim" }));
+        showPrompt();
+      }
+    }
 
+    const disposable = term.onData((data) => {
+      switch (data) {
+        case "\r": {
+          term.write("\r\n");
+          promptVisible = false;
+          const input = buffer;
+          buffer = "";
+          if (input.trim() === "clear") {
+            term.clear();
+            showPrompt();
+            return;
+          }
+          if (input.trim()) {
+            history.push(input);
+            historyIndex = history.length;
+            processing = true;
+            store.submit(input);
+            processing = false;
+          }
+          showPrompt();
+          return;
+        }
+        case "\u007f": // Backspace
+          if (buffer.length > 0) {
+            buffer = buffer.slice(0, -1);
+            term.write("\b \b");
+          }
+          return;
+        case "\t": // Tab-completion
+          tabComplete();
+          return;
+        case "\x1b[A": // Up — history back
+          if (history.length === 0) return;
+          historyIndex = Math.max(0, historyIndex - 1);
+          replaceLine(history[historyIndex] ?? "");
+          return;
+        case "\x1b[B": // Down — history forward
+          if (history.length === 0) return;
+          historyIndex = Math.min(history.length, historyIndex + 1);
+          replaceLine(history[historyIndex] ?? "");
+          return;
+        default:
+          if (data >= " ") {
+            buffer += data;
+            term.write(data);
+            playTypingFx();
+          }
+      }
+    });
+
+    // Boot sequence.
+    term.writeln(colorize({ text: "SYNTH // BREACH — Netrunner Virtual Shell", kind: "banner" }));
+    term.writeln(colorize({ text: "Fully simulated · air-gapped · nothing here touches a real system.", kind: "dim" }));
+    term.writeln(colorize({ text: "Type 'help' for commands, 'objectives' for your checklist.", kind: "dim" }));
+    store.startEpisode(store.currentEpisodeId);
+
+    const onResize = () => fit.fit();
+    window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", onResize);
+      unsub();
       disposable.dispose();
       term.dispose();
     };
-    // Intentionally run once — ctxRef keeps the closures fresh instead of
-    // re-mounting the terminal (and losing scrollback) on every prop change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <div ref={containerRef} className="panel terminal-pane" />;

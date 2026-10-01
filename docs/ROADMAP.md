@@ -11,7 +11,11 @@ Living project tracker. Check items off as they land. Keep this file in sync wit
 ## Current Phase
 > _Update this line each session: which Day/Milestone is active._
 
-**→ Day 1–2: Core engine**
+**→ MVP COMPLETE — all 13 episodes playable start-to-finish.** Remaining: Day 18 deploy
+to a static host, and an optional audio-fidelity pass (SFX are currently synthesized
+tones, not sampled). Everything else below is implemented; see the Notes/Deviations Log
+at the bottom for the as-built architecture and where it diverges from the original
+per-Day plan.
 
 ---
 
@@ -202,4 +206,34 @@ Living project tracker. Check items off as they land. Keep this file in sync wit
 ## Notes / Deviations Log
 > _Record here when implementation diverges from SPEC.md, and why — keeps the spec and the checklist from silently drifting apart._
 
-- _(none yet)_
+**As-built architecture (first full implementation pass):**
+- **Engine contract.** The original `parser.ts` + `hintSystem.ts` scaffold was replaced by a
+  central `engine/gameStore.ts` (mutable state + an output stream + the `EngineApi`),
+  `engine/globalCommands.ts` (help/intel/codex/objectives/status/next/goto/missions/handle/
+  mute/reset), and `engine/simulator.ts` (pure crypto/network/hash primitives). Each chapter is
+  now a self-contained `Episode` object declaring `intro / objectives / commands / hints / outro`.
+  The store enforces progression: when every objective is complete it prints the outro and unlocks
+  the next episode. This satisfies the Day 1–2 exit criterion ("a chapter can declare these
+  commands, in this order, with these hints, and the engine enforces it").
+- **Colored output.** Commands emit semantic `Line` kinds (hex/warden/success/warn/…); `ui/ansi.ts`
+  maps them to 24-bit ANSI so xterm renders the §4 palette. Async output (streamed scans, WARDEN
+  logs, the finale countdown) interleaves correctly with the input line.
+- **Dynamic prompt.** Episodes change the shell prompt via a store var — used for the Ep08 exploit
+  REPL (`operator@synth(proftpd)>`) and the Ep08/09 shell escalations (`daemon@…`, `root@…`).
+- **WARDEN gauge.** Anomaly score is a live gauge in the Intel pane; it climbs 0.02 → 0.07 → 0.15 →
+  0.34 → 0.51 → 0.72 → 0.90 across the campaign, matching the spec's through-line, and the finale's
+  CVSS computes to 10.0.
+- **Finale countdown** is a real `setInterval` (not a fake bar); `api.onLeave()` cancels it if the
+  player navigates away. The decoy-key trap reuses the Ep06 hashing skill via `verify-key`.
+- **Both endings** (`broadcast-leak --mode=public` → Vigilante, `bounty-report --submit
+  --responsible` → Whitehat) are fully implemented with divergent epilogues and badges.
+- **Sibling name.** The spec's `[name]` placeholder is rendered as **ECHO** throughout.
+- **Quote-aware tokenizer.** The dispatcher honors single/double quotes so args with spaces
+  (hex streams, SQL payloads, cipher text) stay whole.
+
+**Tests added (not in the original plan):** `npm run playtest` drives all 13 episodes + both
+endings headlessly (no browser); `scripts/smoke.mjs` loads the built site in Chromium, plays the
+Prologue into Act I, and asserts no console errors.
+
+**Still open:** Day 18 static-host deploy; optional sampled-audio pass (SFX are Web Audio
+oscillator tones today — functional, matches the design intent, but not sampled).

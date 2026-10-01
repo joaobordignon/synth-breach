@@ -1,19 +1,24 @@
-import { useSave } from "../state/SaveContext";
-import type { Chapter } from "../chapters/baseChapter";
+import { store } from "../engine/gameStore";
+import { useGame } from "../state/useGame";
 
-interface HeaderProps {
-  chapter: Chapter;
-}
+const ACT_LABEL = ["PROLOGUE", "ACT I", "ACT II", "ACT III", "ACT IV"];
 
-export function Header({ chapter }: HeaderProps) {
-  const { profile } = useSave();
+export function Header() {
+  useGame();
+  const ep = store.episode;
+  const score = store.profile.score;
+  const muted = store.profile.audioMuted;
 
   return (
     <div className="panel header">
       <span className="glow-pink">
-        ⚡ SYNTH // BREACH [{chapter.act === 0 ? "PROLOGUE" : `ACT ${chapter.act}`}: {chapter.title.toUpperCase()}]
+        ⚡ SYNTH // BREACH [{ACT_LABEL[ep.act]} — {ep.title.toUpperCase()}]
       </span>
-      <span className="glow-cyan">SCORE: {profile.score}</span>
+      <span className="header-right">
+        <span className="glow-cyan">{store.profile.handle}</span>
+        <span className="glow-cyan">SCORE {score}</span>
+        <span title="audio">{muted ? "🔇" : "🔊"}</span>
+      </span>
     </div>
   );
 }

@@ -1,23 +1,45 @@
-import type { SimulatedHost } from "../engine/simulator";
+import { store } from "../engine/gameStore";
+import { useGame } from "../state/useGame";
 
-interface TelemetryPaneProps {
-  hosts: SimulatedHost[];
-}
+// Telemetry & network map: whatever the active command last published via
+// api.setTelemetry — discovered hosts, a packet-capture table, or a
+// Burp-in-TUI request/response block.
 
-export function TelemetryPane({ hosts }: TelemetryPaneProps) {
+const STATUS_CLASS: Record<string, string> = {
+  ACTIVE: "active",
+  OPEN: "active",
+  COMPROMISED: "active",
+  FILTERED: "filtered",
+  SILENT: "filtered",
+  TRAP: "trap",
+};
+
+export function TelemetryPane() {
+  useGame();
+  const t = store.getTelemetry();
+
   return (
-    <div className="panel">
-      <h3 className="glow-pink">📡 TELEMETRY & NETWORK MAP</h3>
-      {hosts.length === 0 ? (
-        <p style={{ color: "var(--muted-lavender, #8a79a5)" }}>No hosts discovered yet. Try `netmap &lt;cidr&gt;`.</p>
+    <div className="panel telemetry-pane">
+      <h3 className="glow-pink">📡 TELEMETRY &amp; NETWORK MAP</h3>
+      {!t ? (
+        <p className="muted">No telemetry yet. Run a scan to populate the map.</p>
       ) : (
-        <ul className="host-list">
-          {hosts.map((host) => (
-            <li key={host.ip} className={host.status === "ACTIVE" ? "active" : "filtered"}>
-              {host.ip} [{host.label} - {host.status === "ACTIVE" ? `ACTIVE - ${host.latencyMs}ms` : host.status}]
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="subnet-tag">{t.title}</p>
+          {t.hosts.length > 0 && (
+            <ul className="host-list">
+              {t.hosts.map((h) => (
+                <li key={h.ip} className={STATUS_CLASS[h.status] ?? "filtered"}>
+                  <span className="host-ip">{h.ip}</span> [{h.label} — {h.status}
+                  {h.detail ? ` · ${h.detail}` : ""}]
+                </li>
+              ))}
+            </ul>
+          )}
+          {t.block && t.block.length > 0 && (
+            <pre className="telemetry-block">{t.block.join("\n")}</pre>
+          )}
+        </>
       )}
     </div>
   );
