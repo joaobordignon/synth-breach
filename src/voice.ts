@@ -9,17 +9,87 @@ let desiredName: string | null = null; // persisted voice preference, by name
 let rate = 0.98;
 let pitch = 0.85;
 
+// Built-in retro robotic voice (SAM — Software Automatic Mouth, 1982), lazy
+// loaded. It needs no OS speech voices, so HEX can always talk — and it fits a
+// 1989 netrunner perfectly. Used when explicitly picked, or as the automatic
+// fallback when the browser/OS exposes no SpeechSynthesis voices at all.
+export const SYNTH_VOICE = "__HEX_SYNTH__";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let samInstance: any = null;
+const samQueue: string[] = [];
+let samBusy = false;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let samCurrent: any = null;
+
+async function ensureSam() {
+  if (!samInstance) {
+    const mod = await import("sam-js");
+    // sam-js uses `export =`; the constructor is the default under interop.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SamJs = ((mod as any).default ?? mod) as any;
+    samInstance = new SamJs({ speed: 72, pitch: 70, mouth: 128, throat: 160 });
+  }
+  return samInstance;
+}
+
+function sanitizeForSam(text: string): string {
+  // SAM speaks ASCII English; drop anything it would choke on.
+  return text.replace(/[^\x20-\x7E]/g, " ").replace(/\s{2,}/g, " ").trim();
+}
+
+async function processSamQueue() {
+  if (samBusy) return;
+  samBusy = true;
+  try {
+    const sam = await ensureSam();
+    while (samQueue.length) {
+      const part = samQueue.shift()!;
+      try {
+        samCurrent = sam.speak(part);
+        await samCurrent;
+      } catch {
+        /* aborted or failed — continue */
+      }
+    }
+  } catch {
+    /* SAM failed to load; give up quietly */
+  }
+  samCurrent = null;
+  samBusy = false;
+}
+
+function speakSam(text: string): void {
+  for (const part of chunk(sanitizeForSam(text))) if (part) samQueue.push(part);
+  void processSamQueue();
+}
+
+function hasOsVoices(): boolean {
+  const s = synth();
+  return !!s && s.getVoices().length > 0;
+}
+
+/** Whether speech should route through the built-in SAM synth. */
+function useSynth(): boolean {
+  return desiredName === SYNTH_VOICE || !hasOsVoices();
+}
+
 function synth(): SpeechSynthesis | null {
   return typeof window !== "undefined" && "speechSynthesis" in window ? window.speechSynthesis : null;
 }
 
 export function voiceSupported(): boolean {
-  return synth() !== null;
+  // Always true: even with no OS SpeechSynthesis voices, the bundled SAM synth
+  // (Web Audio) can speak. Guard only against a total lack of Web Audio.
+  return typeof window !== "undefined" && (synth() !== null || typeof AudioContext !== "undefined");
 }
 
 function pickVoice() {
   const s = synth();
   if (!s) return;
+  if (desiredName === SYNTH_VOICE) {
+    chosenVoice = null; // handled by the SAM synth path
+    return;
+  }
   const voices = s.getVoices();
   if (voices.length === 0) return;
   // An explicit, remembered choice always wins.
@@ -131,13 +201,19 @@ function chunk(text: string): string[] {
 }
 
 export function speak(text: string): void {
-  const s = synth();
-  if (!enabled || !s) return;
+  if (!enabled) return;
   const spoken = clean(text);
   if (!spoken) return;
+  // Route through the built-in SAM synth when chosen, or when the OS exposes no
+  // speech voices at all (so HEX can always be heard).
+  if (useSynth()) {
+    speakSam(spoken);
+    return;
+  }
+  const s = synth();
+  if (!s) return;
   try {
-    // Some engines get wedged in a paused state; nudge them first.
-    s.resume();
+    s.resume(); // some engines get wedged in a paused state
     if (!chosenVoice) pickVoice();
     for (const part of chunk(spoken)) {
       const u = new SpeechSynthesisUtterance(part);
@@ -174,9 +250,19 @@ export function cancelVoice(): void {
       /* ignore */
     }
   }
+  // Stop the SAM synth too.
+  samQueue.length = 0;
+  if (samCurrent && typeof samCurrent.abort === "function") {
+    try {
+      samCurrent.abort("cancelled");
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export function isSpeaking(): boolean {
+  if (samBusy) return true;
   const s = synth();
   return s ? s.speaking : false;
 }

@@ -174,20 +174,27 @@ function fallbackToGenerative() {
   mode = "gen";
 }
 
+function onEnded() {
+  playTrack(trackIndex + 1); // cycle to next
+}
+function onError() {
+  if (mode !== "file") return; // ignore errors fired while stopping
+  failures += 1;
+  if (failures >= playlist.length) fallbackToGenerative(); // none playable
+  else playTrack(trackIndex + 1);
+}
+function onPlaying() {
+  failures = 0;
+}
+
 function playTrack(i: number) {
-  if (playlist.length === 0) return;
+  if (mode !== "file" || playlist.length === 0) return; // not playing a file playlist
   trackIndex = ((i % playlist.length) + playlist.length) % playlist.length;
   if (!audioEl) {
     audioEl = new Audio();
-    audioEl.addEventListener("ended", () => playTrack(trackIndex + 1)); // cycle to next
-    audioEl.addEventListener("error", () => {
-      failures += 1;
-      if (failures >= playlist.length) fallbackToGenerative(); // none playable
-      else playTrack(trackIndex + 1);
-    });
-    audioEl.addEventListener("playing", () => {
-      failures = 0;
-    });
+    audioEl.addEventListener("ended", onEnded);
+    audioEl.addEventListener("error", onError);
+    audioEl.addEventListener("playing", onPlaying);
   }
   audioEl.src = `${base()}music/${playlist[trackIndex]}`;
   audioEl.loop = false;
@@ -216,13 +223,15 @@ export function startMusic(): void {
 }
 
 export function stopMusic(): void {
+  mode = null; // set first so pending handlers/callbacks no-op
   if (audioEl) {
+    audioEl.removeEventListener("ended", onEnded);
+    audioEl.removeEventListener("error", onError);
+    audioEl.removeEventListener("playing", onPlaying);
     audioEl.pause();
-    audioEl.src = "";
     audioEl = null;
   }
   stopGenerative();
-  mode = null;
 }
 
 /** Skip to the next track in the playlist (no-op in generative mode). */

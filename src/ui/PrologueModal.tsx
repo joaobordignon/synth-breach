@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { EpisodeModal } from "../engine/types";
 import { store } from "../engine/gameStore";
-import { listVoices, onVoices, testSpeak, primeVoice, voiceSupported } from "../voice";
+import { listVoices, onVoices, testSpeak, primeVoice, voiceSupported, SYNTH_VOICE } from "../voice";
 
 // Codex-style briefing box shown before a gated episode's HEX intro. Doubles as
 // a quick setup panel — handle, voice (with picker + test), and music — all
@@ -22,7 +22,14 @@ export function PrologueModal({ modal, onClose }: PrologueModalProps) {
 
   useEffect(() => {
     setVoices(listVoices());
-    return onVoices(() => setVoices(listVoices()));
+    const unsub = onVoices(() => setVoices(listVoices()));
+    // Some browsers populate voices lazily and never fire voiceschanged until
+    // nudged — poll a few times to catch them.
+    const timers = [250, 600, 1200, 2500].map((t) => setTimeout(() => setVoices(listVoices()), t));
+    return () => {
+      unsub();
+      timers.forEach(clearTimeout);
+    };
   }, []);
 
   function commitHandle(v: string) {
@@ -99,6 +106,7 @@ export function PrologueModal({ modal, onClose }: PrologueModalProps) {
                 aria-label="voice"
               >
                 <option value="">Auto (recommended)</option>
+                <option value={SYNTH_VOICE}>HEX SYNTH — retro robotic (built-in)</option>
                 {voices.map((v) => (
                   <option key={v.name} value={v.name}>
                     {v.name} ({v.lang})
@@ -110,7 +118,11 @@ export function PrologueModal({ modal, onClose }: PrologueModalProps) {
               </button>
             </span>
           </label>
-          {!supported && <p className="setup-note">Your browser has no speech voices available.</p>}
+          {voices.length === 0 && (
+            <p className="setup-note">
+              No system voices detected — HEX uses the built-in retro synth. Hit ▶ Test.
+            </p>
+          )}
 
           <label className="setup-row">
             <span>Music</span>
