@@ -73,7 +73,14 @@ export const episode00: Episode = {
     "[COMMS // HEX]: When you're squared away, I'll hand you your first live target.",
   ],
   objectives: [
-    { id: "help", label: "Run `help` to see your toolkit" },
+    {
+      id: "help",
+      label: "Run `help` to see your toolkit",
+      hex: [
+        "[COMMS // HEX]: That's your whole kit. Every line is one command — a name, then optional --flags.",
+        "Next, open the `codex`: your reference library, free and unlimited, no judgment.",
+      ],
+    },
     { id: "codex", label: "Open the `codex` reference library (it's free)" },
     { id: "accept-code", label: "Read & `accept-code` — the Operating Code" },
   ],

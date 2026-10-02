@@ -164,15 +164,51 @@ if (voiceSupported()) {
   synth()!.onvoiceschanged = pickVoice;
 }
 
-/** Strip stage directions and shell syntax noise so narration sounds natural.
- *  Command words in `backticks` are READ — we drop only the backticks, not the
- *  word — so HEX actually says "type help", not "type …". */
+/** Prosody multipliers derived from a line's stage directions, so HEX can sound
+ *  quiet / tired / hesitant instead of ignoring the cue. Web Speech can't do
+ *  real emotion, but rate + pitch + volume carry most of it. */
+interface Mood {
+  rate: number;
+  pitch: number;
+  volume: number;
+}
+function deriveMood(raw: string): Mood {
+  const dirs = (raw.match(/\(([^)]*)\)/g) ?? []).join(" ").toLowerCase();
+  let rate = 1,
+    pitch = 1,
+    volume = 1;
+  if (!dirs) return { rate, pitch, volume };
+  if (/quiet|soft|low|whisper|under|breath/.test(dirs)) {
+    volume *= 0.68;
+    pitch *= 0.96;
+  }
+  if (/sad|flat|tired|heavy|hollow|grief|quiet|long/.test(dirs)) {
+    pitch *= 0.9;
+    rate *= 0.88;
+  }
+  if (/pause|beat|hesitat/.test(dirs)) {
+    rate *= 0.92;
+  }
+  return { rate, pitch, volume };
+}
+
+/** Strip shell-syntax noise and turn stage directions into real pacing.
+ *  - Command words in `backticks` are READ (drop only the ticks).
+ *  - A stage direction like "(a long pause)" becomes an em-dash, which chunk()
+ *    splits on — so HEX actually pauses between the two phrases rather than
+ *    silently skipping the cue. The MOOD of the cue is applied via deriveMood. */
 function clean(text: string): string {
   return text
-    .replace(/\([^)]*\)/g, "") // (a long pause) etc. — stage directions, not spoken
+    .replace(/\([^)]*\)/g, " — ") // stage direction -> an inter-utterance pause
     .replace(/`([^`]*)`/g, "$1") // keep the word inside `backticks`, drop the ticks
+    .replace(/\s*—\s*/g, " — ")
+    .replace(/^\s*—\s*/, "") // no leading dash if the line opened on a cue
     .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+function clampNum(v: number, lo: number, hi: number): number {
+  return Math.min(hi, Math.max(lo, v));
 }
 
 export function setVoiceEnabled(next: boolean): void {
@@ -204,6 +240,7 @@ function chunk(text: string): string[] {
 
 export function speak(text: string): void {
   if (!enabled) return;
+  const mood = deriveMood(text); // read the cue BEFORE it's stripped
   const spoken = clean(text);
   if (!spoken) return;
   // Route through the built-in SAM synth when chosen, or when the OS exposes no
@@ -220,9 +257,9 @@ export function speak(text: string): void {
     for (const part of chunk(spoken)) {
       const u = new SpeechSynthesisUtterance(part);
       if (chosenVoice) u.voice = chosenVoice;
-      u.rate = rate;
-      u.pitch = pitch;
-      u.volume = 1;
+      u.rate = clampNum(rate * mood.rate, 0.5, 1.5);
+      u.pitch = clampNum(pitch * mood.pitch, 0, 2);
+      u.volume = clampNum(mood.volume, 0, 1);
       s.speak(u);
     }
   } catch {

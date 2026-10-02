@@ -173,7 +173,14 @@ export const episode05: Episode = {
     { text: "  (copy the intercept above into `cipher-crack`, then `xor-decrypt` — see `<cmd> --help`)", kind: "dim" },
   ],
   objectives: [
-    { id: "caesar", label: "Brute-force the Caesar shift to readable text" },
+    {
+      id: "caesar",
+      label: "Brute-force the Caesar shift to readable text",
+      hex: [
+        "[COMMS // HEX]: Readable now — a fixed-shift cipher never survives 25 guesses. But they buried a",
+        "second layer under it: an XOR bitmask. Peel that off next with the single-byte key I pulled.",
+      ],
+    },
     { id: "xor", label: "Strip the single-byte XOR mask off the stream" },
   ],
   evidence: [
@@ -306,7 +313,14 @@ export const episode06: Episode = {
     "--help` and `crack --help` have the syntax; `codex` explains hashing, salting, and rainbow tables.",
   ],
   objectives: [
-    { id: "identify", label: "Fingerprint the hash algorithm" },
+    {
+      id: "identify",
+      label: "Fingerprint the hash algorithm",
+      hex: [
+        "[COMMS // HEX]: 32 hex characters — that's MD5, broken for password storage for twenty years. You",
+        "can't reverse a hash, but you don't have to: hash a wordlist and compare. Crack the weak one.",
+      ],
+    },
     { id: "crack", label: "Dictionary-attack the admin_root hash" },
   ],
   evidence: [

@@ -24,6 +24,10 @@ export interface Line {
 export interface Objective {
   id: string;
   label: string;
+  /** Optional HEX tutor lines fired when this objective completes — a step-by-step
+   *  "nice, here's what that means / here's the next move" beat. Fires once, after
+   *  the command handler's own output, before any reply beat for the same id. */
+  hex?: Array<string | Line>;
 }
 
 /** A single line in the BBS comms side panel (from HEX, or the player). */

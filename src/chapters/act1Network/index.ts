@@ -103,6 +103,11 @@ export const episode01: Episode = {
           kind: "dim",
         });
         api.setVar("wardenBaseline", 0.02);
+        // Tutor beat AFTER the stream finishes (so it doesn't jump the results).
+        api.printAfter(350 * (SUBNET_ALPHA.length + 3), [
+          { text: "[COMMS // HEX]: Two live out of 254 — the rest are dark. The one marked GATEWAY is your", kind: "hex" },
+          { text: "way in and out of this whole subnet. Now measure the path to it: ping it and read what comes back.", kind: "hex" },
+        ]);
         api.complete("sweep");
         api.addScore(25);
       },

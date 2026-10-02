@@ -32,7 +32,14 @@ export const episode10: Episode = {
   ],
   objectives: [
     { id: "locate", label: "Read Bastion's config to find the cloud API host (ls / cat)" },
-    { id: "intercept", label: "Intercept the login request to the cloud API" },
+    {
+      id: "intercept",
+      label: "Intercept the login request to the cloud API",
+      hex: [
+        "[COMMS // HEX]: Frozen mid-flight. See how it drops your username straight into the SQL query?",
+        "That's the whole flaw. Inject a payload that forces the WHERE clause true and comments out the rest.",
+      ],
+    },
     { id: "inject", label: "Bypass the login with a SQL tautology" },
   ],
   // You rooted this box in Act III — its config names the next target.

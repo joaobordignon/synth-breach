@@ -228,14 +228,13 @@ class GameStore {
   objectiveStatus(): Array<{ label: string; done: boolean }> {
     const objs = this.episode.objectives;
     const all = objs.map((o) => ({ label: o.label, done: this.completed.has(o.id) }));
-    if (!this.episode.progressiveObjectives) return all;
-    // Reveal one at a time: every completed step, plus the single next one.
-    const out: Array<{ label: string; done: boolean }> = [];
-    for (const o of all) {
-      out.push(o);
-      if (!o.done) break; // stop after the first unfinished — that's "current"
-    }
-    return out;
+    // Progressive reveal is the default (opt out with progressiveObjectives:false):
+    // show every completed step plus the single next one, so HEX can tutor the
+    // player through the mission one objective at a time.
+    if (this.episode.progressiveObjectives === false) return all;
+    const firstPending = all.findIndex((o) => !o.done);
+    if (firstPending === -1) return all; // all done
+    return all.filter((o, i) => o.done || i === firstPending);
   }
   isUnlocked(id: number): boolean {
     return this.profile.unlockedEpisodes.includes(id);
@@ -514,6 +513,13 @@ class GameStore {
       if (this.completed.has(id)) return;
       this.completed.add(id);
       this.emitState();
+      // Tutor beat: HEX reacts to the step just cleared — unless it's the final
+      // objective, where the episode outro does the talking.
+      const obj = this.episode.objectives.find((o) => o.id === id);
+      const allDone = this.episode.objectives.every((o) => this.completed.has(o.id));
+      if (obj?.hex && !allDone) {
+        this.emitOutput(toLines(obj.hex, "hex").map(normalizeHex));
+      }
       this.checkEpisodeComplete();
       this.fireBeats(`objective:${id}`);
     },
