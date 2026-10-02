@@ -66,6 +66,24 @@ scripts/         playtest (headless logic) · smoke (browser)
 
 Episodes declare *what* commands exist and *which* objectives win the chapter; the store enforces progression, tracks the WARDEN gauge and score, and streams colored output to the terminal.
 
+## Credits
+
+The curriculum and concepts across the four acts are **inspired by
+[freeCodeCamp](https://www.freecodecamp.org/)'s Cybersecurity and Networking
+curricula** (all in-game text is original to this project; nothing is reproduced
+verbatim). HEX's "Face in Code" visualizer was inspired by
+[jaredrhod/ai-visualizer](https://github.com/jaredrhod/ai-visualizer), and the
+in-terminal audio controls by [bjarneo/cliamp](https://github.com/bjarneo/cliamp).
+Background music is royalty-free synthwave from [Pixabay](https://pixabay.com/music/).
+Built with [xterm.js](https://xtermjs.org/), [React](https://react.dev/) and
+[Vite](https://vitejs.dev/); the retro robotic voice uses SAM via `sam-js`.
+
+This is a fan / educational project and is **not affiliated with or endorsed by**
+any of the above. Full details, licenses, and per-asset terms are in
+**[CREDITS.md](CREDITS.md)**. (In-game: type `credits`.)
+
 ## License
 
-TBD.
+**[MIT](LICENSE)** — free and open source. You're welcome to use, modify, and
+share it. The MIT license covers this project's original source code; bundled
+third-party code and media keep their own licenses (see [CREDITS.md](CREDITS.md)).

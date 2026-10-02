@@ -222,6 +222,22 @@ const commands: Record<string, EpisodeCommand> = {
     },
   },
 
+  credits: {
+    usage: "credits",
+    description: "Show credits, acknowledgments, and license.",
+    run: (_args, api) => {
+      api.print([
+        { text: "SYNTH // BREACH — free & open source (MIT). See LICENSE + CREDITS.md.", kind: "banner" },
+        { text: "  Curriculum inspired by freeCodeCamp — freecodecamp.org (not affiliated).", kind: "normal" },
+        { text: "  Concept nods: cliamp (github.com/bjarneo/cliamp) · ai-visualizer (github.com/jaredrhod/ai-visualizer).", kind: "normal" },
+        { text: "  Built with xterm.js · React · Vite (MIT). Retro voice: SAM / sam-js (abandonware — see CREDITS).", kind: "dim" },
+        { text: "  Music: royalty-free synthwave from Pixabay (delosound, nickpanek, lofidreams, hitslab,", kind: "dim" },
+        { text: "         turtlebeats, lnplusmusic, arpmedia, alex-morgan, zephiramusic).", kind: "dim" },
+        { text: "  An educational project. Not affiliated with any organization listed. Trademarks belong to their owners.", kind: "system" },
+      ]);
+    },
+  },
+
   mute: {
     usage: "mute",
     description: "Toggle sound effects on/off (also Alt+M).",
