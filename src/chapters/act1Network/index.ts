@@ -143,7 +143,7 @@ export const episode01: Episode = {
               kind: "hex",
             },
             {
-              text: "[COMMS // HEX]: Sub-4ms RTT means it's one hop away. That's your gateway. Door's next.",
+              text: "[COMMS // HEX]: Sub-4ms RTT means it's one hop away. That's your gateway — our way into this subnet.",
               kind: "hex",
             },
           ]);
@@ -254,7 +254,10 @@ export const episode02: Episode = {
           hosts: [{ ip: GATEWAY_IP, label: "GATEWAY", status: "OPEN", detail: "22,80 open · 8088 stealth" }],
           block: GATEWAY_PORTS.map((p) => `${p.port}/${p.service}  ${p.interpret}`),
         });
-        api.print("[COMMS // HEX]: 22 and 80, standard. But look at 8088. Which one's hiding?", "hex");
+        api.print([
+          { text: "[COMMS // HEX]: 22 and 80 answered clean. But one of those three never replied at all — a", kind: "hex" },
+          { text: "firewall ate the packet and hoped you'd move on. Read the FLAGS column and `answer` me which port's hiding.", kind: "hex" },
+        ]);
         api.complete("scan");
         api.addScore(30);
       },
