@@ -32,7 +32,8 @@ export const episode01: Episode = {
     "A /24 CIDR sweep probes every host in 10.42.0.0 – 10.42.0.255 with ICMP/ARP. Active hosts " +
       "answer; filtered ones stay silent. `ping` then measures round-trip time and reads the TTL.",
     "Run `netmap 10.42.0.0/24` to map the subnet, then `ping 10.42.0.1` to knock on the gateway.",
-    "Exactly: `netmap 10.42.0.0/24` then `ping 10.42.0.1`.",
+    "Two steps: sweep your assigned subnet with netmap (CIDR form — the 10.42.0.0 network, /24 " +
+      "prefix). The sweep marks the active ROUTER GATEWAY; ping that exact host to read its TTL and RTT.",
   ],
   outro: [
     "[COMMS // HEX]: Gateway's real, and it's breathing. That's your first foothold.",
@@ -144,7 +145,9 @@ export const episode02: Episode = {
       "CLOSED. No response at all is FILTERED: a firewall silently dropped the packet.",
     "Run `portscan --inspect 10.42.0.1` and read the FLAGS column. Then `answer` with the port that " +
       "returned NO RESPONSE.",
-    "Run `portscan --inspect 10.42.0.1`, then `answer 8088`.",
+    "Capture the handshake with portscan's --inspect flag against the gateway (10.42.0.1). Read the " +
+      "FLAGS column: 22 and 80 reply [SYN,ACK] (open); one port returns NO RESPONSE — that's the " +
+      "stealth-filtered one. `answer` with that port's number.",
   ],
   outro: [
     "[COMMS // HEX]: 8088 didn't even bother with a RST — it just went dark. That's not a closed port,",
@@ -240,7 +243,9 @@ export const episode03: Episode = {
     "A Server: header hands an attacker the exact daemon + version to look up CVEs against. And a " +
       "Set-Cookie flying over plain HTTP (not HTTPS/TLS) is readable by anyone sniffing the wire.",
     "Run `banner-grab --target 10.42.0.1 --port 80`, then `inspect --protocol http` to classify it.",
-    "`banner-grab --target 10.42.0.1 --port 80`, then `inspect --protocol http`.",
+    "Grab the banner on the gateway's web port (the well-known HTTP port, 80) with banner-grab's " +
+      "--target and --port flags. Then classify the transport with inspect (its --protocol is http) — " +
+      "note the cleartext X-Transmission-Mode header and the session cookie (ends in ==) leaking with no TLS.",
   ],
   outro: [
     "[COMMS // HEX]: Score's ticking up — still background noise to whatever's watching, but it's",

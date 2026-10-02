@@ -38,7 +38,9 @@ export const episode10: Episode = {
     "The server builds: SELECT * FROM users WHERE username='$user' AND password='$pass'. If you close " +
       "the quote and add OR '1'='1', the WHERE is always true; `--` comments out the password check.",
     "Intercept the login first, then inject the tautology payload: admin' OR '1'='1' --",
-    `proxy-intercept --target ${CLOUD_HOST} ; inject-sql --payload "admin' OR '1'='1' --"`,
+    "proxy-intercept the cloud host (cloud.aetherdyn.internal) to catch the login POST. The server " +
+      "concatenates your username straight into the SQL WHERE clause — so inject-sql a payload that " +
+      "closes the quote, adds an always-true OR '1'='1', and comments the rest out with -- .",
   ],
   outro: [
     "[COMMS // HEX]: role=SYSTEM_DIRECTOR. You're in as Kovacs' own tier. First time I've touched his",
@@ -50,6 +52,11 @@ export const episode10: Episode = {
     "proxy-intercept": {
       usage: "proxy-intercept --target <host>",
       description: "Intercept the next outgoing HTTP request to a host.",
+      help: [
+        "Catches the next outbound HTTP request so you can tamper with it.",
+        "Aether's surveillance core is the cloud API host cloud.aetherdyn.internal.",
+        "Example:  proxy-intercept --target cloud.aetherdyn.internal",
+      ],
       run: (args, api) => {
         if (argVal(args, "--target") !== CLOUD_HOST) return api.print(`[!] Usage: proxy-intercept --target ${CLOUD_HOST}`, "error");
         api.print([
@@ -128,7 +135,9 @@ export const episode11: Episode = {
     "An IDOR is Broken Access Control: the server returns object #0001 to anyone who asks, without " +
       "checking the session owns it. Your own record is user_id=1042; lower IDs belong to execs.",
     "Probe /user/profile to see your own id (1042), then tamper the parameter down to 0001.",
-    "api-probe --endpoint /user/profile ; tamper --param user_id=0001",
+    "Baseline the /user/profile endpoint with api-probe — the response shows your own id, 1042. Then " +
+      "tamper the user_id parameter to a much lower value; the exec records sit near 0001, and the " +
+      "server never checks you actually own that record.",
   ],
   outro: [
     "[COMMS // HEX]: 'RE: PRECOG DEPLOYMENT — ETHICS REVIEW OVERRIDE,' signed Kovacs. Someone below him",
@@ -141,6 +150,11 @@ export const episode11: Episode = {
     "api-probe": {
       usage: "api-probe --endpoint <path>",
       description: "Send a baseline authenticated request to an API endpoint.",
+      help: [
+        "Sends one authenticated request so you can see the normal response.",
+        "Baseline the profile endpoint: /user/profile — note the id in the URL.",
+        "Example:  api-probe --endpoint /user/profile",
+      ],
       run: (args, api) => {
         if (argVal(args, "--endpoint") !== "/user/profile") return api.print("[!] Usage: api-probe --endpoint /user/profile", "error");
         api.print([
@@ -241,7 +255,10 @@ export const episode12: Episode = {
       "memo value. CVSS 3.1 scores the whole chain (Scope-changed, high C/I) at 10.0.",
     "Run the traversal, then `verify-key A` / `verify-key B` and keep the one whose checksum matches " +
       "HEX's memo. Compile the report, then pick: `broadcast-leak --mode=public` or `bounty-report --submit --responsible`.",
-    "fetch-file --path ../../../../etc/aether/master_key.pem ; verify-key A ; bounty-report --compile ; then choose an ending command.",
+    "fetch-file with a --path that climbs out of the web root using ../ sequences to reach " +
+      "/etc/aether/master_key.pem. WARDEN plants a decoy, so verify-key each candidate (A and B) and " +
+      "keep the one whose checksum matches HEX's memo (it starts e3b0). Then compile the advisory with " +
+      "bounty-report, and choose how it ends — leak publicly, or disclose responsibly.",
   ],
   outro: [], // the ending commands print their own epilogue, then complete the campaign
   commands: {

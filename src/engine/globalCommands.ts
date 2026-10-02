@@ -76,16 +76,16 @@ const commands: Record<string, EpisodeCommand> = {
       const ep = store.episode;
       const prev = highestTier.get(ep.id) ?? 1;
       if (tier > prev) highestTier.set(ep.id, tier);
-      const labels = ["THEORY PRIMER", "SYNTAX NUDGE", "TERMINAL OVERRIDE"];
+      const labels = ["THEORY PRIMER", "SYNTAX NUDGE", "DEEP WALKTHROUGH"];
       api.print([
         { text: `[DECKER INTEL // TIER ${tier} — ${labels[tier - 1]}]`, kind: "warn" },
         { text: ep.hints[tier - 1] || "No hint available for this tier.", kind: "normal" },
       ]);
       if (tier === 3) {
         api.print([
-          { text: "  (Full solution viewed — clean-solve bonus forfeited.)", kind: "dim" },
+          { text: "  (Deepest hint viewed — clean-solve bonus forfeited. The exact command is not shown.)", kind: "dim" },
           {
-            text: `  Totally stuck? Admit defeat with \`stuck ${GIVE_UP_FLAGS[0]}\` — HEX drops the exact command in your prompt.`,
+            text: `  Still stuck and want it typed for you? Admit defeat: \`stuck ${GIVE_UP_FLAGS[0]}\` drops the exact command in your prompt.`,
             kind: "dim",
           },
         ]);

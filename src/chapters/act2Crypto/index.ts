@@ -61,7 +61,9 @@ export const episode04: Episode = {
     "Base64 maps every 3 bytes to 4 printable chars; trailing '=' is padding. Hex writes each byte as " +
       "two 0-F digits. Both are reversible with zero key — that's the whole lesson: encoding ≠ secrecy.",
     "Decode the cookie string with `decode --base64 \"...\"`, then feed the hex bytes to `hexview --decode \"...\"`.",
-    `Run: decode --base64 "VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA==" then hexview --decode "${KOVACS_HEX}"`,
+    "First decode the Base64 session cookie printed in your terminal (the value after '=', ending in " +
+      "==) with decode --base64. That reveals a protocol token AND prints an EXEC-LOG hex dump — feed " +
+      "those hex bytes to hexview --decode to read the name signing the exec channel.",
   ],
   outro: [
     "[COMMS // HEX]: TYPE-04-OREON-PROTOCOL, and DIRECTOR_KOVACS signing the exec channel. Good.",
@@ -175,7 +177,9 @@ export const episode05: Episode = {
       "ciphertext ^ key = plaintext, bit by bit.",
     `Run cipher-crack on the intercept, read the shift that yields English, then xor-decrypt the ` +
       `telemetry stream with --key 0x42.`,
-    `cipher-crack --type caesar --text "${CAESAR_CIPHERTEXT}"  then  xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42`,
+    "Caesar first: pass the intercepted ciphertext shown on your deck to cipher-crack --type caesar — " +
+      "it tries all 25 shifts and flags the English one. Then peel the XOR layer: give xor-decrypt the " +
+      "hex stream from your deck and the recovered --key 0x42 (XOR is its own inverse).",
   ],
   outro: [
     "[COMMS // HEX]: 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet — Bastion Core.",
@@ -282,7 +286,9 @@ export const episode06: Episode = {
     "A 32-hex-char digest is 128 bits — the MD5 signature. Because MD5 is unsalted and fast, a dictionary " +
       "attack hashes every word in a list and compares. 'admin_root' hashes to the MD5 of 'admin'.",
     "Run `hash-identify 21232f297a57a5a743894a0e4a801fc3`, then crack that same hash with the wordlist.",
-    "hash-identify 21232f297a57a5a743894a0e4a801fc3  then  crack --hash 21232f297a57a5a743894a0e4a801fc3 --wordlist synth_rockyou.txt",
+    "Fingerprint a hash with hash-identify (32 hex chars = MD5). Then copy the admin_root hash from " +
+      "the dump in your terminal and run crack on it with --wordlist synth_rockyou.txt — it hashes " +
+      "each word and compares until one matches.",
   ],
   outro: [
     "[COMMS // HEX]: ...Hold on. Before we move on Bastion Core, there's something you should know.",

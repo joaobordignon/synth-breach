@@ -70,7 +70,8 @@ export const episode00: Episode = {
     "Every command follows one shape: a name, then optional --flags and values. Nothing here can " +
       "break anything real — the whole range is simulated and air-gapped.",
     "Type `help` to list commands, `codex` to open the library, then read the code and `accept-code`.",
-    "Run these three in order: `help`, `codex`, `accept-code`. That's the whole Prologue.",
+    "Three steps clear the Prologue, in order: list your toolkit, open the reference library (it's " +
+      "free), then acknowledge the Operating Code to sign in. Each is a single word.",
   ],
   outro: [
     "[COMMS // HEX]: Good. You can drive, and you know the rule. Welcome to the active roster,",
