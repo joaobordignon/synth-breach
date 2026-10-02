@@ -164,11 +164,13 @@ if (voiceSupported()) {
   synth()!.onvoiceschanged = pickVoice;
 }
 
-/** Strip stage directions and shell syntax noise so narration sounds natural. */
+/** Strip stage directions and shell syntax noise so narration sounds natural.
+ *  Command words in `backticks` are READ — we drop only the backticks, not the
+ *  word — so HEX actually says "type help", not "type …". */
 function clean(text: string): string {
   return text
-    .replace(/\([^)]*\)/g, "") // (a long pause) etc.
-    .replace(/`[^`]*`/g, "") // inline command snippets
+    .replace(/\([^)]*\)/g, "") // (a long pause) etc. — stage directions, not spoken
+    .replace(/`([^`]*)`/g, "$1") // keep the word inside `backticks`, drop the ticks
     .replace(/\s{2,}/g, " ")
     .trim();
 }

@@ -226,10 +226,16 @@ class GameStore {
     return (this.vars.get("prompt") as string | undefined) ?? "operator@synth:~$ ";
   }
   objectiveStatus(): Array<{ label: string; done: boolean }> {
-    return this.episode.objectives.map((o) => ({
-      label: o.label,
-      done: this.completed.has(o.id),
-    }));
+    const objs = this.episode.objectives;
+    const all = objs.map((o) => ({ label: o.label, done: this.completed.has(o.id) }));
+    if (!this.episode.progressiveObjectives) return all;
+    // Reveal one at a time: every completed step, plus the single next one.
+    const out: Array<{ label: string; done: boolean }> = [];
+    for (const o of all) {
+      out.push(o);
+      if (!o.done) break; // stop after the first unfinished — that's "current"
+    }
+    return out;
   }
   isUnlocked(id: number): boolean {
     return this.profile.unlockedEpisodes.includes(id);

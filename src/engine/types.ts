@@ -175,6 +175,10 @@ export interface Episode {
   /** HEX comms / scene-setting printed when the episode starts. */
   intro: Array<string | Line>;
   objectives: Objective[];
+  /** When true, objectives are revealed one at a time — the checklist shows the
+   *  completed steps plus the single next one, not the whole list. Used by the
+   *  Prologue to guide a first-time player through help → codex → accept-code. */
+  progressiveObjectives?: boolean;
   /** Episode-specific commands, merged over the global command set. */
   commands: Record<string, EpisodeCommand>;
   /** Tier 1 theory, Tier 2 syntax nudge, Tier 3 full solution. */

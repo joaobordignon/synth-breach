@@ -77,6 +77,8 @@ export const episode00: Episode = {
     { id: "codex", label: "Open the `codex` reference library (it's free)" },
     { id: "accept-code", label: "Read & `accept-code` — the Operating Code" },
   ],
+  // Reveal the three onboarding steps one at a time, in order.
+  progressiveObjectives: true,
   hints: [
     "Every command follows one shape: a name, then optional --flags and values. Nothing here can " +
       "break anything real — the whole range is simulated and air-gapped.",
@@ -120,35 +122,34 @@ export const episode00: Episode = {
         "codex <command>  jumps to the concept behind a tool, e.g. `codex netmap`.",
       ],
       run: (args, api) => {
+        // One step at a time: `help` comes first so the toolkit is in view.
+        if (!api.isComplete("help")) {
+          return api.print("[COMMS // HEX]: Hold up — run `help` first, so you can see the kit you're working with. Then open the `codex`.", "hex");
+        }
         const query = args.join(" ").trim();
         api.print(`[*] Opening CODEX reference library${query ? ` → ${query}` : ""}... (free, no penalty)`, "system");
         api.openCodex(query || undefined);
         api.complete("codex");
-        if (!api.getVar("codeShown")) {
-          api.setVar("codeShown", true);
-          api.print([
-            { text: "", kind: "normal" },
-            ...OPERATING_CODE,
-            { text: "", kind: "normal" },
-            { text: "[*] Read the Operating Code above, then `accept-code` to sign in.", kind: "system" },
-          ]);
-        }
+        api.print([
+          { text: "", kind: "normal" },
+          ...OPERATING_CODE,
+          { text: "", kind: "normal" },
+          { text: "[*] That's the Operating Code. Read it, then `accept-code` to sign in.", kind: "system" },
+        ]);
+        api.print("[COMMS // HEX]: Last step — read the Operating Code I just printed, then `accept-code`.", "hex");
       },
     },
     "accept-code": {
       usage: "accept-code",
       description: "Formally acknowledge the Null Pointer Collective's Operating Code.",
       run: (_args, api) => {
-        // If they jumped straight here without opening the codex, show the Code
-        // first — no one signs something they haven't been shown.
-        if (!api.getVar("codeShown")) {
-          api.setVar("codeShown", true);
-          api.print(OPERATING_CODE);
+        // Enforce the order: you can't sign the Code before you've opened it.
+        if (!api.isComplete("codex")) {
+          return api.print("[COMMS // HEX]: Not yet — open the `codex` first and read the Operating Code. Then you can sign it.", "hex");
         }
-        api.print([
-          { text: "", kind: "normal" },
-          { text: "[✓] Operating Code acknowledged. Signed in.", kind: "success" },
-        ]);
+        // Always reprint the Code at the moment of signing — so it's on screen
+        // right here, never scrolled away by the help listing.
+        api.print([...OPERATING_CODE, { text: "", kind: "normal" }, { text: "[✓] Operating Code acknowledged. Signed in.", kind: "success" }]);
         api.addScore(50);
         api.complete("accept-code");
       },

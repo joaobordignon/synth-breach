@@ -62,6 +62,10 @@ const prologueDismissed = (await page.locator(".prologue-modal").count()) === 0;
 // Let HEX's first lines type out in the comms feed before asserting.
 await page.waitForTimeout(3200);
 
+// Progressive objectives: the Prologue reveals its steps one at a time, so only
+// the first objective is visible before `help` runs.
+const objectivesAtStart = await page.locator(".objective-list li").count();
+
 // Player reply chips: a dialogue beat should offer clickable responses to HEX.
 const replyChips = await page.locator(".comms-reply").count();
 if (replyChips > 0) {
@@ -157,6 +161,7 @@ const checks = [
   ["Prologue briefing box shown then dismissed", prologueShown && prologueDismissed],
   ["Prologue has handle + voice + music setup", prologueSetup],
   ["Prologue has a LOAD GAME button", prologueLoad],
+  ["objectives reveal one at a time (Prologue)", objectivesAtStart === 1],
   ["HEX offers clickable player replies", replyChips >= 1],
   ["player reply posts a YOU> line", youLine >= 1],
   ["HEX utterances aren't broken mid-sentence", coalesced],
