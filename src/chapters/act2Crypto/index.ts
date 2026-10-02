@@ -43,9 +43,15 @@ export const episode04: Episode = {
     "[COMMS // HEX]: That session cookie — VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA== . Rookies think encoding",
     "text is the same as encrypting it. Encoding just reshapes data for transport; anyone reverses it",
     "in milliseconds with no secret key. Strip the padding and reveal what Aether's hiding.",
-    "[COMMS // HEX]: `decode --base64 <data>`, then `hexview --decode <stream>` on the exec log.",
+    "[COMMS // HEX]: `decode --base64 <data>`, then `hexview --decode <stream>` on the exec log it unlocks.",
     { text: "[COMMS // HEX]: ...Base64. Typical. I've seen worse out of shops that should know better.", kind: "hex" },
     { text: "Aether especially — they always dress up laziness as protocol. Trust me on that one.", kind: "hex" },
+    // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
+    { text: "", kind: "normal" },
+    { text: "  ── INTERCEPT // SESSION COOKIE ─────────────────────────────", kind: "system" },
+    { text: "  AETHER_SESSION=VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA==", kind: "normal" },
+    { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+    { text: "  (select + copy the value after '=', then run `decode` — see `decode --help`)", kind: "dim" },
   ],
   objectives: [
     { id: "b64", label: "Decode the intercepted session cookie" },
@@ -86,6 +92,18 @@ export const episode04: Episode = {
           api.print("[COMMS // HEX]: There it is — a protocol token, in plain text. No key required.", "hex");
           api.complete("b64");
           api.addScore(40);
+          // The token unlocks the executive hex log — surface it to decode next.
+          if (!api.isComplete("hex")) {
+            api.print([
+              { text: "", kind: "normal" },
+              { text: "[*] Token OREON-PROTOCOL accepted — pulling the executive hex log it unlocks:", kind: "system" },
+              { text: "  ── EXEC-LOG // HEX DUMP ────────────────────────────────────", kind: "system" },
+              { text: `  ${KOVACS_HEX}`, kind: "warn" },
+              { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+              { text: "  (select + copy those bytes, then run `hexview` — see `hexview --help`)", kind: "dim" },
+            ]);
+            api.print("[COMMS // HEX]: There's your dump. `hexview --decode` it — who's signing the exec channel?", "hex");
+          }
         }
       },
     },
@@ -136,6 +154,16 @@ export const episode05: Episode = {
     "bitmask. Let's break their math.",
     { text: "[COMMS // HEX]: ...Vance. Haven't heard that name in a long time.", kind: "hex" },
     { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, Decker. Not the history lesson.", kind: "hex" },
+    { text: "[COMMS // HEX]: Intercept's on your deck. Crack the Caesar layer first, then peel the XOR", kind: "hex" },
+    { text: "with the single-byte key I already pulled off the wire: 0x42.", kind: "hex" },
+    // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
+    { text: "", kind: "normal" },
+    { text: "  ── INTERCEPT // CAESAR LAYER ───────────────────────────────", kind: "system" },
+    { text: "  WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD", kind: "normal" },
+    { text: "  ── TELEMETRY // XOR STREAM  (recovered key: 0x42) ──────────", kind: "system" },
+    { text: "  0x53 0x59 0x4E", kind: "normal" },
+    { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+    { text: "  (copy the intercept above into `cipher-crack`, then `xor-decrypt` — see `<cmd> --help`)", kind: "dim" },
   ],
   objectives: [
     { id: "caesar", label: "Brute-force the Caesar shift to readable text" },
