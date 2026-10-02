@@ -44,7 +44,7 @@ export const episode01: Episode = {
   outro: [
     "[COMMS // HEX]: Gateway's real, and it's breathing — and your run's banked. That's your first",
     "foothold, and a save you can walk away from.",
-    "[COMMS // HEX]: Get some rest, {handle} — tomorrow we go looking for a door. Type `next`.",
+    "[COMMS // HEX]: Get some rest, {handle} — when you're ready, type `next`.",
   ],
   beats: [
     {
