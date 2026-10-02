@@ -1,39 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Original artwork for SYNTH // BREACH (MIT). A simplified, stylized
-     "anonymous mask" drawn from scratch as plain geometry — NOT a copy of any
-     specific existing mask artwork. White/gray on black so the in-game
-     "Face in Code" sampler reads the mask as bright glyphs and the features
-     (eyes, brows, moustache, goatee) as dark cut-outs. -->
+<!-- Original artwork for SYNTH // BREACH (MIT). A stylized "anonymous netrunner
+     mask" drawn from scratch as plain geometry. Inspired by the generic pale-
+     theatrical-mask silhouette, but intentionally NOT a copy of the trademarked
+     V-for-Vendetta / Guy Fawkes mask design (different brows, eyes, moustache
+     and a plain vertical chin stripe rather than the iconic curled features).
+     White/gray on black so the in-game "Face in Code" sampler reads the mask as
+     bright glyphs and the features (eyes, brows, moustache, goatee) as dark
+     cut-outs. Regenerate the PNG with: node scripts/make-mask.mjs -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320" width="300" height="320">
   <rect x="0" y="0" width="300" height="320" fill="#000000"/>
 
-  <!-- face -->
-  <path d="M150 28 C205 32 250 70 252 120 C254 166 235 196 220 222 C205 252 180 292 150 308
-           C120 292 95 252 80 222 C65 196 46 166 48 120 C50 70 95 32 150 28 Z"
-        fill="#d9d9d9"/>
+  <!-- face: broad shield, tapering to a soft-pointed chin -->
+  <path d="M150 24 C212 28 258 68 258 126 C258 172 239 200 223 228
+           C207 258 180 300 150 314 C120 300 93 258 77 228 C61 200 42 172 42 126
+           C42 68 88 28 150 24 Z"
+        fill="#dcdcdc"/>
 
-  <!-- cheek highlights (brighter accents) -->
-  <circle cx="96" cy="180" r="15" fill="#ffffff" opacity="0.85"/>
-  <circle cx="204" cy="180" r="15" fill="#ffffff" opacity="0.85"/>
+  <!-- soft highlights: forehead + cheeks (brighter = denser glyphs) -->
+  <ellipse cx="150" cy="74" rx="46" ry="26" fill="#ffffff" opacity="0.5"/>
+  <circle cx="98" cy="188" r="17" fill="#ffffff" opacity="0.8"/>
+  <circle cx="202" cy="188" r="17" fill="#ffffff" opacity="0.8"/>
 
-  <!-- subtle nose ridge (slightly darker than the face) -->
-  <path d="M150 132 L140 184 C145 191 155 191 160 184 Z" fill="#b9b9b9"/>
+  <!-- nose: slim ridge shadow -->
+  <path d="M150 128 L138 188 C144 197 156 197 162 188 Z" fill="#c2c2c2"/>
 
-  <!-- eyebrows (arched, severe) -->
-  <path d="M74 112 C98 90 132 90 146 106" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/>
-  <path d="M226 112 C202 90 168 90 154 106" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/>
+  <!-- eyebrows: thick, high, arched -->
+  <path d="M70 108 C96 82 134 84 150 102" fill="none" stroke="#111111" stroke-width="10" stroke-linecap="round"/>
+  <path d="M230 108 C204 82 166 84 150 102" fill="none" stroke="#111111" stroke-width="10" stroke-linecap="round"/>
 
-  <!-- eyes (hollow) -->
-  <path d="M86 130 C104 116 130 118 142 132 C128 148 102 148 86 130 Z" fill="#0a0a0a"/>
-  <path d="M214 130 C196 116 170 118 158 132 C172 148 198 148 214 130 Z" fill="#0a0a0a"/>
+  <!-- eyes: almond, hollow, with an outer liner flick -->
+  <path d="M84 132 C104 116 132 118 146 134 C130 150 102 150 84 136 Z" fill="#0a0a0a"/>
+  <path d="M216 132 C196 116 168 118 154 134 C170 150 198 150 216 136 Z" fill="#0a0a0a"/>
+  <path d="M82 130 C96 120 120 120 140 130" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M218 130 C204 120 180 120 160 130" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
 
-  <!-- handlebar moustache -->
-  <path d="M150 198 C128 198 108 190 86 174 C100 198 124 212 150 210
-           C176 212 200 198 214 174 C192 190 172 198 150 198 Z" fill="#141414"/>
+  <!-- moustache: trimmed, gently upturned (not the iconic curl) -->
+  <path d="M150 204 C127 204 106 195 86 180 C101 203 127 216 150 212
+           C173 216 199 203 214 180 C194 195 173 204 150 204 Z" fill="#121212"/>
 
-  <!-- smile -->
-  <path d="M116 214 C135 226 165 226 184 214" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+  <!-- smile: wide, calm -->
+  <path d="M114 216 C135 230 165 230 186 216" fill="none" stroke="#121212" stroke-width="5" stroke-linecap="round"/>
 
-  <!-- pointed goatee -->
-  <path d="M136 226 L164 226 L150 272 Z" fill="#141414"/>
+  <!-- chin stripe: a thin tapering soul-patch line -->
+  <path d="M146 228 L154 228 L150 290 Z" fill="#121212"/>
 </svg>

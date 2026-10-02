@@ -8,7 +8,7 @@ import type { CommsEntry, CommsReply } from "../engine/types";
 
 // The "old BBS comms server" side panel. New HEX transmissions arrive from the
 // store, are revealed with a typewriter effect (and read aloud as they type
-// when voice is on), and pulse the Guy Fawkes "face in code" while HEX speaks.
+// when voice is on), and pulse the original "face in code" mask while HEX speaks.
 // At story beats, pre-written player replies are offered as clickable chips
 // that post into the feed as YOU> and draw a tailored HEX response.
 

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 
 // HEX's "Face in Code" visualizer — the jaredrhod/ai-visualizer approach:
-// the actual Guy Fawkes mask image is sampled into a grid and re-rendered as
-// green ASCII/code glyphs whose density follows the image's brightness. The
+// an original stylized "anonymous netrunner" mask (public/hex-mask.png, drawn
+// from assets/hex-mask.svg — MIT, not the trademarked V-mask) is sampled into a
+// grid and re-rendered as green ASCII/code glyphs whose density follows the
+// image's brightness. The
 // face only resolves while HEX is transmitting or the voice is speaking; when
 // idle it fades to black ("awaiting signal"). A generic Anonymous symbol, not
 // a depiction of any real person.
