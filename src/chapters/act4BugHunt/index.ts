@@ -24,24 +24,48 @@ export const episode10: Episode = {
   codexTopic: "webSecurity",
   intro: [
     "[COMMS // HEX]: Same rule as always, {handle} — cleared shard, this stays on the range. This one",
-    "matters most to get right, because this is Kovacs' house.",
-    "[COMMS // HEX]: You have root on Bastion, but the surveillance core lives in their cloud API.",
-    "Their login gate stitches user input directly into SQL queries. If backend code treats your data",
-    "as executable commands, the database becomes your puppet.",
-    "[COMMS // HEX]: Intercept the login request to their cloud API, then inject a SQL tautology into",
-    "it. `proxy-intercept --help` and `inject-sql --help` for syntax; `codex` for how injection works.",
+    "matters most, because this is Kovacs' house. But Bastion isn't the brain — the surveillance core",
+    "runs somewhere in their cloud, and we don't have the address yet.",
+    "[COMMS // HEX]: You still own the Bastion box. A machine that talks to the cloud has to know where",
+    "the cloud IS — so read its config. `ls` what root can see, `cat` whatever names the backend. Find",
+    "me that host, then we take its login apart.",
   ],
   objectives: [
+    { id: "locate", label: "Read Bastion's config to find the cloud API host (ls / cat)" },
     { id: "intercept", label: "Intercept the login request to the cloud API" },
     { id: "inject", label: "Bypass the login with a SQL tautology" },
   ],
+  // You rooted this box in Act III — its config names the next target.
+  files: {
+    "/etc/aether/services.conf": {
+      lines: [
+        "# aether-bastion — service routing (root-only)",
+        "log_forwarder   = 10.42.20.1:514",
+        "auth_backend    = cloud.aetherdyn.internal:443",
+        "surveillance    = https://cloud.aetherdyn.internal/api/v1   # PRECOG core",
+        "# NOTE: PRECOG scoring runs in the cloud, not on this host.",
+      ],
+      reveal: {
+        evidence: { label: "Cloud API host", value: "cloud.aetherdyn.internal" },
+        completes: "locate",
+        score: 30,
+        hex: [
+          "[COMMS // HEX]: cloud.aetherdyn.internal. That's it — that's where PRECOG actually lives, and",
+          "where it scored ECHO. Their login gate stitches user input straight into SQL. Intercept it, then",
+          "make the database your puppet.",
+        ],
+      },
+    },
+  },
   hints: [
-    "The server builds: SELECT * FROM users WHERE username='$user' AND password='$pass'. If you close " +
-      "the quote and add OR '1'='1', the WHERE is always true; `--` comments out the password check.",
-    "Intercept the login first, then inject the tautology payload: admin' OR '1'='1' --",
-    "proxy-intercept the cloud host (cloud.aetherdyn.internal) to catch the login POST. The server " +
-      "concatenates your username straight into the SQL WHERE clause — so inject-sql a payload that " +
-      "closes the quote, adds an always-true OR '1'='1', and comments the rest out with -- .",
+    "Recon first: a host that talks to the cloud stores the cloud's address. `ls` the Bastion box and " +
+      "`cat` its service config. Then — the login server builds SELECT * FROM users WHERE " +
+      "username='$user' AND password='$pass'. Close the quote, OR '1'='1' (always true), `--` the rest.",
+    "`ls`, then `cat /etc/aether/services.conf` to get the host. Intercept its login, then inject the " +
+      "tautology payload: admin' OR '1'='1' --",
+    "Read the Bastion config (`cat /etc/aether/services.conf`) — it names cloud.aetherdyn.internal. " +
+      "proxy-intercept that host to catch the login POST, then inject-sql a payload that closes the quote, " +
+      "adds an always-true OR '1'='1', and comments the rest out with -- .",
   ],
   outro: [
     "[COMMS // HEX]: role=SYSTEM_DIRECTOR. You're in as Kovacs' own tier. First time I've touched his",
@@ -84,11 +108,17 @@ export const episode10: Episode = {
       description: "Intercept the next outgoing HTTP request to a host.",
       help: [
         "Catches the next outbound HTTP request so you can tamper with it.",
-        "Aether's surveillance core is the cloud API host cloud.aetherdyn.internal.",
-        "Example:  proxy-intercept --target cloud.aetherdyn.internal",
+        "Point it at the cloud API host you found in Bastion's config (it's in",
+        "your Evidence Locker — `recall` if you cleared the screen).",
+        "Example:  proxy-intercept --target <host>",
       ],
       run: (args, api) => {
-        if (argVal(args, "--target") !== CLOUD_HOST) return api.print(`[!] Usage: proxy-intercept --target ${CLOUD_HOST}`, "error");
+        if (!api.isComplete("locate")) {
+          return api.print("[!] You don't have the cloud host yet. Read Bastion's config first — `ls`, then `cat` it.", "warn");
+        }
+        if (argVal(args, "--target") !== CLOUD_HOST) {
+          return api.print("[!] That's not the host Bastion's config named. Check the Evidence Locker (`recall`).", "error");
+        }
         api.print([
           { text: "[*] Proxy armed. Captured outbound request:", kind: "system" },
           { text: "  POST /api/v1/auth/login HTTP/1.1", kind: "normal" },

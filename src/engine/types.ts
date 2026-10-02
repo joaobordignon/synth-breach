@@ -82,6 +82,24 @@ export interface EvidenceItem {
   value: string;
 }
 
+/** A readable artifact in an episode's virtual filesystem (`ls` / `cat`).
+ *  Reading one can pay off a recon objective: surface evidence, complete an
+ *  objective, and fire a HEX reaction — so targets are DISCOVERED in-world
+ *  instead of appearing from nowhere. */
+export interface ReconFile {
+  /** Lines printed by `cat <path>`. */
+  lines: string[];
+  /** Optional payoff the first time this file is read. */
+  reveal?: {
+    evidence?: EvidenceItem;
+    /** Objective id completed when this file is read. */
+    completes?: string;
+    /** HEX reaction lines (routed to the comms panel). */
+    hex?: string[];
+    score?: number;
+  };
+}
+
 /** The surface area a command handler is allowed to touch. */
 export interface EngineApi {
   /** Print immediately (string = normal line, or tagged Line objects). */
@@ -170,4 +188,8 @@ export interface Episode {
   /** Key reference strings surfaced at episode start (intercept data, cipher
    *  text, etc.) — seeded into the Evidence Locker so `clear` never loses them. */
   evidence?: EvidenceItem[];
+  /** Virtual filesystem for this episode, keyed by path, explorable with the
+   *  global `ls` / `cat` commands — the recon layer that lets the player find
+   *  their next target (an IP, a host) by reading the world. */
+  files?: Record<string, ReconFile>;
 }

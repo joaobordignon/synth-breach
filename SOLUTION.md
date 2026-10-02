@@ -21,6 +21,8 @@
 | Tiered hint (1 = theory, 2 = syntax, 3 = deep walkthrough) | `intel` (run again for the next tier) |
 | Jump to an unlocked episode | `goto <id>` |
 | See current objectives | `objectives` |
+| Explore the host you're on (recon) | `ls` then `cat <path>` |
+| Reprint the Evidence Locker (survives `clear`) | `recall` |
 | Save your run to a file | `save` |
 | Load a run (or use **LOAD GAME** on the boot screen) | `load` |
 | Full reset | `reset --confirm` |
@@ -107,9 +109,13 @@ Then `next`.
 **EP07 · The Perimeter Scan**
 ```
 trace --pattern caught-cell-01 --compare hex-contact-log
+ls
+cat gamma-recon.cap
 vulnscan --host 10.42.20.10
 searchsploit "ProFTPD 1.3.3c"
 ```
+> `cat gamma-recon.cap` is the recon step — it reveals the Bastion host
+> (`10.42.20.10`) and drops it in the Evidence Locker. `vulnscan` is gated on it.
 Then `next`.
 
 **EP08 · The Default Bastion**
@@ -139,9 +145,13 @@ Then `next`.
 
 **EP10 · The Broken Gate**
 ```
+ls
+cat /etc/aether/services.conf
 proxy-intercept --target cloud.aetherdyn.internal
 inject-sql --payload "admin' OR '1'='1' --"
 ```
+> `cat /etc/aether/services.conf` is the recon step — Bastion's own config names
+> the cloud host (`cloud.aetherdyn.internal`). `proxy-intercept` is gated on it.
 Then `next`.
 
 **EP11 · The Phantom Parameter**
@@ -223,6 +233,7 @@ next
 Act III:
 ```
 trace --pattern caught-cell-01 --compare hex-contact-log
+cat gamma-recon.cap
 vulnscan --host 10.42.20.10
 searchsploit "ProFTPD 1.3.3c"
 next
@@ -239,6 +250,7 @@ next
 ```
 Act IV → ending:
 ```
+cat /etc/aether/services.conf
 proxy-intercept --target cloud.aetherdyn.internal
 inject-sql --payload "admin' OR '1'='1' --"
 next

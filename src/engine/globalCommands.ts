@@ -67,6 +67,58 @@ const commands: Record<string, EpisodeCommand> = {
     run: () => {},
   },
 
+  ls: {
+    usage: "ls [path]",
+    description: "List readable files on the host you're on (recon).",
+    help: [
+      "Lists the files the current foothold exposes. `cat <path>` reads one.",
+      "Recon artifacts (configs, captures, logs) often leak your next target.",
+    ],
+    run: (args, api) => {
+      const files = store.episode.files ?? {};
+      const keys = Object.keys(files);
+      if (keys.length === 0) return api.print("[*] Nothing readable from here.", "dim");
+      const prefix = args.find((a) => !a.startsWith("-"));
+      const shown = prefix ? keys.filter((k) => k.startsWith(prefix) || k.startsWith(prefix.replace(/\/$/, ""))) : keys;
+      if (shown.length === 0) return api.print(`ls: ${prefix}: No such file or directory`, "error");
+      api.print([
+        { text: "[*] Readable from this foothold:", kind: "system" },
+        ...shown.map((k) => ({ text: `  ${k}`, kind: "normal" as const })),
+        { text: "    (cat <path> to read one)", kind: "dim" },
+      ]);
+    },
+  },
+
+  cat: {
+    usage: "cat <path>",
+    description: "Read a file's contents (recon).",
+    help: [
+      "Prints a file. `ls` first to see what's readable here.",
+      "A config or capture often names the host/IP you need next.",
+    ],
+    run: (args, api) => {
+      const path = args.find((a) => !a.startsWith("-"));
+      if (!path) return api.print("[!] Usage: cat <path>", "error");
+      const files = store.episode.files ?? {};
+      // Exact path, then a forgiving basename match (so `cat services.conf` works).
+      const base = path.replace(/^\.?\//, "");
+      const key =
+        files[path] ? path :
+        files[base] ? base :
+        Object.keys(files).find((k) => k === path || k.endsWith(`/${base}`) || k.split("/").pop() === base);
+      const f = key ? files[key] : undefined;
+      if (!f) return api.print(`cat: ${path}: No such file or directory`, "error");
+      api.print(f.lines.map((l) => ({ text: `  ${l}`, kind: "normal" as const })));
+      const r = f.reveal;
+      if (r) {
+        if (r.evidence) api.evidence(r.evidence.label, r.evidence.value);
+        if (r.hex) api.print(r.hex.map((h) => ({ text: h, kind: "hex" as const })));
+        if (typeof r.score === "number") api.addScore(r.score);
+        if (r.completes) api.complete(r.completes);
+      }
+    },
+  },
+
   recall: {
     usage: "recall",
     description: "Reprint the Evidence Locker — recovered strings for this episode (survives `clear`).",
