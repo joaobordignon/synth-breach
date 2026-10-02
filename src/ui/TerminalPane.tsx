@@ -55,6 +55,24 @@ export function TerminalPane() {
       promptVisible = false;
     }
 
+    // Insert text at the cursor (used for typing, pasting, and middle-click).
+    // Pasted content can be multi-line / contain control chars — flatten it.
+    function typeChars(data: string) {
+      const clean = data.replace(/[\r\n]+/g, " ").replace(/[^\x20-\x7E]/g, "");
+      if (!clean) return;
+      buffer += clean;
+      term.write(clean);
+      playTypingFx();
+    }
+
+    // Replace the whole input line (fill-from-UI and history recall).
+    function setBuffer(next: string) {
+      clearInputLine();
+      buffer = next.replace(/[\r\n]+/g, " ").replace(/[^\x20-\x7E]/g, "");
+      showPrompt();
+      term.focus();
+    }
+
     // Background / command output stream.
     const unsub = store.onOutput((lines) => {
       if (promptVisible) clearInputLine();
@@ -125,13 +143,32 @@ export function TerminalPane() {
           replaceLine(history[historyIndex] ?? "");
           return;
         default:
-          if (data >= " ") {
-            buffer += data;
-            term.write(data);
-            playTypingFx();
-          }
+          // Single keystrokes and pasted chunks (xterm delivers paste here too).
+          typeChars(data);
       }
     });
+
+    // Copy with Ctrl/Cmd+C when there's a selection (xterm renders to canvas,
+    // so the browser's own copy can't see the text). Ctrl+C is plain copy — it
+    // does NOT open devtools (that's Ctrl+Shift+I / F12). Paste (Ctrl/Cmd+V,
+    // right-click, middle-click) is delivered by xterm straight to onData above.
+    term.attachCustomKeyEventHandler((e) => {
+      if (e.type !== "keydown") return true;
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && !e.shiftKey && (e.key === "c" || e.key === "C")) {
+        if (term.hasSelection()) {
+          const sel = term.getSelection();
+          if (sel) navigator.clipboard?.writeText(sel).catch(() => {});
+          e.preventDefault();
+          return false; // consumed as copy
+        }
+        return true; // no selection — let it pass, don't send ^C
+      }
+      return true;
+    });
+
+    // Let side-panel UI drop a command straight at the prompt (click-to-insert).
+    const unsubInput = store.onInputRequest((text) => setBuffer(text));
 
     // Boot sequence.
     term.writeln(colorize({ text: "SYNTH // BREACH — Netrunner Virtual Shell", kind: "banner" }));
@@ -146,6 +183,7 @@ export function TerminalPane() {
     return () => {
       window.removeEventListener("resize", onResize);
       unsub();
+      unsubInput();
       disposable.dispose();
       term.dispose();
     };

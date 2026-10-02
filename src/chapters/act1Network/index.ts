@@ -25,8 +25,8 @@ export const episode01: Episode = {
     "[COMMS // HEX]: Send a pulse across the wire. `netmap 10.42.0.0/24`, then `ping` the gateway.",
   ],
   objectives: [
-    { id: "sweep", label: "Sweep the subnet: netmap 10.42.0.0/24" },
-    { id: "ping", label: "Ping the gateway: ping 10.42.0.1" },
+    { id: "sweep", label: "Map your /24 subnet and spot the live gateway" },
+    { id: "ping", label: "Measure latency to the gateway with ICMP" },
   ],
   hints: [
     "A /24 CIDR sweep probes every host in 10.42.0.0 – 10.42.0.255 with ICMP/ARP. Active hosts " +
@@ -42,6 +42,11 @@ export const episode01: Episode = {
     netmap: {
       usage: "netmap <cidr>",
       description: "Sweep a subnet for active hosts (ARP/ICMP).",
+      help: [
+        "Give it a subnet in CIDR form: <network-address>/<prefix>.",
+        "Your assigned /24 covers 10.42.0.0 through 10.42.0.255.",
+        "Example:  netmap <network>/<prefix>",
+      ],
       run: (args, api) => {
         const cidr = args[0];
         if (!cidr) return api.print("[!] Usage: netmap <cidr>, e.g. netmap 10.42.0.0/24", "error");
@@ -73,6 +78,11 @@ export const episode01: Episode = {
     ping: {
       usage: "ping <ip>",
       description: "Send ICMP echo requests to a host.",
+      help: [
+        "Reports TTL (OS/hop hint) and round-trip time for one host.",
+        "Point it at the active gateway you just found on the map.",
+        "Example:  ping <ip-address>",
+      ],
       run: (args, api) => {
         const ip = args[0];
         if (!ip) return api.print("[!] Usage: ping <ip>", "error");
@@ -126,8 +136,8 @@ export const episode02: Episode = {
     "[COMMS // HEX]: `portscan --inspect 10.42.0.1`. Then tell me which port is hiding: `answer <port>`.",
   ],
   objectives: [
-    { id: "scan", label: "Capture the handshake: portscan --inspect 10.42.0.1" },
-    { id: "answer", label: "Identify the stealth-filtered port: answer <port>" },
+    { id: "scan", label: "Capture the TCP handshake against the gateway" },
+    { id: "answer", label: "Identify which port is stealth-filtered" },
   ],
   hints: [
     "A port replying [SYN, ACK] completed two of three handshake steps — it's OPEN. [RST, ACK] means " +
@@ -145,6 +155,12 @@ export const episode02: Episode = {
     portscan: {
       usage: "portscan --inspect <ip>",
       description: "SYN-scan a host and render the captured packet handshake table.",
+      help: [
+        "Pass --inspect <ip> to render the captured packet table.",
+        "Read the FLAGS column: [SYN,ACK] = open, [RST,ACK] = closed,",
+        "NO RESPONSE = silently filtered (a firewall dropped it).",
+        "Example:  portscan --inspect <ip>",
+      ],
       run: (args, api) => {
         if (!args.includes("--inspect") || !args.includes(GATEWAY_IP)) {
           return api.print(`[!] Usage: portscan --inspect ${GATEWAY_IP}`, "error");
@@ -185,6 +201,7 @@ export const episode02: Episode = {
     answer: {
       usage: "answer <port>",
       description: "Answer HEX's field question (which port is filtered).",
+      help: ["Submit the port number you judge to be stealth-filtered.  Example:  answer <port>"],
       run: (args, api) => {
         if (!api.isComplete("scan")) return api.print("[!] Run the portscan first.", "warn");
         if (args[0] === "8088") {
@@ -216,8 +233,8 @@ export const episode03: Episode = {
     "[COMMS // HEX]: `banner-grab --target 10.42.0.1 --port 80`. Then `inspect --protocol http`.",
   ],
   objectives: [
-    { id: "banner", label: "Grab the HTTP banner: banner-grab --target 10.42.0.1 --port 80" },
-    { id: "inspect", label: "Classify the transport: inspect --protocol http" },
+    { id: "banner", label: "Grab the service banner on the web port" },
+    { id: "inspect", label: "Classify the transport as cleartext or encrypted" },
   ],
   hints: [
     "A Server: header hands an attacker the exact daemon + version to look up CVEs against. And a " +
@@ -236,6 +253,11 @@ export const episode03: Episode = {
     "banner-grab": {
       usage: "banner-grab --target <ip> --port <port>",
       description: "Probe a socket and dump the service's response banner.",
+      help: [
+        "Opens a socket and prints the service's response headers.",
+        "Target the gateway's open web port (the well-known HTTP port is 80).",
+        "Example:  banner-grab --target <ip> --port <port>",
+      ],
       run: (args, api) => {
         const target = argVal(args, "--target");
         const port = argVal(args, "--port");

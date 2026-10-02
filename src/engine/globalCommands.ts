@@ -2,6 +2,7 @@ import type { EpisodeCommand, Line } from "./types";
 import { store, GLOBAL_COMMANDS, registerGlobalCommands } from "./gameStore";
 import { EPISODES } from "../chapters";
 import { exportSave, importSaveViaPicker } from "../state/saveFile";
+import { SOLUTIONS, GIVE_UP_FLAGS } from "./solutions";
 
 // Commands available in every episode. Episode-specific commands are merged
 // *over* these (an episode may override e.g. `whoami`). Reading hints or the
@@ -80,7 +81,55 @@ const commands: Record<string, EpisodeCommand> = {
         { text: `[DECKER INTEL // TIER ${tier} — ${labels[tier - 1]}]`, kind: "warn" },
         { text: ep.hints[tier - 1] || "No hint available for this tier.", kind: "normal" },
       ]);
-      if (tier === 3) api.print("  (Full solution viewed — clean-solve bonus forfeited.)", "dim");
+      if (tier === 3) {
+        api.print([
+          { text: "  (Full solution viewed — clean-solve bonus forfeited.)", kind: "dim" },
+          {
+            text: `  Totally stuck? Admit defeat with \`stuck ${GIVE_UP_FLAGS[0]}\` — HEX drops the exact command in your prompt.`,
+            kind: "dim",
+          },
+        ]);
+      }
+    },
+  },
+
+  stuck: {
+    usage: "stuck --<give-up-flag>",
+    description: "Last resort (unlocks after `intel 3`): drops the exact next command into your prompt.",
+    hidden: true, // revealed by the intel 3 output, not the help list
+    help: [
+      "Only works once you've read the full solution (`intel 3`).",
+      "Append one of the (deliberately ridiculous) surrender flags, e.g.:",
+      `  stuck ${GIVE_UP_FLAGS[0]}`,
+      "Each use drops the next command of the solution into your prompt; press Enter to run it.",
+    ],
+    run: (args, api) => {
+      const epId = store.episode.id;
+      if (!usedFullSolution(epId)) {
+        return api.print(
+          "[!] `stuck` is locked. Work it — `intel` (theory), `intel 2` (syntax), then `intel 3`. It unlocks after you've read the full solution.",
+          "warn",
+        );
+      }
+      const flag = args.find((a) => a.startsWith("--"))?.toLowerCase();
+      if (!flag || !GIVE_UP_FLAGS.includes(flag)) {
+        return api.print([
+          { text: "[*] To formally admit defeat, append one of these:", kind: "warn" },
+          ...GIVE_UP_FLAGS.map((f) => ({ text: `    stuck ${f}`, kind: "dim" as const })),
+        ]);
+      }
+      const sol = SOLUTIONS[epId] ?? [];
+      if (sol.length === 0) {
+        return api.print("[*] No canned solution for this one — you're on your own, Decker.", "dim");
+      }
+      const idx = Math.min(sol.length - 1, store.getStuckIndex());
+      const cmd = sol[idx];
+      store.bumpStuckIndex();
+      api.print([
+        { text: `[*] ${flag.replace(/^--/, "")}. Fine. Here — just run this:`, kind: "warn" },
+        { text: `  ${cmd}`, kind: "success" },
+      ]);
+      store.fillInput(cmd);
     },
   },
 

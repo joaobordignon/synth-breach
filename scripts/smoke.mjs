@@ -93,6 +93,16 @@ const telemetryText = await page.locator(".telemetry-pane").innerText();
 await type("goto 1");
 await page.waitForTimeout(700);
 const faceActive = (await page.locator(".hex-face.active").count()) === 1;
+// Per-command --help (man page).
+await type("netmap --help");
+const helpText = await page.locator(".xterm-rows").innerText();
+// Tool chips insert the command NAME (a scaffold), not the full answer.
+const toolChips = await page.locator(".tool-chip").count();
+if (toolChips > 0) {
+  await page.locator(".tool-chip").first().click();
+  await page.waitForTimeout(250);
+}
+const promptText = await page.locator(".xterm-rows").innerText();
 await page.screenshot({ path: "scripts/smoke-screenshot.png", fullPage: false });
 
 await browser.close();
@@ -105,6 +115,9 @@ const checks = [
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],
   ["face resolves while HEX transmits", faceActive],
+  ["<cmd> --help prints a man page", /USAGE/.test(helpText) && /netmap/.test(helpText)],
+  ["Intel pane has tool chips", toolChips >= 1],
+  ["tool chip inserts a command scaffold", /\$ netmap/.test(promptText)],
   ["comms panel has voice + music controls", /VOICE|MUSIC/.test(commsText)],
   ["header has save/load controls", /SAVE/.test(headerText) && /LOAD/.test(headerText)],
   ["accept-code acknowledged", /acknowledged|roster|unlocked/i.test(terminalText)],

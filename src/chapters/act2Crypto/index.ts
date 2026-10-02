@@ -48,8 +48,8 @@ export const episode04: Episode = {
     { text: "Aether especially — they always dress up laziness as protocol. Trust me on that one.", kind: "hex" },
   ],
   objectives: [
-    { id: "b64", label: "Decode the cookie: decode --base64 <data>" },
-    { id: "hex", label: "Decode the exec log: hexview --decode <stream>" },
+    { id: "b64", label: "Decode the intercepted session cookie" },
+    { id: "hex", label: "Decode the executive hex log to a name" },
   ],
   hints: [
     "Base64 maps every 3 bytes to 4 printable chars; trailing '=' is padding. Hex writes each byte as " +
@@ -66,6 +66,11 @@ export const episode04: Episode = {
     decode: {
       usage: 'decode --base64 "<data>"',
       description: "Decode a Base64 string back to ASCII.",
+      help: [
+        "Base64 ends in '=' padding and is reversible with no key.",
+        "You captured the cookie value in the Episode 03 banner (select+copy it).",
+        'Example:  decode --base64 "<the cookie value>"',
+      ],
       run: (args, api) => {
         if (argVal(args, "--base64") === undefined && args[0] !== "--base64") {
           return api.print('[!] Usage: decode --base64 "<data>"', "error");
@@ -87,6 +92,11 @@ export const episode04: Episode = {
     hexview: {
       usage: 'hexview --decode "<hex bytes>"',
       description: "Interpret a hex byte stream as ASCII.",
+      help: [
+        "Each byte is two hex digits (0-9, a-f); decode them to ASCII characters.",
+        "HEX hands you the exec log's hex bytes in the briefing — paste them in.",
+        'Example:  hexview --decode "44 49 52 ..."',
+      ],
       run: (args, api) => {
         const data = (argVal(args, "--decode") ?? "").replace(/^["']|["']$/g, "");
         if (!data) return api.print('[!] Usage: hexview --decode "44 49 52 ..."', "error");
@@ -128,8 +138,8 @@ export const episode05: Episode = {
     { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, Decker. Not the history lesson.", kind: "hex" },
   ],
   objectives: [
-    { id: "caesar", label: "Brute-force the shift: cipher-crack --type caesar --text \"...\"" },
-    { id: "xor", label: "Strip the XOR mask: xor-decrypt --stream \"...\" --key 0x42" },
+    { id: "caesar", label: "Brute-force the Caesar shift to readable text" },
+    { id: "xor", label: "Strip the single-byte XOR mask off the stream" },
   ],
   hints: [
     "A Caesar cipher shifts every letter by a fixed amount — only 25 possibilities, so you brute-force " +
@@ -148,6 +158,11 @@ export const episode05: Episode = {
     "cipher-crack": {
       usage: 'cipher-crack --type caesar --text "<ciphertext>"',
       description: "Brute-force all 25 Caesar/ROT shifts and flag the English one.",
+      help: [
+        "Tries every shift and highlights the one that reads as English.",
+        "Feed it the intercepted ciphertext from HEX's briefing (copy it).",
+        'Example:  cipher-crack --type caesar --text "WKH SURMHFW ..."',
+      ],
       run: (args, api) => {
         if (argVal(args, "--type") !== "caesar") return api.print("[!] Only --type caesar is wired up here.", "error");
         const text = (argVal(args, "--text") ?? "").replace(/^["']|["']$/g, "") || CAESAR_CIPHERTEXT;
@@ -177,6 +192,11 @@ export const episode05: Episode = {
     "xor-decrypt": {
       usage: 'xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42',
       description: "XOR a hex stream against a single-byte key, with live bit-flip view.",
+      help: [
+        "XOR is its own inverse: ciphertext ^ key = plaintext, byte by byte.",
+        "Pass the hex --stream and the single-byte --key HEX recovered (0x42).",
+        'Example:  xor-decrypt --stream "0x.. 0x.." --key 0x42',
+      ],
       run: (args, api) => {
         const stream = (argVal(args, "--stream") ?? "").replace(/^["']|["']$/g, "");
         const keyStr = argVal(args, "--key") ?? "";
@@ -227,8 +247,8 @@ export const episode06: Episode = {
     "[COMMS // HEX]: `hash-identify <hash>`, then `crack --hash <hash> --wordlist synth_rockyou.txt`.",
   ],
   objectives: [
-    { id: "identify", label: "Fingerprint the algorithm: hash-identify <hash>" },
-    { id: "crack", label: "Dictionary-attack admin_root: crack --hash <hash> --wordlist synth_rockyou.txt" },
+    { id: "identify", label: "Fingerprint the hash algorithm" },
+    { id: "crack", label: "Dictionary-attack the admin_root hash" },
   ],
   hints: [
     "A 32-hex-char digest is 128 bits — the MD5 signature. Because MD5 is unsalted and fast, a dictionary " +
@@ -251,6 +271,11 @@ export const episode06: Episode = {
     "hash-identify": {
       usage: "hash-identify <hash>",
       description: "Fingerprint a hash by length/signature.",
+      help: [
+        "Length gives it away: 32 hex chars = MD5, 40 = SHA-1, 64 = SHA-256.",
+        "The dump in the briefing lists each user's hash — copy one in.",
+        "Example:  hash-identify <32-hex-char-hash>",
+      ],
       run: (args, api) => {
         const h = args[0];
         if (!h) return api.print("[!] Usage: hash-identify <hash>", "error");
@@ -267,6 +292,11 @@ export const episode06: Episode = {
     crack: {
       usage: "crack --hash <hash> --wordlist <file>",
       description: "Run a dictionary attack against a hash.",
+      help: [
+        "Hashes each word in the list and compares — no 'decrypting' a hash.",
+        "Target the admin_root hash; the wordlist file is synth_rockyou.txt.",
+        "Example:  crack --hash <hash> --wordlist synth_rockyou.txt",
+      ],
       run: (args, api) => {
         const hash = argVal(args, "--hash");
         const wordlist = argVal(args, "--wordlist");

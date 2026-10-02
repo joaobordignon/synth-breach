@@ -87,6 +87,9 @@ export interface EpisodeCommand {
   description: string;
   /** Hidden from `help` listing (still runnable) when true. */
   hidden?: boolean;
+  /** Extra man-page lines shown by `<command> --help` (what it does, flags,
+   *  an example with placeholders — guidance, not the literal answer). */
+  help?: string[];
   run: (args: string[], api: EngineApi) => void;
 }
 

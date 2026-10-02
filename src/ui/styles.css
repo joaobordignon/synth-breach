@@ -151,6 +151,35 @@ body {
   text-shadow: 0 0 6px rgba(5, 255, 161, 0.5);
 }
 
+.tool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0 2px;
+}
+
+.tool-chip {
+  background: rgba(1, 205, 254, 0.08);
+  border: 1px solid rgba(1, 205, 254, 0.4);
+  color: var(--neon-cyan, #01cdfe);
+  border-radius: 2px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.tool-chip::before {
+  content: "▸ ";
+  color: var(--neon-green, #05ffa1);
+}
+
+.tool-chip:hover {
+  background: rgba(1, 205, 254, 0.2);
+  border-color: var(--neon-cyan, #01cdfe);
+  text-shadow: 0 0 6px var(--neon-cyan, #01cdfe);
+}
+
 .concept-list li {
   padding: 1px 0 1px 12px;
   color: var(--neon-cyan, #01cdfe);

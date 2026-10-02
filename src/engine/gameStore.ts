@@ -60,6 +60,7 @@ class GameStore {
   private stateListeners = new Set<StateListener>();
   private fxListeners = new Set<FxListener>();
   private commsListeners = new Set<CommsListener>();
+  private inputListeners = new Set<(text: string) => void>();
   private timers = new Set<ReturnType<typeof setTimeout>>();
 
   /** Rolling BBS comms history (HEX transmissions), capped. */
@@ -85,6 +86,14 @@ class GameStore {
   }
   getComms(): CommsEntry[] {
     return this.commsLog;
+  }
+  /** The terminal subscribes; UI calls fillInput() to drop text at the prompt. */
+  onInputRequest(cb: (text: string) => void): () => void {
+    this.inputListeners.add(cb);
+    return () => this.inputListeners.delete(cb);
+  }
+  fillInput(text: string): void {
+    for (const cb of this.inputListeners) cb(text);
   }
 
   // HEX dialogue (kind "hex") is routed to the BBS comms side panel instead of
@@ -132,6 +141,15 @@ class GameStore {
   isUnlocked(id: number): boolean {
     return this.profile.unlockedEpisodes.includes(id);
   }
+  private stuckIndex = 0;
+  /** Index of the next solution command the `stuck` escape hatch will drop. */
+  getStuckIndex(): number {
+    return this.stuckIndex;
+  }
+  bumpStuckIndex(): void {
+    this.stuckIndex += 1;
+  }
+
   /** All command names valid right now (globals + current episode). */
   commandNames(): string[] {
     return [...new Set([...Object.keys(GLOBAL_COMMANDS), ...Object.keys(this.episode.commands)])].sort();
@@ -237,6 +255,7 @@ class GameStore {
     this.heldIntro = null;
     this.introHeld = false;
     this.gateModal = null;
+    this.stuckIndex = 0;
     this.vars.delete("prompt"); // reset any REPL/shell prompt from a prior episode
     this.emitState();
 
@@ -283,6 +302,18 @@ class GameStore {
       this.emitOutput([
         { text: `[!] Unknown command: ${name}. Type 'help' for the command list.`, kind: "error" },
       ]);
+      return true;
+    }
+    // `<command> --help` / `-h`: man-page style usage, never auto-run.
+    if (args.includes("--help") || args.includes("-h")) {
+      const lines: Line[] = [
+        { text: `NAME    ${name}`, kind: "banner" },
+        { text: `USAGE   ${cmd.usage}`, kind: "success" },
+        { text: `        ${cmd.description}`, kind: "normal" },
+      ];
+      for (const h of cmd.help ?? []) lines.push({ text: `  ${h}`, kind: "normal" });
+      lines.push({ text: "  Stuck? `intel` → theory · `intel 2` → syntax nudge · `intel 3` → full solution.", kind: "dim" });
+      this.emitOutput(lines);
       return true;
     }
     try {

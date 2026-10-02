@@ -31,8 +31,8 @@ export const episode10: Episode = {
     "[COMMS // HEX]: `proxy-intercept --target cloud.aetherdyn.internal`, then `inject-sql --payload`.",
   ],
   objectives: [
-    { id: "intercept", label: "Catch the login POST: proxy-intercept --target cloud.aetherdyn.internal" },
-    { id: "inject", label: "Bypass auth: inject-sql --payload \"admin' OR '1'='1' --\"" },
+    { id: "intercept", label: "Intercept the login request to the cloud API" },
+    { id: "inject", label: "Bypass the login with a SQL tautology" },
   ],
   hints: [
     "The server builds: SELECT * FROM users WHERE username='$user' AND password='$pass'. If you close " +
@@ -71,6 +71,11 @@ export const episode10: Episode = {
     "inject-sql": {
       usage: 'inject-sql --payload "<payload>"',
       description: "Replace the intercepted username field with a SQL payload and forward it.",
+      help: [
+        "The server concatenates your input into: ...WHERE username='<you>'...",
+        "Close the quote, OR an always-true condition, then comment out the rest",
+        "with --. You need a tautology like '1'='1' plus a SQL comment.",
+      ],
       run: (args, api) => {
         if (!api.isComplete("intercept")) return api.print("[!] Intercept the login first.", "warn");
         const payload = (argVal(args, "--payload") ?? "").replace(/^["']|["']$/g, "");
@@ -116,8 +121,8 @@ export const episode11: Episode = {
     "[COMMS // HEX]: `api-probe --endpoint /user/profile` for a baseline, then `tamper --param user_id=0001`.",
   ],
   objectives: [
-    { id: "probe", label: "Baseline the endpoint: api-probe --endpoint /user/profile" },
-    { id: "tamper", label: "Access another object: tamper --param user_id=0001" },
+    { id: "probe", label: "Baseline the profile API with your own token" },
+    { id: "tamper", label: "Tamper the object ID to reach an exec record" },
   ],
   hints: [
     "An IDOR is Broken Access Control: the server returns object #0001 to anyone who asks, without " +
@@ -155,6 +160,11 @@ export const episode11: Episode = {
     tamper: {
       usage: "tamper --param user_id=<id>",
       description: "Replay the request with a tampered parameter.",
+      help: [
+        "The server trusts the client-supplied id (an IDOR). Your own id is 1042;",
+        "the exec records sit at low ids. Walk it down toward 0001.",
+        "Example:  tamper --param user_id=<id>",
+      ],
       run: (args, api) => {
         if (!api.isComplete("probe")) return api.print("[!] Probe the endpoint first.", "warn");
         const param = argVal(args, "--param") ?? args[0] ?? "";
@@ -220,10 +230,10 @@ export const episode12: Episode = {
     "`verify-key` the real one against my memo checksum before the window closes. Then `bounty-report --compile`.",
   ],
   objectives: [
-    { id: "traversal", label: "Escape the web root: fetch-file --path ../../../../etc/aether/master_key.pem" },
-    { id: "verify", label: "Beat the decoy: verify-key <A|B> before the trace lands" },
-    { id: "report", label: "Compile the advisory: bounty-report --compile" },
-    { id: "ending", label: "Choose the ending: broadcast-leak OR bounty-report --submit --responsible" },
+    { id: "traversal", label: "Escape the web root to the master key (path traversal)" },
+    { id: "verify", label: "Verify the REAL key before the trace lands" },
+    { id: "report", label: "Compile the vuln-chain advisory" },
+    { id: "ending", label: "Choose how it ends — leak, or disclose" },
   ],
   hints: [
     "Path traversal walks `../` out of the served directory to read arbitrary files. The Warden plants " +
@@ -238,6 +248,11 @@ export const episode12: Episode = {
     "fetch-file": {
       usage: "fetch-file --path <path>",
       description: "Request a file through the vulnerable viewer endpoint.",
+      help: [
+        "The viewer doesn't sanitize paths. Walk out of the web root with ../",
+        "sequences to reach /etc/aether/master_key.pem.",
+        "Example:  fetch-file --path ../../../../etc/aether/<target>",
+      ],
       run: (args, api) => {
         const path = argVal(args, "--path") ?? "";
         if (!path) return api.print("[!] Usage: fetch-file --path report.pdf", "error");
@@ -293,6 +308,11 @@ export const episode12: Episode = {
     "verify-key": {
       usage: "verify-key <A|B>",
       description: "Checksum a candidate key against HEX's memo value (reuses the Ep06 hashing skill).",
+      help: [
+        "WARDEN planted a decoy. Checksum each candidate (A or B) and keep the",
+        "one matching HEX's memo value (it starts e3b0). Wrong pick costs time.",
+        "Example:  verify-key A",
+      ],
       run: (args, api) => {
         if (!api.isComplete("traversal")) return api.print("[!] Extract the key first (path traversal).", "warn");
         const pick = (args[0] ?? "").toUpperCase();
