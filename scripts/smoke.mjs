@@ -58,6 +58,14 @@ const prologueDismissed = (await page.locator(".prologue-modal").count()) === 0;
 // Let HEX's first lines type out in the comms feed before asserting.
 await page.waitForTimeout(3200);
 
+// Player reply chips: a dialogue beat should offer clickable responses to HEX.
+const replyChips = await page.locator(".comms-reply").count();
+if (replyChips > 0) {
+  await page.locator(".comms-reply").first().click();
+  await page.waitForTimeout(1000);
+}
+const youLine = await page.locator(".comms-line.you").count();
+
 // The xterm textarea receives keystrokes.
 async function type(cmd) {
   await page.locator(".xterm-helper-textarea").focus();
@@ -118,6 +126,8 @@ server.close();
 const checks = [
   ["Prologue briefing box shown then dismissed", prologueShown && prologueDismissed],
   ["Prologue has handle + voice + music setup", prologueSetup],
+  ["HEX offers clickable player replies", replyChips >= 1],
+  ["player reply posts a YOU> line", youLine >= 1],
   ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],

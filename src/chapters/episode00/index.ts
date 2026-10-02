@@ -78,6 +78,23 @@ export const episode00: Episode = {
     "Decker. I'm unlocking the first live target range: 10.42.0.0/24, Aether's outer perimeter.",
     "[COMMS // HEX]: Somewhere past that router is the machine that scored ECHO. We start there.",
   ],
+  beats: [
+    {
+      trigger: "intro",
+      prompt: "You still with me, Decker? First run's always the one that sticks.",
+      replies: [
+        { text: "Ready. Point me at it.", response: ["Good. No hesitation — that's the right kind of scared. Start with `help`."] },
+        {
+          text: "...This is really all simulated?",
+          response: ["Every byte. Air-gapped shard. Out there it's a felony; in here it's a classroom. Breathe — then `help`."],
+        },
+        {
+          text: "Why me?",
+          response: ["Because you've got a reason. People with reasons don't quit at the first locked door. Now — `help`."],
+        },
+      ],
+    },
+  ],
   commands: {
     "accept-code": {
       usage: "accept-code",

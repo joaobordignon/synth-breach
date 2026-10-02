@@ -775,6 +775,56 @@ body {
   font-weight: bold;
 }
 
+.comms-line.you {
+  color: var(--neon-cyan, #01cdfe);
+  text-shadow: 0 0 2px rgba(1, 205, 254, 0.4);
+}
+
+.comms-line.you .comms-caret {
+  color: var(--sunset-amber, #ffb900);
+}
+
+/* Player reply chips */
+.comms-replies {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 0 2px;
+  border-top: 1px dashed var(--muted-lavender, #8a79a5);
+  margin-top: 4px;
+}
+
+.comms-replies-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--sunset-amber, #ffb900);
+}
+
+.comms-reply {
+  text-align: left;
+  background: rgba(1, 205, 254, 0.08);
+  border: 1px solid rgba(1, 205, 254, 0.45);
+  color: var(--neon-cyan, #01cdfe);
+  border-radius: 3px;
+  padding: 6px 9px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 1.35;
+  animation: commsin 0.25s ease-out;
+}
+
+.comms-reply::before {
+  content: "› ";
+  color: var(--sunset-amber, #ffb900);
+}
+
+.comms-reply:hover {
+  background: rgba(1, 205, 254, 0.2);
+  border-color: var(--neon-cyan, #01cdfe);
+  text-shadow: 0 0 6px var(--neon-cyan, #01cdfe);
+}
+
 .comms-cursor {
   color: var(--neon-green, #05ffa1);
   animation: blink 0.8s steps(2) infinite;

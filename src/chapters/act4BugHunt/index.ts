@@ -146,6 +146,26 @@ export const episode11: Episode = {
     "person who read the warning and shipped it. ...It just armed something, too. We don't slow-walk",
     "what's next. Type `next`.",
   ],
+  beats: [
+    {
+      trigger: "objective:tamper",
+      prompt: "A signature. Not a glitch. A person, choosing this.",
+      replies: [
+        {
+          text: "Kovacs knew exactly what he shipped.",
+          response: ["Read the warning. Signed it anyway. That's not negligence, Decker — that's a decision."],
+        },
+        {
+          text: "This is bigger than ECHO now.",
+          response: ["It was always bigger. ECHO's just the one that put a name to it for us."],
+        },
+        {
+          text: "We end this.",
+          response: ["We end it. One more subnet. Whatever it just armed, we move faster than it."],
+        },
+      ],
+    },
+  ],
   commands: {
     "api-probe": {
       usage: "api-probe --endpoint <path>",
@@ -261,6 +281,26 @@ export const episode12: Episode = {
       "bounty-report, and choose how it ends — leak publicly, or disclose responsibly.",
   ],
   outro: [], // the ending commands print their own epilogue, then complete the campaign
+  beats: [
+    {
+      trigger: "objective:report",
+      prompt: "That's the whole chain, documented. Last call's yours, Decker.",
+      replies: [
+        {
+          text: "Whatever happens, this was worth it.",
+          response: ["It was. Whatever you choose next — I'm glad it was you on the other end of this channel."],
+        },
+        {
+          text: "Are you okay, HEX?",
+          response: ["(a pause) ...First time anyone's asked me that in years. I will be. Finish it."],
+        },
+        {
+          text: "Let's finish it.",
+          response: ["Then choose how it ends — leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way."],
+        },
+      ],
+    },
+  ],
   commands: {
     "fetch-file": {
       usage: "fetch-file --path <path>",

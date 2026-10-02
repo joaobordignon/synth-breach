@@ -4,17 +4,21 @@ import { useGame } from "../state/useGame";
 import { HexFace } from "./HexFace";
 import { speak, primeVoice, isSpeaking, voiceSupported, cancelVoice } from "../voice";
 import { nextTrack } from "../music";
-import type { CommsEntry } from "../engine/types";
+import type { CommsEntry, CommsReply } from "../engine/types";
 
 // The "old BBS comms server" side panel. New HEX transmissions arrive from the
 // store, are revealed with a typewriter effect (and read aloud as they type
-// when voice is on), and pulse the Guy Fawkes "face in code" while active.
+// when voice is on), and pulse the Guy Fawkes "face in code" while HEX speaks.
+// At story beats, pre-written player replies are offered as clickable chips
+// that post into the feed as YOU> and draw a tailored HEX response.
 
+type Speaker = "hex" | "you";
 interface Item {
   id: number;
   shown: string;
   full: string;
   done: boolean;
+  speaker: Speaker;
 }
 
 const TICK_MS = 28;
@@ -23,13 +27,14 @@ const CHARS_PER_TICK = 2;
 export function CommsPane() {
   useGame(); // re-render on music/voice setting changes
   const [items, setItems] = useState<Item[]>(() =>
-    store.getComms().map((e) => ({ id: e.id, shown: e.text, full: e.text, done: true })),
+    store.getComms().map((e) => ({ id: e.id, shown: e.text, full: e.text, done: true, speaker: e.speaker ?? "hex" })),
   );
   const [active, setActive] = useState(false);
+  const [replies, setReplies] = useState<CommsReply[]>(() => store.getOfferedReplies());
   const feedRef = useRef<HTMLDivElement>(null);
 
   const queueRef = useRef<CommsEntry[]>([]);
-  const typingRef = useRef<{ id: number; full: string; pos: number } | null>(null);
+  const typingRef = useRef<{ id: number; full: string; pos: number; speaker: Speaker } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -48,10 +53,13 @@ export function CommsPane() {
         stopTimer();
         return;
       }
-      typingRef.current = { id: next.id, full: next.text, pos: 0 };
-      setItems((prev) => [...prev, { id: next.id, shown: "", full: next.text, done: false }]);
-      speak(next.text); // HEX reads the line as it starts typing
-      setActive(true);
+      const speaker: Speaker = next.speaker ?? "hex";
+      typingRef.current = { id: next.id, full: next.text, pos: 0, speaker };
+      setItems((prev) => [...prev, { id: next.id, shown: "", full: next.text, done: false, speaker }]);
+      if (speaker === "hex") {
+        speak(next.text); // only HEX is voiced + animates the face
+        setActive(true);
+      }
     }
     const t = typingRef.current;
     t.pos = Math.min(t.full.length, t.pos + (reduced ? t.full.length : CHARS_PER_TICK));
@@ -70,15 +78,18 @@ export function CommsPane() {
   useEffect(() => {
     const unsub = store.onComms((entry) => {
       queueRef.current.push(entry);
-      setActive(true);
+      if ((entry.speaker ?? "hex") === "hex") setActive(true);
       ensureTimer();
     });
-    // Hold the face "active" while typing or while the voice is still speaking.
+    const unsubReplies = store.onReplies((r) => setReplies(r));
+    // Hold the face "active" while HEX is typing or the voice is still speaking.
     const poll = setInterval(() => {
-      setActive(typingRef.current !== null || isSpeaking());
+      const t = typingRef.current;
+      setActive((t !== null && t.speaker === "hex") || isSpeaking());
     }, 220);
     return () => {
       unsub();
+      unsubReplies();
       clearInterval(poll);
       stopTimer();
     };
@@ -101,7 +112,13 @@ export function CommsPane() {
       const completed = prev.map((it) =>
         current && it.id === current.id ? { ...it, shown: it.full, done: true } : it,
       );
-      const extra = pending.map((e) => ({ id: e.id, shown: e.text, full: e.text, done: true }));
+      const extra: Item[] = pending.map((e) => ({
+        id: e.id,
+        shown: e.text,
+        full: e.text,
+        done: true,
+        speaker: e.speaker ?? "hex",
+      }));
       return [...completed, ...extra];
     });
     setActive(false);
@@ -134,13 +151,32 @@ export function CommsPane() {
           <p className="muted">// awaiting transmission…</p>
         ) : (
           items.map((e) => (
-            <div key={e.id} className="comms-line">
-              <span className="comms-caret">HEX&gt;</span> {e.shown}
+            <div key={e.id} className={`comms-line ${e.speaker === "you" ? "you" : ""}`}>
+              <span className="comms-caret">{e.speaker === "you" ? "YOU>" : "HEX>"}</span> {e.shown}
               {!e.done && <span className="comms-cursor">▋</span>}
             </div>
           ))
         )}
       </div>
+
+      {replies.length > 0 && (
+        <div className="comms-replies">
+          <div className="comms-replies-label">▸ respond:</div>
+          {replies.map((r, i) => (
+            <button
+              key={i}
+              type="button"
+              className="comms-reply"
+              onClick={() => {
+                skip(); // flush any still-typing HEX backlog so the reply is immediate
+                store.chooseReply(i);
+              }}
+            >
+              {r.text}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="comms-controls">
         <button

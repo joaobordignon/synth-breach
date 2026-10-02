@@ -26,13 +26,33 @@ export interface Objective {
   label: string;
 }
 
-/** A single HEX transmission routed to the BBS comms side panel. */
+/** A single line in the BBS comms side panel (from HEX, or the player). */
 export interface CommsEntry {
   id: number;
   /** Display text with the "[COMMS // HEX]:" prefix already stripped. */
   text: string;
   /** Episode id this transmission belongs to. */
   episode: number;
+  /** Who sent it — "hex" (default, voiced) or "you" (player reply). */
+  speaker?: "hex" | "you";
+}
+
+/** A pre-written player reply to HEX, and HEX's follow-up to it. */
+export interface CommsReply {
+  /** The clickable chip text (also posted into the feed as YOU>). */
+  text: string;
+  /** HEX's response line(s) to this reply. */
+  response: Array<string | Line>;
+}
+
+/** A dialogue beat: HEX poses something, the player picks a reply. */
+export interface ReplyBeat {
+  /** When to offer it: "intro" (after the episode's HEX intro) or
+   *  "objective:<id>" (after that objective completes). */
+  trigger: string;
+  /** Optional extra HEX line that poses the question. */
+  prompt?: string;
+  replies: CommsReply[];
 }
 
 export interface TelemetryHost {
@@ -127,4 +147,6 @@ export interface Episode {
   outro: Array<string | Line>;
   /** Codex topic auto-suggested for this episode. */
   codexTopic?: string;
+  /** Optional player-reply dialogue beats (see ReplyBeat). */
+  beats?: ReplyBeat[];
 }

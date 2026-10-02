@@ -1,4 +1,4 @@
-import type { CommsEntry, Episode, EngineApi, Line, LineKind, TelemetryState } from "./types";
+import type { CommsEntry, CommsReply, Episode, EngineApi, Line, LineKind, TelemetryState } from "./types";
 import { EPISODES, firstEpisodeId, nextEpisodeId } from "../chapters";
 import { hasCodexForCommand } from "../codex";
 import {
@@ -23,6 +23,7 @@ type OutputListener = (lines: Line[]) => void;
 type StateListener = () => void;
 type FxListener = (effect: "glitch" | "fireworks" | "alarm") => void;
 type CommsListener = (entry: CommsEntry) => void;
+type ReplyListener = (replies: CommsReply[]) => void;
 
 /** Strip the "[COMMS // HEX]:" prefix so the comms panel can render it cleanly. */
 function stripHexPrefix(text: string): string {
@@ -61,12 +62,16 @@ class GameStore {
   private stateListeners = new Set<StateListener>();
   private fxListeners = new Set<FxListener>();
   private commsListeners = new Set<CommsListener>();
+  private replyListeners = new Set<ReplyListener>();
   private inputListeners = new Set<(text: string) => void>();
   private timers = new Set<ReturnType<typeof setTimeout>>();
 
-  /** Rolling BBS comms history (HEX transmissions), capped. */
+  /** Rolling BBS comms history (HEX transmissions + player replies), capped. */
   private commsLog: CommsEntry[] = [];
   private commsSeq = 0;
+  /** Player-reply chips currently offered, and which dialogue beats have fired. */
+  private offeredReplies: CommsReply[] = [];
+  private firedBeats = new Set<string>();
 
   // ---- subscriptions ------------------------------------------------------
   onOutput(cb: OutputListener): () => void {
@@ -85,8 +90,56 @@ class GameStore {
     this.commsListeners.add(cb);
     return () => this.commsListeners.delete(cb);
   }
+  onReplies(cb: ReplyListener): () => void {
+    this.replyListeners.add(cb);
+    return () => this.replyListeners.delete(cb);
+  }
   getComms(): CommsEntry[] {
     return this.commsLog;
+  }
+  getOfferedReplies(): CommsReply[] {
+    return this.offeredReplies;
+  }
+
+  private offerReplies(replies: CommsReply[]) {
+    this.offeredReplies = replies;
+    for (const cb of this.replyListeners) cb(replies);
+  }
+  private clearReplies() {
+    if (this.offeredReplies.length === 0) return;
+    this.offeredReplies = [];
+    for (const cb of this.replyListeners) cb([]);
+  }
+
+  /** Post a player reply into the comms feed as YOU>, then HEX responds. */
+  chooseReply(index: number) {
+    const reply = this.offeredReplies[index];
+    if (!reply) return;
+    this.clearReplies();
+    const entry: CommsEntry = { id: this.commsSeq++, text: reply.text, episode: this.currentEpisodeId, speaker: "you" };
+    this.commsLog.push(entry);
+    if (this.commsLog.length > 300) this.commsLog.shift();
+    for (const cb of this.commsListeners) cb(entry);
+    // HEX answers after a short beat, so it reads as a back-and-forth.
+    const t = setTimeout(() => {
+      this.timers.delete(t);
+      this.emitOutput(toLines(reply.response, "hex").map(normalizeHex));
+    }, 650);
+    this.timers.add(t);
+  }
+
+  /** Fire any dialogue beats whose trigger matches (once each per episode). */
+  private fireBeats(trigger: string) {
+    const ep = this.episode;
+    if (!ep.beats) return;
+    ep.beats.forEach((beat, i) => {
+      if (beat.trigger !== trigger) return;
+      const key = `${ep.id}:${i}`;
+      if (this.firedBeats.has(key)) return;
+      this.firedBeats.add(key);
+      if (beat.prompt) this.emitOutput([normalizeHex({ text: beat.prompt, kind: "hex" })]);
+      this.offerReplies(beat.replies);
+    });
   }
   /** The terminal subscribes; UI calls fillInput() to drop text at the prompt. */
   onInputRequest(cb: (text: string) => void): () => void {
@@ -107,7 +160,7 @@ class GameStore {
       if (line.kind === "hex") {
         const text = stripHexPrefix(line.text);
         if (!text) continue; // drop blank spacer lines in the comms feed
-        const entry: CommsEntry = { id: this.commsSeq++, text, episode: this.currentEpisodeId };
+        const entry: CommsEntry = { id: this.commsSeq++, text, episode: this.currentEpisodeId, speaker: "hex" };
         this.commsLog.push(entry);
         if (this.commsLog.length > 300) this.commsLog.shift();
         for (const cb of this.commsListeners) cb(entry);
@@ -257,6 +310,8 @@ class GameStore {
     this.introHeld = false;
     this.gateModal = null;
     this.stuckIndex = 0;
+    this.firedBeats.clear();
+    this.offerReplies([]); // clear any dialogue chips from the prior episode
     this.vars.delete("prompt"); // reset any REPL/shell prompt from a prior episode
     this.emitState();
 
@@ -278,6 +333,7 @@ class GameStore {
       return;
     }
     this.emitOutput(toLines(ep.intro, "hex").map(normalizeHex));
+    this.fireBeats("intro");
   }
 
   /** Dismiss the gated briefing box and release the held HEX intro. */
@@ -289,6 +345,7 @@ class GameStore {
     this.gateModal = null;
     this.emitState();
     this.emitOutput(toLines(lines, "hex").map(normalizeHex));
+    this.fireBeats("intro");
   }
 
   /** Dispatch a line of player input. Returns false for empty input. */
@@ -409,6 +466,7 @@ class GameStore {
       this.completed.add(id);
       this.emitState();
       this.checkEpisodeComplete();
+      this.fireBeats(`objective:${id}`);
     },
     isComplete: (id) => this.completed.has(id),
     getVar: <T>(key: string) => this.vars.get(key) as T | undefined,

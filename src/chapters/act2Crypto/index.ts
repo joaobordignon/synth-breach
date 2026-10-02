@@ -186,6 +186,20 @@ export const episode05: Episode = {
     "[COMMS // HEX]: And did you catch that log? That channel didn't have a second layer yesterday.",
     "Something in there is watching what we break and patching around it in real time. Type `next`.",
   ],
+  beats: [
+    {
+      trigger: "intro",
+      prompt: "...You caught that, didn't you. The way I said her name.",
+      replies: [
+        {
+          text: "Who's Vance to you?",
+          response: ["(a long pause) Someone I worked beside, a lifetime ago. Leave it there for now. Please.", "...We'll get to it. Just not tonight."],
+        },
+        { text: "Focus. Got it.", response: ["...Thank you, Decker. Crack the Caesar layer first."] },
+        { text: "You can tell me when you're ready.", response: ["(quiet) ...Yeah. I know. Let's work."] },
+      ],
+    },
+  ],
   commands: {
     "cipher-crack": {
       usage: 'cipher-crack --type caesar --text "<ciphertext>"',
@@ -300,6 +314,26 @@ export const episode06: Episode = {
     "this system isn't activism for me, Decker. It's the closest thing I've got to fixing what I broke.",
     "[COMMS // HEX]: Every hint I've handed you — call it paying a debt.",
     { text: "[COMMS // HEX]: (a long pause) ...Anyway. Bastion Core's waiting. You ready? Type `next`.", kind: "hex" },
+  ],
+  beats: [
+    {
+      trigger: "objective:crack",
+      prompt: "...So now you know. All of it.",
+      replies: [
+        {
+          text: "You built it — and now you're tearing it down.",
+          response: ["That's the only math that lets me sleep. Barely. But it's enough to keep moving."],
+        },
+        {
+          text: "Doesn't change anything between us.",
+          response: ["(a breath) ...It changes plenty for me. But I'll take it. Thank you, Decker."],
+        },
+        {
+          text: "We'll fix it. Together.",
+          response: ["(quiet) Yeah. Together. Bastion Core's waiting when you are."],
+        },
+      ],
+    },
   ],
   commands: {
     "hash-identify": {
