@@ -49,6 +49,9 @@ await page.waitForTimeout(800);
 
 // The Prologue opens as a briefing box; HEX stays offline until it's dismissed.
 const prologueShown = (await page.locator(".prologue-modal").count()) === 1;
+const prologueSetup =
+  (await page.locator(".prologue-setup .setup-input").count()) === 1 &&
+  (await page.locator(".prologue-setup .setup-select").count()) === 1;
 await page.locator(".prologue-begin").click();
 await page.waitForTimeout(300);
 const prologueDismissed = (await page.locator(".prologue-modal").count()) === 0;
@@ -97,6 +100,7 @@ server.close();
 
 const checks = [
   ["Prologue briefing box shown then dismissed", prologueShown && prologueDismissed],
+  ["Prologue has handle + voice + music setup", prologueSetup],
   ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],

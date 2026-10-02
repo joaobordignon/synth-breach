@@ -72,8 +72,8 @@ export function App() {
         <CommsPane />
       </div>
       <CodexModal open={codexOpen} onClose={closeCodex} />
-      {store.introHeld && store.episode.modal && (
-        <PrologueModal modal={store.episode.modal} onClose={() => store.releaseIntro()} />
+      {store.introHeld && store.gateModal && (
+        <PrologueModal modal={store.gateModal} onClose={() => store.releaseIntro()} />
       )}
       <FxLayer />
     </div>

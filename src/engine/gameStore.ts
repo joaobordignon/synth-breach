@@ -8,7 +8,7 @@ import {
 } from "../state/profile";
 import { playSuccessChime, playAlarmBuzzer, setMuted } from "../audio";
 import { startMusic, stopMusic, setMusicVolume } from "../music";
-import { setVoiceEnabled, cancelVoice } from "../voice";
+import { setVoiceEnabled, cancelVoice, setVoiceByName } from "../voice";
 
 // ---------------------------------------------------------------------------
 // The game store is the single mutable heart of the engine. xterm (imperative)
@@ -51,6 +51,8 @@ class GameStore {
   /** When an episode gates its intro behind a briefing box, the held lines. */
   private heldIntro: Array<string | Line> | null = null;
   introHeld = false;
+  /** The modal to show while the intro is held (rich briefing or reconnect). */
+  gateModal: import("./types").EpisodeModal | null = null;
 
   private telemetry: TelemetryState | null = null;
   private leaveCallbacks: Array<() => void> = [];
@@ -182,6 +184,10 @@ class GameStore {
     setVoiceEnabled(on);
     if (!on) cancelVoice();
   }
+  setVoiceName(name: string | null) {
+    this.patchProfile({ voiceName: name });
+    setVoiceByName(name);
+  }
 
   resetGame() {
     this.clearTimers();
@@ -211,8 +217,14 @@ class GameStore {
     }
   }
 
-  /** Print the active episode's intro and prime its objectives/telemetry. */
-  startEpisode(id: number) {
+  /**
+   * Print the active episode's intro and prime its objectives/telemetry.
+   * `bootGate` holds the intro behind a reconnect box on the first load of a
+   * session (even for a resumed, non-Prologue episode), so HEX never speaks
+   * until the player clicks — which also provides the gesture browsers require
+   * to unlock speech audio.
+   */
+  startEpisode(id: number, opts?: { bootGate?: boolean }) {
     if (!this.isUnlocked(id)) {
       this.emitOutput([{ text: `[!] Episode ${pad(id)} is still locked.`, kind: "error" }]);
       return;
@@ -224,6 +236,7 @@ class GameStore {
     this.telemetry = null;
     this.heldIntro = null;
     this.introHeld = false;
+    this.gateModal = null;
     this.vars.delete("prompt"); // reset any REPL/shell prompt from a prior episode
     this.emitState();
 
@@ -235,10 +248,12 @@ class GameStore {
     ];
     this.emitOutput(header);
 
-    if (ep.gateIntro && ep.modal) {
-      // Hold HEX's transmission until the briefing box is dismissed.
+    const gate = (ep.gateIntro && ep.modal) || opts?.bootGate;
+    if (gate) {
+      // Hold HEX's transmission until the briefing/reconnect box is dismissed.
       this.heldIntro = ep.intro;
       this.introHeld = true;
+      this.gateModal = ep.modal ?? reconnectModal(ep);
       this.emitState();
       return;
     }
@@ -251,6 +266,7 @@ class GameStore {
     const lines = this.heldIntro ?? [];
     this.heldIntro = null;
     this.introHeld = false;
+    this.gateModal = null;
     this.emitState();
     this.emitOutput(toLines(lines, "hex").map(normalizeHex));
   }
@@ -428,6 +444,17 @@ function pad(n: number): string {
   return n.toString().padStart(2, "0");
 }
 
+/** A minimal gate box for resuming a non-Prologue episode on boot. */
+function reconnectModal(ep: Episode): import("./types").EpisodeModal {
+  const tag = ep.act === 0 ? "PROLOGUE" : `ACT ${["", "I", "II", "III", "IV"][ep.act]}`;
+  return {
+    title: "SIGNAL REACQUIRED",
+    lead: `Welcome back, Decker. Resuming ${tag} — Episode ${pad(ep.id)}: "${ep.title}". Jack in to bring HEX online.`,
+    sections: [],
+    dismissLabel: "RECONNECT ▸",
+  };
+}
+
 function episodeBanner(ep: Episode): string {
   const tag = ep.act === 0 ? "PROLOGUE" : `ACT ${["", "I", "II", "III", "IV"][ep.act]}`;
   return `>>> ${tag} — EPISODE ${pad(ep.id)}: ${ep.title.toUpperCase()}`;
@@ -445,4 +472,5 @@ export const store = new GameStore();
 // can't autostart (browser autoplay policy) — App resumes it on first gesture.
 setMuted(store.profile.audioMuted);
 setVoiceEnabled(store.profile.voiceEnabled);
+setVoiceByName(store.profile.voiceName ?? null);
 setMusicVolume(store.profile.musicVolume);

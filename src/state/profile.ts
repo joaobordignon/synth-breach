@@ -11,6 +11,8 @@ export interface PlayerProfile {
   musicEnabled: boolean;
   musicVolume: number; // 0..1
   voiceEnabled: boolean;
+  /** Chosen SpeechSynthesis voice name, or null for the auto default. */
+  voiceName?: string | null;
   /** Last local write time (ms). */
   updatedAt?: number;
 }
@@ -25,6 +27,7 @@ export function defaultProfile(): PlayerProfile {
     musicEnabled: false,
     musicVolume: 0.35,
     voiceEnabled: false,
+    voiceName: null,
     updatedAt: 0,
   };
 }

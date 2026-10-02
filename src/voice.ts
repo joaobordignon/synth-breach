@@ -5,6 +5,7 @@
 
 let enabled = false;
 let chosenVoice: SpeechSynthesisVoice | null = null;
+let desiredName: string | null = null; // persisted voice preference, by name
 let rate = 0.98;
 let pitch = 0.85;
 
@@ -21,7 +22,15 @@ function pickVoice() {
   if (!s) return;
   const voices = s.getVoices();
   if (voices.length === 0) return;
-  // Prefer a deeper/neutral English voice for HEX; fall back to any English.
+  // An explicit, remembered choice always wins.
+  if (desiredName) {
+    const match = voices.find((v) => v.name === desiredName);
+    if (match) {
+      chosenVoice = match;
+      return;
+    }
+  }
+  // Otherwise prefer a deeper/neutral English voice for HEX.
   const prefer = [
     /Google UK English Male/i,
     /Daniel/i,
@@ -38,6 +47,45 @@ function pickVoice() {
     }
   }
   chosenVoice = voices[0];
+}
+
+/** All voices the browser/OS offers (English first, then the rest). */
+export function listVoices(): SpeechSynthesisVoice[] {
+  const s = synth();
+  if (!s) return [];
+  const voices = s.getVoices();
+  return [...voices].sort((a, b) => {
+    const ae = /^en/i.test(a.lang) ? 0 : 1;
+    const be = /^en/i.test(b.lang) ? 0 : 1;
+    return ae - be || a.name.localeCompare(b.name);
+  });
+}
+
+/** Remember and apply a voice choice by name (persisted via the profile). */
+export function setVoiceByName(name: string | null): void {
+  desiredName = name && name.length > 0 ? name : null;
+  pickVoice();
+}
+
+export function getVoiceName(): string | null {
+  return chosenVoice?.name ?? null;
+}
+
+/** Subscribe to the browser's async voice-list population. */
+export function onVoices(cb: () => void): () => void {
+  const s = synth();
+  if (!s) return () => {};
+  const handler = () => cb();
+  s.addEventListener("voiceschanged", handler);
+  return () => s.removeEventListener("voiceschanged", handler);
+}
+
+/** Speak a sample regardless of the on/off toggle — for the "test voice" button. */
+export function testSpeak(text: string): void {
+  const wasEnabled = enabled;
+  enabled = true;
+  speak(text);
+  enabled = wasEnabled;
 }
 
 // Voices load asynchronously in most browsers.
