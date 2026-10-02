@@ -66,7 +66,7 @@ export function IntelPane() {
       </div>
 
       <p className="hint-tip">
-        <code>&lt;cmd&gt; --help</code> explains a tool · <code>intel</code> → theory · <code>intel 2</code> → syntax · <code>intel 3</code> → full solution.
+        <code>&lt;cmd&gt; --help</code> explains a tool · <code>intel</code> → theory · <code>intel 2</code> → syntax · <code>intel 3</code> → deep walkthrough.
       </p>
       <p className="hint-tip">
         Select text + Ctrl/Cmd+C to copy · Ctrl/Cmd+V (or right-click) to paste values into the terminal.

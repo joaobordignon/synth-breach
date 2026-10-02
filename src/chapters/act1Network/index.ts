@@ -17,7 +17,7 @@ export const episode01: Episode = {
   briefing: "HEX: Hardware can't hide from an ICMP pulse. Sweep the subnet, then ping the gateway.",
   codexTopic: "networking",
   intro: [
-    "[COMMS // HEX]: Channel's live. Same rule as always, Decker — this shard's ours to test,",
+    "[COMMS // HEX]: Channel's live. Same rule as always, {handle} — this shard's ours to test,",
     "cleared and air-gapped. Nothing you learn here gets pointed at something you don't own. Clear?",
     "[COMMS // HEX]: Good. Aether severed standard DNS, thinks their perimeter's invisible. Cute.",
     "[COMMS // HEX]: Your subnet is 10.42.0.0/24. The /24 means the first 3 octets — 24 bits —",
@@ -44,7 +44,7 @@ export const episode01: Episode = {
   outro: [
     "[COMMS // HEX]: Gateway's real, and it's breathing — and your run's banked. That's your first",
     "foothold, and a save you can walk away from.",
-    "[COMMS // HEX]: Get some rest, Decker — tomorrow we go looking for a door. Type `next`.",
+    "[COMMS // HEX]: Get some rest, {handle} — tomorrow we go looking for a door. Type `next`.",
   ],
   beats: [
     {
@@ -183,7 +183,7 @@ export const episode02: Episode = {
   ],
   outro: [
     "[COMMS // HEX]: 8088 didn't even bother with a RST — it just went dark. That's not a closed port,",
-    "Decker, that's a port that only talks to people who already know the secret handshake.",
+    "{handle}, that's a port that only talks to people who already know the secret handshake.",
     "[COMMS // HEX]: Corporate infrastructure doesn't hide what it isn't ashamed of. Type `next`.",
   ],
   commands: {

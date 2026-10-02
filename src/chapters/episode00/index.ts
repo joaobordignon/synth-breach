@@ -64,7 +64,7 @@ export const episode00: Episode = {
     dismissLabel: "JACK IN ▸",
   },
   intro: [
-    "[COMMS // HEX]: Signal's clean. You're jacked in, Decker. I read you five-by-five.",
+    "[COMMS // HEX]: Signal's clean. You're jacked in, {handle}. I read you five-by-five.",
     "[COMMS // HEX]: You read the Code. Good. Now prove you can drive this rig — type `help` and",
     "let's see what you've got.",
     "[COMMS // HEX]: Then read the Operating Code in-shell and `accept-code`. Check the `codex`",
@@ -86,13 +86,13 @@ export const episode00: Episode = {
   ],
   outro: [
     "[COMMS // HEX]: Good. You can drive, and you know the rule. Welcome to the active roster,",
-    "Decker. I'm unlocking the first live target range: 10.42.0.0/24, Aether's outer perimeter.",
+    "{handle}. I'm unlocking the first live target range: 10.42.0.0/24, Aether's outer perimeter.",
     "[COMMS // HEX]: Somewhere past that router is the machine that scored ECHO. We start there.",
   ],
   beats: [
     {
       trigger: "intro",
-      prompt: "You still with me, Decker? First run's always the one that sticks.",
+      prompt: "You still with me, {handle}? First run's always the one that sticks.",
       replies: [
         { text: "Ready. Point me at it.", response: ["Good. No hesitation — that's the right kind of scared. Start with `help`."] },
         {

@@ -416,7 +416,7 @@ class GameStore {
       if (hasCodexForCommand(name)) {
         lines.push({ text: `  📖 Theory: \`codex ${name}\` opens the concept behind this tool.`, kind: "dim" });
       }
-      lines.push({ text: "  Stuck? `intel` → theory · `intel 2` → syntax nudge · `intel 3` → full solution.", kind: "dim" });
+      lines.push({ text: "  Stuck? `intel` → theory · `intel 2` → syntax nudge · `intel 3` → deep walkthrough.", kind: "dim" });
       this.emitOutput(lines);
       return true;
     }
@@ -600,7 +600,7 @@ function reconnectModal(ep: Episode): import("./types").EpisodeModal {
   const tag = ep.act === 0 ? "PROLOGUE" : `ACT ${["", "I", "II", "III", "IV"][ep.act]}`;
   return {
     title: "SIGNAL REACQUIRED",
-    lead: `Welcome back, Decker. Resuming ${tag} — Episode ${pad(ep.id)}: "${ep.title}". Jack in to bring HEX online.`,
+    lead: `Welcome back, ${store.profile.handle}. Resuming ${tag} — Episode ${pad(ep.id)}: "${ep.title}". Jack in to bring HEX online.`,
     sections: [],
     dismissLabel: "RECONNECT ▸",
   };

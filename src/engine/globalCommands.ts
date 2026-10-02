@@ -92,7 +92,7 @@ const commands: Record<string, EpisodeCommand> = {
 
   intel: {
     usage: "intel [1|2|3]",
-    description: "Decker Intel hint — Tier 1 theory (default), 2 syntax nudge, 3 full solution.",
+    description: "Operator intel hint — Tier 1 theory (default), 2 syntax nudge, 3 deep walkthrough.",
     run: (args, api) => {
       const tier = (Number(args[0]) || 1) as 1 | 2 | 3;
       if (tier < 1 || tier > 3) return api.print("[!] Tier must be 1, 2, or 3.", "error");
@@ -143,7 +143,7 @@ const commands: Record<string, EpisodeCommand> = {
       }
       const sol = SOLUTIONS[epId] ?? [];
       if (sol.length === 0) {
-        return api.print("[*] No canned solution for this one — you're on your own, Decker.", "dim");
+        return api.print("[*] No canned solution for this one — you're on your own, {handle}.", "dim");
       }
       const idx = Math.min(sol.length - 1, store.getStuckIndex());
       const cmd = sol[idx];

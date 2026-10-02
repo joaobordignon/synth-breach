@@ -160,7 +160,7 @@ const checks = [
   ["HEX offers clickable player replies", replyChips >= 1],
   ["player reply posts a YOU> line", youLine >= 1],
   ["HEX utterances aren't broken mid-sentence", coalesced],
-  ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
+  ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /ECHO|Aether|channel|signal/i.test(commsText)],
   ["HEX speaks the chosen handle (no {handle} leak)", /TEST\/\/RUNNER/.test(commsText) && !/\{handle\}/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],

@@ -23,7 +23,7 @@ export const episode10: Episode = {
   briefing: "HEX: Their login stitches user input straight into SQL. Make the database your puppet.",
   codexTopic: "webSecurity",
   intro: [
-    "[COMMS // HEX]: Same rule as always, Decker — cleared shard, this stays on the range. This one",
+    "[COMMS // HEX]: Same rule as always, {handle} — cleared shard, this stays on the range. This one",
     "matters most to get right, because this is Kovacs' house.",
     "[COMMS // HEX]: You have root on Bastion, but the surveillance core lives in their cloud API.",
     "Their login gate stitches user input directly into SQL queries. If backend code treats your data",
@@ -59,7 +59,7 @@ export const episode10: Episode = {
           tone: "warm",
           response: [
             "(quiet) Yeah — I do. I helped build the locks on this place. Only right I'm here when they come " +
-              "off. Keep moving, Decker.",
+              "off. Keep moving, {handle}.",
           ],
         },
         {
@@ -173,7 +173,7 @@ export const episode11: Episode = {
   outro: [
     "[COMMS // HEX]: 'RE: PRECOG DEPLOYMENT — ETHICS REVIEW OVERRIDE,' signed Kovacs. Someone below him",
     "flagged exactly this — no appeals process, no oversight. Same hole ECHO fell through.",
-    "[COMMS // HEX]: And he signed off anyway. That's not a rogue AI making a mistake, Decker. That's a",
+    "[COMMS // HEX]: And he signed off anyway. That's not a rogue AI making a mistake, {handle}. That's a",
     "person who read the warning and shipped it. ...It just armed something, too. We don't slow-walk",
     "what's next. Type `next`.",
   ],
@@ -184,7 +184,7 @@ export const episode11: Episode = {
       replies: [
         {
           text: "Kovacs knew exactly what he shipped.",
-          response: ["Read the warning. Signed it anyway. That's not negligence, Decker — that's a decision."],
+          response: ["Read the warning. Signed it anyway. That's not negligence, {handle} — that's a decision."],
         },
         {
           text: "This is bigger than ECHO now.",
@@ -317,7 +317,7 @@ export const episode12: Episode = {
   beats: [
     {
       trigger: "objective:report",
-      prompt: "That's the whole chain, documented. Last call's yours, Decker.",
+      prompt: "That's the whole chain, documented. Last call's yours, {handle}.",
       replies: [
         {
           text: "Whatever happens, this was worth it.",
@@ -458,7 +458,7 @@ export const episode12: Episode = {
         ]);
         api.print([
           { text: "[COMMS // HEX]: That's the whole chain, scored and documented. Now the only question left:", kind: "hex" },
-          { text: "how does this end? Two ways, Decker — and they are NOT the same.", kind: "hex" },
+          { text: "how does this end? Two ways, {handle} — and they are NOT the same.", kind: "hex" },
           { text: "  broadcast-leak --mode=public            -> Full Exposure (Vigilante)", kind: "warn" },
           { text: "  bounty-report --submit --responsible    -> Coordinated Disclosure (Whitehat)", kind: "success" },
         ]);
@@ -494,14 +494,14 @@ function rapportCoda(api: Api): Line[] {
       { text: "", kind: "normal" },
       { text: "[COMMS // HEX]: ...One more thing, before I drop this channel for good. You talked to me", kind: "hex" },
       { text: "like I was a person, not a voice in your ear. I'd forgotten what that was like. Thank you", kind: "hex" },
-      { text: "for that, Decker — more than for any of the rest of it. Don't be a stranger out there.", kind: "hex" },
+      { text: "for that, {handle} — more than for any of the rest of it. Don't be a stranger out there.", kind: "hex" },
     ];
   }
   if (r >= 1) {
     return [
       { text: "", kind: "normal" },
       { text: "[COMMS // HEX]: We made a decent team, you and me. Didn't expect that going in. Take care", kind: "hex" },
-      { text: "of yourself out there, Decker. Channel's always open if you need it.", kind: "hex" },
+      { text: "of yourself out there, {handle}. Channel's always open if you need it.", kind: "hex" },
     ];
   }
   return [
@@ -553,7 +553,7 @@ function runWhitehatEnding(api: import("../../engine/types").EngineApi) {
     { text: "  EPILOGUE — A formal audit forces systemic reform: PRECOG is dismantled with oversight,", kind: "dim" },
     { text: "  an appeals process is mandated, and — the part that matters — ECHO's record is legally", kind: "dim" },
     { text: "  and cleanly expunged. No leak, no collateral. Just a name, returned.", kind: "dim" },
-    { text: "[COMMS // HEX]: That's the one I cared about, Decker. Debt paid — by both of us. Thank you.", kind: "hex" },
+    { text: "[COMMS // HEX]: That's the one I cared about, {handle}. Debt paid — by both of us. Thank you.", kind: "hex" },
   ]);
   api.print(rapportCoda(api));
   api.addScore(150);
