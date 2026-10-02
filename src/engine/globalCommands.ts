@@ -273,7 +273,9 @@ const commands: Record<string, EpisodeCommand> = {
     description: "Download your progress as a .synthsave file (to continue elsewhere).",
     run: (_args, api) => {
       exportSave();
-      api.print("[✓] Save file downloaded. Keep it — `load` it on any device to continue.", "success");
+      api.print("[✓] Save file downloaded. Keep it — `load` it on any device, or hit LOAD GAME on the boot screen, to continue.", "success");
+      // Ticks the Episode 01 onboarding objective (harmless no-op elsewhere).
+      api.complete("save");
     },
   },
 

@@ -27,17 +27,47 @@ export const episode01: Episode = {
   objectives: [
     { id: "sweep", label: "Map your /24 subnet and spot the live gateway" },
     { id: "ping", label: "Measure latency to the gateway with ICMP" },
+    { id: "save", label: "Bank your progress with `save` — carry the run anywhere" },
   ],
   hints: [
     "A /24 CIDR sweep probes every host in 10.42.0.0 – 10.42.0.255 with ICMP/ARP. Active hosts " +
-      "answer; filtered ones stay silent. `ping` then measures round-trip time and reads the TTL.",
-    "Run `netmap 10.42.0.0/24` to map the subnet, then `ping 10.42.0.1` to knock on the gateway.",
-    "Two steps: sweep your assigned subnet with netmap (CIDR form — the 10.42.0.0 network, /24 " +
-      "prefix). The sweep marks the active ROUTER GATEWAY; ping that exact host to read its TTL and RTT.",
+      "answer; filtered ones stay silent. `ping` then measures round-trip time and reads the TTL. " +
+      "And `save` writes your whole run to a file you keep.",
+    "Run `netmap 10.42.0.0/24` to map the subnet, `ping 10.42.0.1` to knock on the gateway, then " +
+      "`save` to bank your progress.",
+    "Three steps: sweep your assigned subnet with netmap (CIDR form — the 10.42.0.0 network, /24 " +
+      "prefix). The sweep marks the active ROUTER GATEWAY; ping that exact host to read its TTL and " +
+      "RTT. Then run `save` — it downloads a .synthsave file of your run that you can `load` (or " +
+      "LOAD GAME on the boot screen) to continue later, anywhere.",
   ],
   outro: [
-    "[COMMS // HEX]: Gateway's real, and it's breathing. That's your first foothold.",
+    "[COMMS // HEX]: Gateway's real, and it's breathing — and your run's banked. That's your first",
+    "foothold, and a save you can walk away from.",
     "[COMMS // HEX]: Get some rest, Decker — tomorrow we go looking for a door. Type `next`.",
+  ],
+  beats: [
+    {
+      trigger: "objective:ping",
+      prompt: "Gateway's logged. Before we push on — one habit that keeps a run alive: bank it.",
+      replies: [
+        {
+          text: "How do I save?",
+          tone: "warm",
+          response: [
+            "Type `save`. It drops a .synthsave file on your machine — your whole run, portable. Next time, " +
+              "`load` it in-shell or hit LOAD GAME on the boot screen and you pick up right here. Do it now.",
+          ],
+        },
+        {
+          text: "Already on it.",
+          tone: "mission",
+          response: [
+            "Good instinct. `save` drops a .synthsave file — your run, portable. `load` or LOAD GAME brings it " +
+              "back. Bank it before we move on.",
+          ],
+        },
+      ],
+    },
   ],
   commands: {
     netmap: {
@@ -253,6 +283,27 @@ export const episode03: Episode = {
     "[COMMS // HEX]: That cookie value ending in `==`? That's not encryption — it's Base64, dressed",
     "up to look important. Decode it and we're past the edge. Subnet Beta's next: the Crypto Vault.",
     "[COMMS // HEX]: That's where they actually try to hide things properly. Type `next`.",
+  ],
+  beats: [
+    {
+      trigger: "objective:inspect",
+      prompt: "Edge perimeter's wide open and barely noticed us. Easy, so far. ...It won't stay easy.",
+      replies: [
+        {
+          text: "What's actually behind all this, HEX?",
+          tone: "warm",
+          response: [
+            "A machine that decided ECHO was a threat, and a company that called that a feature. We're going " +
+              "to read it its own rights — one subnet at a time.",
+          ],
+        },
+        {
+          text: "Bring on the Crypto Vault.",
+          tone: "mission",
+          response: ["That's the spirit. Real ciphers in there, not Base64 in a trenchcoat. Type `next`."],
+        },
+      ],
+    },
   ],
   commands: {
     "banner-grab": {

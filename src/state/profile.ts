@@ -13,6 +13,9 @@ export interface PlayerProfile {
   voiceEnabled: boolean;
   /** Chosen SpeechSynthesis voice name, or null for the auto default. */
   voiceName?: string | null;
+  /** How warmly the player has answered HEX across the campaign (sum of warm
+   *  reply choices). Read back once at the ending to tailor HEX's farewell. */
+  bond?: number;
   /** Last local write time (ms). */
   updatedAt?: number;
 }
@@ -28,6 +31,7 @@ export function defaultProfile(): PlayerProfile {
     musicVolume: 0.35,
     voiceEnabled: false,
     voiceName: null,
+    bond: 0,
     updatedAt: 0,
   };
 }

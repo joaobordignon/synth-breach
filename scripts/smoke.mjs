@@ -52,6 +52,8 @@ const prologueShown = (await page.locator(".prologue-modal").count()) === 1;
 const prologueSetup =
   (await page.locator(".prologue-setup .setup-input").count()) === 1 &&
   (await page.locator(".prologue-setup .setup-select").count()) === 1;
+// A returning operator can load a save straight from the boot screen.
+const prologueLoad = (await page.locator(".prologue-load").count()) === 1;
 await page.locator(".prologue-begin").click();
 await page.waitForTimeout(300);
 const prologueDismissed = (await page.locator(".prologue-modal").count()) === 0;
@@ -65,6 +67,13 @@ if (replyChips > 0) {
   await page.waitForTimeout(1000);
 }
 const youLine = await page.locator(".comms-line.you").count();
+
+// Fluid comms: a HEX utterance authored across several array lines must render as
+// ONE bubble, never broken mid-sentence across two HEX> lines. The Ep00 intro
+// line "...drive this rig — type help and / let's see what you've got." is two
+// source lines; after coalescing they share a single .comms-line element.
+const commsLineTexts = await page.locator(".comms-line").allInnerTexts();
+const coalesced = commsLineTexts.some((t) => /drive this rig/.test(t) && /what you've got/.test(t));
 
 // The xterm textarea receives keystrokes.
 async function type(cmd) {
@@ -126,8 +135,10 @@ server.close();
 const checks = [
   ["Prologue briefing box shown then dismissed", prologueShown && prologueDismissed],
   ["Prologue has handle + voice + music setup", prologueSetup],
+  ["Prologue has a LOAD GAME button", prologueLoad],
   ["HEX offers clickable player replies", replyChips >= 1],
   ["player reply posts a YOU> line", youLine >= 1],
+  ["HEX utterances aren't broken mid-sentence", coalesced],
   ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],

@@ -567,10 +567,15 @@ body {
   font-size: 12px;
 }
 
+.prologue-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 .prologue-begin {
   display: block;
-  width: 100%;
-  margin-top: 20px;
+  flex: 1 1 auto;
   padding: 11px;
   background: rgba(5, 255, 161, 0.08);
   border: 1px solid var(--neon-green, #05ffa1);
@@ -586,6 +591,43 @@ body {
 
 .prologue-begin:hover {
   background: rgba(5, 255, 161, 0.18);
+}
+
+.prologue-load {
+  flex: 0 0 auto;
+  padding: 11px 16px;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid var(--neon-cyan, #00e5ff);
+  color: var(--neon-cyan, #00e5ff);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  transition: background 0.2s ease;
+}
+
+.prologue-load:hover {
+  background: rgba(0, 229, 255, 0.16);
+}
+
+.prologue-load-hint {
+  margin: 10px 0 0;
+  font-size: 11px;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.prologue-load-hint code {
+  color: var(--neon-cyan, #00e5ff);
+}
+
+.prologue-load-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--alert-red, #ff3c5f);
+  text-align: center;
 }
 
 /* ---- Full-screen FX ---- */

@@ -193,10 +193,11 @@ export const episode05: Episode = {
       replies: [
         {
           text: "Who's Vance to you?",
+          tone: "warm",
           response: ["(a long pause) Someone I worked beside, a lifetime ago. Leave it there for now. Please.", "...We'll get to it. Just not tonight."],
         },
-        { text: "Focus. Got it.", response: ["...Thank you, Decker. Crack the Caesar layer first."] },
-        { text: "You can tell me when you're ready.", response: ["(quiet) ...Yeah. I know. Let's work."] },
+        { text: "Focus. Got it.", tone: "mission", response: ["...Thank you, Decker. Crack the Caesar layer first."] },
+        { text: "You can tell me when you're ready.", tone: "warm", response: ["(quiet) ...Yeah. I know. Let's work."] },
       ],
     },
   ],
@@ -322,14 +323,17 @@ export const episode06: Episode = {
       replies: [
         {
           text: "You built it — and now you're tearing it down.",
+          tone: "mission",
           response: ["That's the only math that lets me sleep. Barely. But it's enough to keep moving."],
         },
         {
           text: "Doesn't change anything between us.",
+          tone: "warm",
           response: ["(a breath) ...It changes plenty for me. But I'll take it. Thank you, Decker."],
         },
         {
           text: "We'll fix it. Together.",
+          tone: "warm",
           response: ["(quiet) Yeah. Together. Bastion Core's waiting when you are."],
         },
       ],

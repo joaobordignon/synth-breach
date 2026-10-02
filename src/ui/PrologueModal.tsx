@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { EpisodeModal } from "../engine/types";
 import { store } from "../engine/gameStore";
 import { listVoices, onVoices, testSpeak, primeVoice, voiceSupported, SYNTH_VOICE } from "../voice";
+import { importSaveViaPicker } from "../state/saveFile";
 
 // Codex-style briefing box shown before a gated episode's HEX intro. Doubles as
 // a quick setup panel — handle, voice (with picker + test), and music — all
@@ -19,6 +20,7 @@ export function PrologueModal({ modal, onClose }: PrologueModalProps) {
   const [musicEnabled, setMusicEnabled] = useState(store.profile.musicEnabled);
   const [voiceName, setVoiceName] = useState(store.profile.voiceName ?? "");
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>(() => listVoices());
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     setVoices(listVoices());
@@ -56,6 +58,20 @@ export function PrologueModal({ modal, onClose }: PrologueModalProps) {
     commitHandle(handle);
     if (store.profile.voiceEnabled) primeVoice();
     onClose();
+  }
+  function loadGame() {
+    setLoadError(null);
+    // Unlock audio within this click gesture in case the resumed run has it on.
+    if (store.profile.voiceEnabled) primeVoice();
+    importSaveViaPicker((msg, ok) => {
+      if (ok) {
+        // replaceProfile() has already jumped the store to the resumed episode;
+        // dismiss the briefing so the resumed game (and HEX) takes over.
+        onClose();
+      } else {
+        setLoadError(msg);
+      }
+    });
   }
 
   const supported = voiceSupported();
@@ -133,9 +149,18 @@ export function PrologueModal({ modal, onClose }: PrologueModalProps) {
           </label>
         </section>
 
-        <button className="prologue-begin" onClick={begin} autoFocus>
-          {modal.dismissLabel ?? "BEGIN ▸"}
-        </button>
+        <div className="prologue-actions">
+          <button className="prologue-begin" onClick={begin} autoFocus>
+            {modal.dismissLabel ?? "BEGIN ▸"}
+          </button>
+          <button type="button" className="prologue-load" onClick={loadGame}>
+            ⟳ LOAD GAME
+          </button>
+        </div>
+        <p className="prologue-load-hint">
+          Returning operator? <strong>LOAD GAME</strong> imports a <code>.synthsave</code> file to pick up where you left off.
+        </p>
+        {loadError && <p className="prologue-load-error">[!] {loadError}</p>}
       </div>
     </div>
   );

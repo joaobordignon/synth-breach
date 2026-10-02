@@ -43,6 +43,10 @@ export interface CommsReply {
   text: string;
   /** HEX's response line(s) to this reply. */
   response: Array<string | Line>;
+  /** Optional emotional tenor. A "warm" (personal, trusting, open) reply nudges
+   *  the player's bond with HEX upward; that bond is read back once at the
+   *  ending to tailor HEX's farewell. "mission"/"guarded" stay neutral. */
+  tone?: "warm" | "mission" | "guarded";
 }
 
 /** A dialogue beat: HEX poses something, the player picks a reply. */
@@ -93,6 +97,9 @@ export interface EngineApi {
   handle(): string;
   /** The flagged family member's name used in HEX's dialogue. */
   sibling(): string;
+  /** How warmly the player has answered HEX across the campaign (0+). Used by
+   *  the finale to tailor HEX's farewell to the relationship actually built. */
+  rapport(): number;
   /** Award an achievement badge (deduped). */
   award(badge: string): void;
   /** Trigger a full-screen visual effect by name (see ui/FxLayer). */

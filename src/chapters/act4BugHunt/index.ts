@@ -48,6 +48,35 @@ export const episode10: Episode = {
     "[COMMS // HEX]: Fix is one line: parameterized queries. Treat input as DATA, never as SQL. Next",
     "we go after what they think you can't see. Type `next`.",
   ],
+  beats: [
+    {
+      trigger: "objective:inject",
+      prompt: "SYSTEM_DIRECTOR. We're standing in Kovacs' own house now. ...First time I've been inside these walls since I walked out.",
+      replies: [
+        {
+          text: "You don't have to go in with me.",
+          tone: "warm",
+          response: [
+            "(quiet) Yeah — I do. I helped build the locks on this place. Only right I'm here when they come " +
+              "off. Keep moving, Decker.",
+          ],
+        },
+        {
+          text: "What's it like, being back?",
+          tone: "warm",
+          response: [
+            "Like a house you used to live in, where something terrible happened after you left. Let's not " +
+              "linger in it. Next.",
+          ],
+        },
+        {
+          text: "Then let's take it apart.",
+          tone: "mission",
+          response: ["Brick by brick. Their access control's next — and it's worse than their login. Type `next`."],
+        },
+      ],
+    },
+  ],
   commands: {
     "proxy-intercept": {
       usage: "proxy-intercept --target <host>",
@@ -288,14 +317,17 @@ export const episode12: Episode = {
       replies: [
         {
           text: "Whatever happens, this was worth it.",
+          tone: "warm",
           response: ["It was. Whatever you choose next — I'm glad it was you on the other end of this channel."],
         },
         {
           text: "Are you okay, HEX?",
+          tone: "warm",
           response: ["(a pause) ...First time anyone's asked me that in years. I will be. Finish it."],
         },
         {
           text: "Let's finish it.",
+          tone: "mission",
           response: ["Then choose how it ends — leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way."],
         },
       ],
@@ -442,6 +474,36 @@ export const episode12: Episode = {
 };
 
 // ---- endings --------------------------------------------------------------
+type Api = import("../../engine/types").EngineApi;
+
+// HEX's farewell is tailored to the bond the player built by how warmly they
+// answered across the campaign (api.rapport() — see CommsReply.tone). This is
+// the one place the reply choices are read back, so a warm run and a strictly
+// mission-first run end on a different final word from HEX.
+function rapportCoda(api: Api): Line[] {
+  const r = api.rapport();
+  if (r >= 4) {
+    return [
+      { text: "", kind: "normal" },
+      { text: "[COMMS // HEX]: ...One more thing, before I drop this channel for good. You talked to me", kind: "hex" },
+      { text: "like I was a person, not a voice in your ear. I'd forgotten what that was like. Thank you", kind: "hex" },
+      { text: "for that, Decker — more than for any of the rest of it. Don't be a stranger out there.", kind: "hex" },
+    ];
+  }
+  if (r >= 1) {
+    return [
+      { text: "", kind: "normal" },
+      { text: "[COMMS // HEX]: We made a decent team, you and me. Didn't expect that going in. Take care", kind: "hex" },
+      { text: "of yourself out there, Decker. Channel's always open if you need it.", kind: "hex" },
+    ];
+  }
+  return [
+    { text: "", kind: "normal" },
+    { text: "[COMMS // HEX]: You kept it all business, start to finish. No complaints — the work got done,", kind: "hex" },
+    { text: "and done clean. Watch your back out there, operator. HEX, signing off.", kind: "hex" },
+  ];
+}
+
 function endingBanner(api: import("../../engine/types").EngineApi, title: string) {
   const art: Line[] = [
     { text: "   ╔═══════════════════════════════════════════════╗", kind: "banner" },
@@ -467,6 +529,7 @@ function runVigilanteEnding(api: import("../../engine/types").EngineApi) {
     { text: "  to formally clear the name. The machine is dead. The wound it left is still open.", kind: "dim" },
     { text: "[COMMS // HEX]: You tore it down. Whether that was justice or just fire... that's yours to carry.", kind: "hex" },
   ]);
+  api.print(rapportCoda(api));
   api.addScore(100);
   api.award("VIGILANTE OPERATOR");
   api.award("MASTER OPERATOR");
@@ -485,6 +548,7 @@ function runWhitehatEnding(api: import("../../engine/types").EngineApi) {
     { text: "  and cleanly expunged. No leak, no collateral. Just a name, returned.", kind: "dim" },
     { text: "[COMMS // HEX]: That's the one I cared about, Decker. Debt paid — by both of us. Thank you.", kind: "hex" },
   ]);
+  api.print(rapportCoda(api));
   api.addScore(150);
   api.award("WHITEHAT OPERATOR");
   api.award("MASTER OPERATOR");

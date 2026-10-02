@@ -25,6 +25,9 @@ type FxListener = (effect: "glitch" | "fireworks" | "alarm") => void;
 type CommsListener = (entry: CommsEntry) => void;
 type ReplyListener = (replies: CommsReply[]) => void;
 
+/** Matches the "[COMMS // HEX]:" prefix that opens a distinct HEX utterance. */
+const HEX_PREFIX = /^\[COMMS\s*\/\/\s*HEX\]/i;
+
 /** Strip the "[COMMS // HEX]:" prefix so the comms panel can render it cleanly. */
 function stripHexPrefix(text: string): string {
   return text.replace(/^\[COMMS\s*\/\/\s*HEX\]:?\s*/i, "").trim();
@@ -116,6 +119,10 @@ class GameStore {
     const reply = this.offeredReplies[index];
     if (!reply) return;
     this.clearReplies();
+    // A warm reply deepens the player's bond with HEX; the finale reads it back.
+    if (reply.tone === "warm") {
+      this.patchProfile({ bond: (this.profile.bond ?? 0) + 1 });
+    }
     const entry: CommsEntry = { id: this.commsSeq++, text: reply.text, episode: this.currentEpisodeId, speaker: "you" };
     this.commsLog.push(entry);
     if (this.commsLog.length > 300) this.commsLog.shift();
@@ -153,21 +160,44 @@ class GameStore {
   // HEX dialogue (kind "hex") is routed to the BBS comms side panel instead of
   // the terminal; everything else prints to the terminal. A mixed batch is
   // split so each stream keeps its own order.
+  //
+  // HEX lines are authored across several array entries for source readability,
+  // but a single spoken utterance must land as ONE comms bubble — never broken
+  // mid-sentence across two "HEX>" lines. So consecutive HEX lines are
+  // coalesced: a line carrying the "[COMMS // HEX]:" prefix opens a new bubble;
+  // an unprefixed HEX line is a continuation and is joined to it with a space;
+  // a blank line or any terminal line closes the current bubble.
   private emitOutput(lines: Line[]) {
     if (lines.length === 0) return;
     const terminalLines: Line[] = [];
+    let hexBuf: string | null = null;
+    const flushHex = () => {
+      const text = hexBuf?.trim();
+      hexBuf = null;
+      if (!text) return;
+      const entry: CommsEntry = { id: this.commsSeq++, text, episode: this.currentEpisodeId, speaker: "hex" };
+      this.commsLog.push(entry);
+      if (this.commsLog.length > 300) this.commsLog.shift();
+      for (const cb of this.commsListeners) cb(entry);
+    };
     for (const line of lines) {
       if (line.kind === "hex") {
+        const opensUtterance = HEX_PREFIX.test(line.text);
         const text = stripHexPrefix(line.text);
-        if (!text) continue; // drop blank spacer lines in the comms feed
-        const entry: CommsEntry = { id: this.commsSeq++, text, episode: this.currentEpisodeId, speaker: "hex" };
-        this.commsLog.push(entry);
-        if (this.commsLog.length > 300) this.commsLog.shift();
-        for (const cb of this.commsListeners) cb(entry);
+        if (opensUtterance) {
+          flushHex(); // a new utterance begins
+          hexBuf = text;
+        } else if (text === "") {
+          flushHex(); // a blank spacer ends the current utterance
+        } else {
+          hexBuf = hexBuf ? `${hexBuf} ${text}` : text; // continuation
+        }
       } else {
+        flushHex(); // a terminal line ends any open HEX utterance
         terminalLines.push(line);
       }
     }
+    flushHex();
     if (terminalLines.length === 0) return;
     for (const cb of this.outputListeners) cb(terminalLines);
   }
@@ -481,6 +511,7 @@ class GameStore {
     },
     handle: () => this.profile.handle,
     sibling: () => (this.getVarPublic<string>("sibling") ?? "ECHO"),
+    rapport: () => this.profile.bond ?? 0,
     award: (badge) => {
       if (this.profile.achievements.includes(badge)) return;
       this.patchProfile({ achievements: [...this.profile.achievements, badge] });

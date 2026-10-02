@@ -90,6 +90,7 @@ export const episode00: Episode = {
         },
         {
           text: "Why me?",
+          tone: "warm",
           response: ["Because you've got a reason. People with reasons don't quit at the first locked door. Now — `help`."],
         },
       ],

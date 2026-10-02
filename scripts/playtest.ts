@@ -32,7 +32,7 @@ async function waitFor(pred: () => boolean, timeoutMs = 4000) {
 // Exact solution scripts per episode id.
 const SCRIPTS: Record<number, string[]> = {
   0: ["help", "codex", "accept-code"],
-  1: ["netmap 10.42.0.0/24", "ping 10.42.0.1"],
+  1: ["netmap 10.42.0.0/24", "ping 10.42.0.1", "save"],
   2: ["portscan --inspect 10.42.0.1", "answer 8088"],
   3: ["banner-grab --target 10.42.0.1 --port 80", "inspect --protocol http"],
   4: ['decode --base64 "VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA=="', 'hexview --decode "44 49 52 45 43 54 4f 52 5f 4b 4f 56 41 43 53"'],
