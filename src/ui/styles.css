@@ -353,6 +353,33 @@ body {
   color: #cfe8ff;
 }
 
+.codex-cmds {
+  margin: 8px 0 2px;
+  font-size: 12px;
+}
+
+.codex-cmds-label {
+  color: var(--neon-green, #05ffa1);
+  letter-spacing: 0.5px;
+}
+
+.codex-cmd {
+  background: rgba(1, 205, 254, 0.1);
+  border: 1px solid rgba(1, 205, 254, 0.5);
+  color: var(--neon-cyan, #01cdfe);
+  border-radius: 2px;
+  padding: 1px 8px;
+  margin: 0 4px 4px 0;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.codex-cmd:hover {
+  background: rgba(1, 205, 254, 0.22);
+  text-shadow: 0 0 6px var(--neon-cyan, #01cdfe);
+}
+
 .codex-modal pre {
   background: rgba(13, 2, 33, 0.85);
   border-left: 2px solid var(--neon-green, #05ffa1);

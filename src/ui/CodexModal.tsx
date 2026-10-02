@@ -12,6 +12,7 @@ interface CodexEntry {
   summary: string;
   body: string;
   example?: string;
+  relatedCommands?: string[];
 }
 interface CodexTopic {
   topic: string;
@@ -60,6 +61,25 @@ export function CodexModal({ open, onClose }: CodexModalProps) {
             <summary>{entry.term}</summary>
             <p>{entry.body}</p>
             {entry.example && <pre>{entry.example}</pre>}
+            {entry.relatedCommands && entry.relatedCommands.length > 0 && (
+              <p className="codex-cmds">
+                <span className="codex-cmds-label">▸ Try in terminal:</span>{" "}
+                {entry.relatedCommands.map((cmd) => (
+                  <button
+                    key={cmd}
+                    type="button"
+                    className="codex-cmd"
+                    title={`Insert "${cmd} " into the terminal (then ${cmd} --help)`}
+                    onClick={() => {
+                      store.fillInput(cmd + " ");
+                      onClose();
+                    }}
+                  >
+                    {cmd}
+                  </button>
+                ))}
+              </p>
+            )}
           </details>
         ))}
       </section>

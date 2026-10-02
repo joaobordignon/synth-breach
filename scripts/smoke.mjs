@@ -68,6 +68,7 @@ async function type(cmd) {
 
 await type("help");
 await type("codex");
+const codexCmds = await page.locator(".codex-cmd").count();
 await page.keyboard.press("Escape");
 await page.waitForTimeout(300);
 const codexClosed = (await page.locator(".codex-modal").count()) === 0;
@@ -123,6 +124,7 @@ const checks = [
   ["accept-code acknowledged", /acknowledged|roster|unlocked/i.test(terminalText)],
   ["header shows score", /SCORE/.test(headerText)],
   ["Escape closes Codex modal", codexClosed],
+  ["Codex links concepts to terminal commands", codexCmds >= 1],
   ["telemetry pane populated by netmap", /10\.42\.0\.1/.test(telemetryText)],
   ["no console errors", errors.length === 0],
 ];
