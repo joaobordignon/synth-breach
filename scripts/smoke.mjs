@@ -79,7 +79,7 @@ const youLine = await page.locator(".comms-line.you").count();
 // line "...drive this rig — type help and / let's see what you've got." is two
 // source lines; after coalescing they share a single .comms-line element.
 const commsLineTexts = await page.locator(".comms-line").allInnerTexts();
-const coalesced = commsLineTexts.some((t) => /drive this rig/.test(t) && /what you've got/.test(t));
+const coalesced = commsLineTexts.some((t) => /drive this rig/.test(t) && /working with/.test(t));
 
 // The xterm textarea receives keystrokes.
 async function type(cmd) {

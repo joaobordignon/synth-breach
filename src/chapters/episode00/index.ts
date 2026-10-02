@@ -64,25 +64,22 @@ export const episode00: Episode = {
     dismissLabel: "JACK IN ▸",
   },
   intro: [
-    "[COMMS // HEX]: Signal's clean. You're jacked in, {handle}. I read you five-by-five.",
-    "[COMMS // HEX]: You read the Code. Good. Now prove you can drive this rig — type `help` and",
-    "let's see what you've got.",
-    "[COMMS // HEX]: Then read the Operating Code in-shell and `accept-code`. Check the `codex`",
-    "anytime — it's free, always, no judgment. You're on the deck as {handle} — change that tag",
-    "whenever you want with `handle <name>`, I'll keep up.",
-    "[COMMS // HEX]: When you're squared away, I'll hand you your first live target.",
+    "[COMMS // HEX]: Signal's clean. You're jacked in, {handle} — I read you five by five.",
+    "[COMMS // HEX]: First things first: let's see if you can drive this rig. Type `help`, and I'll show",
+    "you what you're working with.",
   ],
   objectives: [
     {
       id: "help",
       label: "Run `help` to see your toolkit",
       hex: [
-        "[COMMS // HEX]: That's your whole kit. Every line is one command — a name, then optional --flags.",
-        "Next, open the `codex`: your reference library, free and unlimited, no judgment.",
+        "[COMMS // HEX]: Nice — that's your whole toolkit. Every line there is a command you can run.",
+        "[COMMS // HEX]: Want to know more about any of it? That's what the `codex` is for — our reference",
+        "library, and it's always free. Go on, open it up.",
       ],
     },
     { id: "codex", label: "Open the `codex` reference library (it's free)" },
-    { id: "accept-code", label: "Read & `accept-code` — the Operating Code" },
+    { id: "accept-code", label: "Read & `accept-code` — our code of conduct" },
   ],
   // Reveal the three onboarding steps one at a time, in order.
   progressiveObjectives: true,
@@ -137,13 +134,14 @@ export const episode00: Episode = {
         api.print(`[*] Opening CODEX reference library${query ? ` → ${query}` : ""}... (free, no penalty)`, "system");
         api.openCodex(query || undefined);
         api.complete("codex");
+        api.print("[COMMS // HEX]: Good — the codex is your friend. Pop it open any time you're stuck.", "hex");
         api.print([
-          { text: "", kind: "normal" },
-          ...OPERATING_CODE,
-          { text: "", kind: "normal" },
-          { text: "[*] That's the Operating Code. Read it, then `accept-code` to sign in.", kind: "system" },
+          { text: "[COMMS // HEX]: Now the one thing that matters more than any command: our code of conduct.", kind: "hex" },
+          { text: "We only ever break into what we're cleared to break into — and this whole range is practice,", kind: "hex" },
+          { text: "nothing real. Here it is:", kind: "hex" },
         ]);
-        api.print("[COMMS // HEX]: Last step — read the Operating Code I just printed, then `accept-code`.", "hex");
+        api.print([{ text: "", kind: "normal" }, ...OPERATING_CODE, { text: "", kind: "normal" }]);
+        api.print("[COMMS // HEX]: Read it over. When you're ready to sign on with us, type `accept-code`.", "hex");
       },
     },
     "accept-code": {

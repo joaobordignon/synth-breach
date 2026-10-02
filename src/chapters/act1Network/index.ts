@@ -22,8 +22,8 @@ export const episode01: Episode = {
     "[COMMS // HEX]: Good. Aether severed standard DNS, thinks their perimeter's invisible. Cute.",
     "[COMMS // HEX]: Your subnet is 10.42.0.0/24. The /24 means the first 3 octets — 24 bits —",
     "belong to Aether. The last 8 bits are 254 possible hosts behind one gateway.",
-    "[COMMS // HEX]: Send a pulse across the wire — netmap the subnet, then ping the gateway it",
-    "turns up. If the syntax trips you, `netmap --help` or `ping --help`; the theory's in the `codex`.",
+    "[COMMS // HEX]: Start with a sweep — map your subnet and see what's actually alive on it. If the",
+    "syntax trips you, `netmap --help`; the theory's always in the `codex`. Show me what's out there.",
   ],
   objectives: [
     { id: "sweep", label: "Map your /24 subnet and spot the live gateway" },

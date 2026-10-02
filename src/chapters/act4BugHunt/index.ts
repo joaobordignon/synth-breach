@@ -192,8 +192,9 @@ export const episode11: Episode = {
     "[COMMS // HEX]: You're logged in on an operator token, but locked out of the classified index.",
     "Watch the API calls. Many backends authenticate WHO you are but forget to authorize WHAT you can",
     "view — they pass object IDs in the URL and blindly trust the client.",
-    "[COMMS // HEX]: Baseline the profile API with your own token, then tamper the object id downward",
-    "to reach an exec's record. `api-probe --help` and `tamper --help` for syntax; `codex` for IDOR.",
+    "[COMMS // HEX]: Start by baselining the profile API with your own token — see what a normal, honest",
+    "request even looks like, and what it gives back. `api-probe --help` for syntax; `codex` for IDOR and",
+    "access control. Once we see the shape of it, the hole shows itself.",
   ],
   objectives: [
     { id: "probe", label: "Baseline the profile API with your own token" },

@@ -46,8 +46,8 @@ export const episode04: Episode = {
     "[COMMS // HEX]: Here's the lesson rookies miss: encoding is not encryption. Base64 just reshapes",
     "data for transport — anyone reverses it in milliseconds, no key required. So reverse it, and let's",
     "read what Aether thinks it's hiding.",
-    "[COMMS // HEX]: Strip the padding off the cookie, then hexview the exec-log dump it unlocks. If the",
-    "syntax trips you, `decode --help` / `hexview --help`; `codex` has the encoding-vs-encryption theory.",
+    "[COMMS // HEX]: Start by stripping the padding off that cookie — reverse the Base64 and see what",
+    "falls out. `decode --help` if you need the syntax; `codex` has the encoding-vs-encryption theory.",
     // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
     { text: "", kind: "normal" },
     { text: "  ── INTERCEPT // SESSION COOKIE ─────────────────────────────", kind: "system" },
@@ -160,34 +160,29 @@ export const episode05: Episode = {
     "bitmask. Let's break their math.",
     { text: "[COMMS // HEX]: ...Vance. Haven't heard that name in a long time.", kind: "hex" },
     { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, {handle}. Not the history lesson.", kind: "hex" },
-    { text: "[COMMS // HEX]: Intercept's on your deck. Crack the Caesar layer first, then peel the XOR", kind: "hex" },
-    { text: "with the single-byte key I already pulled off the wire: 0x42. `cipher-crack --help` /", kind: "hex" },
-    { text: "`xor-decrypt --help` for syntax; `codex` for the symmetric-cipher theory.", kind: "hex" },
+    { text: "[COMMS // HEX]: Intercept's on your deck. Start with the outer layer — it's a classic rotation", kind: "hex" },
+    { text: "cipher, the oldest trick there is. Crack that first and let's see if it reads. `cipher-crack --help`", kind: "hex" },
+    { text: "for syntax; `codex` for the cipher theory.", kind: "hex" },
     // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
     { text: "", kind: "normal" },
     { text: "  ── INTERCEPT // CAESAR LAYER ───────────────────────────────", kind: "system" },
     { text: "  WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD", kind: "normal" },
-    { text: "  ── TELEMETRY // XOR STREAM  (recovered key: 0x42) ──────────", kind: "system" },
-    { text: "  0x53 0x59 0x4E", kind: "normal" },
     { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
-    { text: "  (copy the intercept above into `cipher-crack`, then `xor-decrypt` — see `<cmd> --help`)", kind: "dim" },
+    { text: "  (copy the ciphertext above into `cipher-crack` — see `cipher-crack --help`)", kind: "dim" },
   ],
   objectives: [
     {
       id: "caesar",
       label: "Brute-force the Caesar shift to readable text",
       hex: [
-        "[COMMS // HEX]: Readable now — a fixed-shift cipher never survives 25 guesses. But they buried a",
-        "second layer under it: an XOR bitmask. Peel that off next with the single-byte key I pulled.",
+        "[COMMS // HEX]: Readable now — a fixed-shift cipher never survives 25 guesses. But look: there's a",
+        "second layer buried under it, an XOR bitmask. I just pulled the stream and the key onto your deck",
+        "(they're in your Evidence Locker too). Peel that layer off next.",
       ],
     },
     { id: "xor", label: "Strip the single-byte XOR mask off the stream" },
   ],
-  evidence: [
-    { label: "Caesar ciphertext", value: "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD" },
-    { label: "XOR stream (hex)", value: "0x53 0x59 0x4E" },
-    { label: "XOR key (recovered)", value: "0x42" },
-  ],
+  evidence: [{ label: "Caesar ciphertext", value: "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD" }],
   hints: [
     "A Caesar cipher shifts every letter by a fixed amount — only 25 possibilities, so you brute-force " +
       "all of them and eyeball which reads as English (frequency analysis). XOR is its own inverse: " +
@@ -243,6 +238,19 @@ export const episode05: Episode = {
           text: `[✓] ROT-${best.shift} reads as English: "${best.text}"`,
           kind: "success",
         });
+        // Staggered reveal: cracking the Caesar layer surfaces the XOR layer's
+        // stream + key — so the second step's data appears only now.
+        if (!api.isComplete("xor")) {
+          api.print([
+            { text: "", kind: "normal" },
+            { text: "  ── TELEMETRY // XOR STREAM  (recovered key: 0x42) ──────────", kind: "system" },
+            { text: "  0x53 0x59 0x4E", kind: "normal" },
+            { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+            { text: "  (feed this stream + the key to `xor-decrypt` — see `xor-decrypt --help`)", kind: "dim" },
+          ]);
+          api.evidence("XOR stream (hex)", "0x53 0x59 0x4E");
+          api.evidence("XOR key (recovered)", "0x42");
+        }
         api.complete("caesar");
         api.addScore(45);
         // The instant the Caesar layer falls, WARDEN adapts (first real reaction).
@@ -307,10 +315,10 @@ export const episode06: Episode = {
     { text: "    kovacs:     5d41402abc4b2a76b9719d911017c592", kind: "dim" },
     { text: "    vance:      098f6bcd4621d373cade4e832627b4f6", kind: "dim" },
     { text: "    admin_root: 21232f297a57a5a743894a0e4a801fc3", kind: "dim" },
-    "[COMMS // HEX]: Kovacs. Vance. Same two names as the intercept. And 'admin_root' on a password of",
-    "'admin' — some things never change in that building, no matter how many years go by.",
-    "[COMMS // HEX]: Fingerprint one of those hashes, then dictionary-attack the weak one. `hash-identify",
-    "--help` and `crack --help` have the syntax; `codex` explains hashing, salting, and rainbow tables.",
+    "[COMMS // HEX]: Kovacs. Vance. Same two names from the intercept — and an 'admin_root' account that",
+    "should've been locked down years ago. Some things never change in that building.",
+    "[COMMS // HEX]: Start by fingerprinting one of those hashes — what are we even dealing with? `hash-identify",
+    "--help` for syntax; `codex` explains hashing, salting, and rainbow tables.",
   ],
   objectives: [
     {
