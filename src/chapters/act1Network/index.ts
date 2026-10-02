@@ -160,13 +160,14 @@ export const episode02: Episode = {
   briefing: "HEX: Every service answers one of three ways — open, slammed shut, or silently dropped. Scan and watch the flags.",
   codexTopic: "networking",
   intro: [
-    "[COMMS // HEX]: Good work on the gateway. Now we need an entry point.",
-    "[COMMS // HEX]: Every service listens on a TCP/UDP port with three possible answers: wide open,",
-    "slammed shut, or silently dropped like it never heard you. Firewalls love that last one.",
-    "[COMMS // HEX]: Run a packet capture while you scan. A server reveals its soul in the handshake —",
-    "SYN, SYN-ACK, ACK, every time, unless something's actively lying to you.",
-    "[COMMS // HEX]: Scan the gateway with packet inspection on, read the flags, then `answer` me which",
-    "port's hiding. `portscan --help` for the syntax, `codex` for the three-way-handshake theory.",
+    "[COMMS // HEX]: Good work on the gateway. Now we need an entry point — a port left listening.",
+    "[COMMS // HEX]: Every service answers one of three ways: wide open, slammed shut, or silently",
+    "dropped like it never heard you. Firewalls love that last one. A server reveals its soul in the",
+    "handshake — SYN, SYN-ACK, ACK — unless something's actively lying to you.",
+    "[COMMS // HEX]: You've got a tool on your deck that maps a host's ports and captures how each one",
+    "answers. Dig through your kit — `help` lists it, `<tool> --help` tells you what it does — and point",
+    "it somewhere worth your time. The gateway's the only door into this subnet; everything else is noise.",
+    "[COMMS // HEX]: Read the flags it brings back, then `answer` me which port is hiding.",
   ],
   objectives: [
     { id: "scan", label: "Capture the TCP handshake against the gateway" },
@@ -197,8 +198,28 @@ export const episode02: Episode = {
         "Example:  portscan --inspect <ip>",
       ],
       run: (args, api) => {
-        if (!args.includes("--inspect") || !args.includes(GATEWAY_IP)) {
-          return api.print(`[!] Usage: portscan --inspect ${GATEWAY_IP}`, "error");
+        if (!args.includes("--inspect")) {
+          return api.print("[!] This tool captures a handshake table. Try: portscan --inspect <ip>. See `portscan --help`.", "error");
+        }
+        const ip = args.find((a) => /^\d{1,3}(\.\d{1,3}){3}$/.test(a));
+        if (!ip) return api.print("[!] Give it a host to scan: portscan --inspect <ip>.", "error");
+        // Scanning any host is allowed — but only the gateway has doors worth our
+        // time. Other hosts return boring output and HEX waves them off.
+        if (ip !== GATEWAY_IP) {
+          const known = SUBNET_ALPHA.find((h) => h.ip === ip);
+          const alive = known && known.status === "ACTIVE";
+          api.print([
+            { text: `[*] Sending SYN probes to ${ip}, capturing responses...`, kind: "system" },
+            alive
+              ? { text: `  ${ip}: every probed port closed — nothing's listening here worth a handshake.`, kind: "dim" }
+              : { text: `  ${ip}: no response — host is down or fully filtered.`, kind: "dim" },
+          ]);
+          api.print(
+            "[COMMS // HEX]: Dead end. No services on that host we can use. The gateway (10.42.0.1) is the " +
+              "only way deeper into this subnet — put the scan there.",
+            "hex",
+          );
+          return;
         }
         api.print("[*] Sending SYN probes to 10.42.0.1, capturing responses...", "system");
         const header =
@@ -261,12 +282,12 @@ export const episode03: Episode = {
   briefing: "HEX: Legacy servers blab their versions and send secrets in cleartext. Grab the banner.",
   codexTopic: "networking",
   intro: [
-    "[COMMS // HEX]: We know port 80 is listening. Look past the door — at what's leaking through.",
-    "[COMMS // HEX]: Legacy servers from the 80s love talking too much. They blab exact versions in",
-    "every header and broadcast their payload in clear, unencrypted ASCII. No lock, no envelope —",
-    "just a postcard anyone can read in transit.",
-    "[COMMS // HEX]: Grab the banner off the open web port, then inspect the transport. `banner-grab",
-    "--help` and `inspect --help` carry the syntax; `codex` has the cleartext-vs-encrypted theory.",
+    "[COMMS // HEX]: We know port 80 is listening. We need more off that gateway — the stuff it leaks",
+    "just by answering. Legacy servers from the 80s love talking too much: they blab exact versions in",
+    "every header and broadcast in clear, unencrypted ASCII. A postcard anyone can read in transit.",
+    "[COMMS // HEX]: Look at your tools and the mission board, {handle} — I'm sure you can pull it. If",
+    "only there were a way to... grab... something off that web port. Check `help`, and `<tool> --help`",
+    "if a tool's new to you. The `codex` has the theory if you want to read ahead.",
   ],
   objectives: [
     { id: "banner", label: "Grab the service banner on the web port" },
@@ -343,6 +364,14 @@ export const episode03: Episode = {
         api.evidence("Session cookie (Base64)", COOKIE_B64);
         api.complete("banner");
         api.addScore(30);
+        // Only NOW does HEX point at the second step — with a groan-worthy hint.
+        api.print([
+          { text: "[COMMS // HEX]: There it is — a version string AND a Set-Cookie, in the clear. Why did the", kind: "hex" },
+          { text: "HTTP packet blush? Because it saw the TLS get undressed. ...I'm here all week.", kind: "hex" },
+          { text: "[COMMS // HEX]: Point is, nothing here is wearing a lock. Prove it: there's a tool that classifies", kind: "hex" },
+          { text: "a transport as cleartext or encrypted. Find it in your kit and run it against this protocol —", kind: "hex" },
+          { text: "`codex` has the TLS theory if you want to know WHY it matters.", kind: "hex" },
+        ]);
       },
     },
     inspect: {
