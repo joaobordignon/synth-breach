@@ -134,11 +134,17 @@ const commands: Record<string, EpisodeCommand> = {
   },
 
   codex: {
-    usage: "codex [topic]",
-    description: "Open the in-game reference library (networking / cryptography / pentesting / web).",
-    run: (_args, api) => {
-      api.print("[*] Opening CODEX reference library... (free, no penalty)", "system");
-      api.openCodex();
+    usage: "codex [topic|command]",
+    description: "Open the reference library. `codex <command>` jumps to the matching concept.",
+    help: [
+      "No argument opens this episode's topic.",
+      "codex <topic>    networking · cryptography · pentesting · webSecurity",
+      "codex <command>  jumps to the concept behind a tool, e.g. `codex netmap`.",
+    ],
+    run: (args, api) => {
+      const query = args.join(" ").trim();
+      api.print(`[*] Opening CODEX reference library${query ? ` → ${query}` : ""}... (free, no penalty)`, "system");
+      api.openCodex(query || undefined);
       api.complete("codex");
     },
   },

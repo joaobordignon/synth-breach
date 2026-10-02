@@ -67,7 +67,7 @@ export interface EngineApi {
   getVar<T = unknown>(key: string): T | undefined;
   setVar(key: string, value: unknown): void;
   addScore(points: number): void;
-  openCodex(): void;
+  openCodex(query?: string): void;
   setTelemetry(state: TelemetryState | null): void;
   /** Player's chosen handle. */
   handle(): string;

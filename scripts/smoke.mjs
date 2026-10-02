@@ -97,6 +97,12 @@ const faceActive = (await page.locator(".hex-face.active").count()) === 1;
 // Per-command --help (man page).
 await type("netmap --help");
 const helpText = await page.locator(".xterm-rows").innerText();
+// Reverse link: `codex <command>` jumps to the concept and highlights it.
+await type("codex netmap");
+await page.waitForTimeout(400);
+const codexHit = await page.locator(".codex-modal details.codex-hit").count();
+await page.keyboard.press("Escape");
+await page.waitForTimeout(200);
 // Tool chips insert the command NAME (a scaffold), not the full answer.
 const toolChips = await page.locator(".tool-chip").count();
 if (toolChips > 0) {
@@ -117,6 +123,8 @@ const checks = [
   ["face-in-code visualizer present", faceCanvas === 1],
   ["face resolves while HEX transmits", faceActive],
   ["<cmd> --help prints a man page", /USAGE/.test(helpText) && /netmap/.test(helpText)],
+  ["--help points back to the codex", /codex netmap/.test(helpText)],
+  ["codex <command> jumps + highlights the concept", codexHit >= 1],
   ["Intel pane has tool chips", toolChips >= 1],
   ["tool chip inserts a command scaffold", /\$ netmap/.test(promptText)],
   ["comms panel has voice + music controls", /VOICE|MUSIC/.test(commsText)],

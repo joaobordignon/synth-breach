@@ -342,6 +342,17 @@ body {
   border-radius: 2px;
 }
 
+.codex-modal details.codex-hit {
+  background: rgba(1, 205, 254, 0.1);
+  box-shadow: 0 0 0 1px var(--neon-cyan, #01cdfe), 0 0 12px rgba(1, 205, 254, 0.35);
+  animation: codexpulse 1.2s ease-out 1;
+}
+
+@keyframes codexpulse {
+  0% { box-shadow: 0 0 0 1px var(--neon-cyan, #01cdfe), 0 0 22px rgba(1, 205, 254, 0.8); }
+  100% { box-shadow: 0 0 0 1px var(--neon-cyan, #01cdfe), 0 0 12px rgba(1, 205, 254, 0.35); }
+}
+
 .codex-modal summary {
   cursor: pointer;
   color: var(--neon-cyan, #01cdfe);

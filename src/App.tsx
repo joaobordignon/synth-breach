@@ -15,7 +15,13 @@ import { HOTKEYS } from "./config";
 export function App() {
   useGame(); // re-render when the gated-intro state changes
   const [codexOpen, setCodexOpen] = useState(false);
-  const openCodex = useCallback(() => setCodexOpen(true), []);
+  const [codexQuery, setCodexQuery] = useState<string | null>(null);
+  const [codexNonce, setCodexNonce] = useState(0);
+  const openCodex = useCallback((query?: string) => {
+    setCodexQuery(query ?? null);
+    setCodexNonce((n) => n + 1); // force re-resolve even if the query repeats
+    setCodexOpen(true);
+  }, []);
   const closeCodex = useCallback(() => setCodexOpen(false), []);
 
   // Let `codex` (the command) open the modal through the store.
@@ -47,7 +53,13 @@ export function App() {
     function onKey(e: KeyboardEvent) {
       if (e.key === HOTKEYS.openCodex) {
         e.preventDefault();
-        setCodexOpen((p) => !p);
+        setCodexOpen((p) => {
+          if (!p) {
+            setCodexQuery(null); // F1 opens to the current episode's topic
+            setCodexNonce((n) => n + 1);
+          }
+          return !p;
+        });
       } else if (e.key === "Escape") {
         setCodexOpen(false);
       } else if (e.altKey && e.key.toLowerCase() === HOTKEYS.toggleMute) {
@@ -71,7 +83,7 @@ export function App() {
         </div>
         <CommsPane />
       </div>
-      <CodexModal open={codexOpen} onClose={closeCodex} />
+      <CodexModal open={codexOpen} onClose={closeCodex} query={codexQuery} queryNonce={codexNonce} />
       {store.introHeld && store.gateModal && (
         <PrologueModal modal={store.gateModal} onClose={() => store.releaseIntro()} />
       )}

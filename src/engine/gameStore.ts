@@ -1,5 +1,6 @@
 import type { CommsEntry, Episode, EngineApi, Line, LineKind, TelemetryState } from "./types";
 import { EPISODES, firstEpisodeId, nextEpisodeId } from "../chapters";
+import { hasCodexForCommand } from "../codex";
 import {
   type PlayerProfile,
   loadProfile,
@@ -312,6 +313,9 @@ class GameStore {
         { text: `        ${cmd.description}`, kind: "normal" },
       ];
       for (const h of cmd.help ?? []) lines.push({ text: `  ${h}`, kind: "normal" });
+      if (hasCodexForCommand(name)) {
+        lines.push({ text: `  📖 Theory: \`codex ${name}\` opens the concept behind this tool.`, kind: "dim" });
+      }
       lines.push({ text: "  Stuck? `intel` → theory · `intel 2` → syntax nudge · `intel 3` → full solution.", kind: "dim" });
       this.emitOutput(lines);
       return true;
@@ -412,7 +416,7 @@ class GameStore {
     addScore: (points) => {
       this.patchProfile({ score: Math.max(0, this.profile.score + points) });
     },
-    openCodex: () => this.openCodexFn?.(),
+    openCodex: (query) => this.openCodexFn?.(query),
     setTelemetry: (state) => {
       this.telemetry = state;
       this.emitState();
@@ -436,7 +440,7 @@ class GameStore {
   }
 
   // CodexModal open handler, injected by the React layer.
-  openCodexFn: (() => void) | null = null;
+  openCodexFn: ((query?: string) => void) | null = null;
 }
 
 /** Split a command line into tokens, honoring single/double quotes so that
