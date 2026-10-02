@@ -168,11 +168,31 @@ const commands: Record<string, EpisodeCommand> = {
 
   mute: {
     usage: "mute",
-    description: "Toggle audio on/off (also Alt+M).",
+    description: "Toggle sound effects on/off (also Alt+M).",
     run: (_args, api) => {
       const next = !store.profile.audioMuted;
       store.setMuted(next);
-      api.print(`[*] Audio ${next ? "muted" : "unmuted"}.`, "system");
+      api.print(`[*] Sound effects ${next ? "muted" : "unmuted"}.`, "system");
+    },
+  },
+
+  music: {
+    usage: "music",
+    description: "Toggle the synthwave background music.",
+    run: (_args, api) => {
+      const next = !store.profile.musicEnabled;
+      store.setMusicEnabled(next);
+      api.print(`[*] Background music ${next ? "on" : "off"}.`, "system");
+    },
+  },
+
+  voice: {
+    usage: "voice",
+    description: "Toggle HEX voice narration (reads comms aloud).",
+    run: (_args, api) => {
+      const next = !store.profile.voiceEnabled;
+      store.setVoiceEnabled(next);
+      api.print(`[*] HEX voice narration ${next ? "on" : "off"}.`, "system");
     },
   },
 

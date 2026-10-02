@@ -26,6 +26,15 @@ export interface Objective {
   label: string;
 }
 
+/** A single HEX transmission routed to the BBS comms side panel. */
+export interface CommsEntry {
+  id: number;
+  /** Display text with the "[COMMS // HEX]:" prefix already stripped. */
+  text: string;
+  /** Episode id this transmission belongs to. */
+  episode: number;
+}
+
 export interface TelemetryHost {
   ip: string;
   label: string;

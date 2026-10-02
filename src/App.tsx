@@ -3,9 +3,12 @@ import { Header } from "./ui/Header";
 import { IntelPane } from "./ui/IntelPane";
 import { TelemetryPane } from "./ui/TelemetryPane";
 import { TerminalPane } from "./ui/TerminalPane";
+import { CommsPane } from "./ui/CommsPane";
 import { CodexModal } from "./ui/CodexModal";
 import { FxLayer } from "./ui/FxLayer";
 import { store } from "./engine/gameStore";
+import { startMusic } from "./music";
+import { initCloud } from "./cloud";
 import { HOTKEYS } from "./config";
 
 export function App() {
@@ -21,6 +24,28 @@ export function App() {
     };
   }, [openCodex]);
 
+  // Boot the cloud-save provider (no-op if unconfigured).
+  useEffect(() => {
+    void initCloud();
+  }, []);
+
+  // Resume background music on the first user gesture if it was left on
+  // (browsers block audio autoplay until an interaction).
+  useEffect(() => {
+    if (!store.profile.musicEnabled) return;
+    const resume = () => {
+      if (store.profile.musicEnabled) startMusic();
+      window.removeEventListener("pointerdown", resume);
+      window.removeEventListener("keydown", resume);
+    };
+    window.addEventListener("pointerdown", resume);
+    window.addEventListener("keydown", resume);
+    return () => {
+      window.removeEventListener("pointerdown", resume);
+      window.removeEventListener("keydown", resume);
+    };
+  }, []);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === HOTKEYS.openCodex) {
@@ -32,8 +57,6 @@ export function App() {
         store.setMuted(!store.profile.audioMuted);
       }
     }
-    // Capture phase: run before xterm's own textarea handlers, which would
-    // otherwise swallow Escape/F1 while the terminal is focused.
     window.addEventListener("keydown", onKey, { capture: true });
     return () => window.removeEventListener("keydown", onKey, { capture: true });
   }, []);
@@ -41,11 +64,16 @@ export function App() {
   return (
     <div className="deck">
       <Header />
-      <div className="main-row">
-        <IntelPane />
-        <TelemetryPane />
+      <div className="deck-body">
+        <div className="left-stack">
+          <div className="main-row">
+            <IntelPane />
+            <TelemetryPane />
+          </div>
+          <TerminalPane />
+        </div>
+        <CommsPane />
       </div>
-      <TerminalPane />
       <CodexModal open={codexOpen} onClose={closeCodex} />
       <FxLayer />
     </div>

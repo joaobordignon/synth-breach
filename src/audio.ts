@@ -12,6 +12,13 @@ function getContext(): AudioContext {
   return ctx;
 }
 
+/** Shared AudioContext for the music engine (music.ts); resumes if suspended. */
+export function getAudioContext(): AudioContext {
+  const c = getContext();
+  if (c.state === "suspended") void c.resume();
+  return c;
+}
+
 function beep(frequency: number, durationMs: number, type: OscillatorType = "sine", gain = 0.05) {
   if (muted) return;
   const audioCtx = getContext();

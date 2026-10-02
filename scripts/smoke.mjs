@@ -65,6 +65,9 @@ await page.waitForTimeout(500);
 
 const terminalText = await page.locator(".xterm-rows").innerText();
 const headerText = await page.locator(".header").innerText();
+// HEX dialogue is now routed to the BBS comms side panel, not the terminal.
+const commsText = await page.locator(".comms-pane").innerText();
+const faceCanvas = await page.locator(".hex-face-rain").count();
 
 // Play into Act I so the telemetry pane and a streamed scan are visible.
 await type("next");
@@ -79,7 +82,10 @@ await browser.close();
 server.close();
 
 const checks = [
-  ["terminal shows HEX comms", /HEX/.test(terminalText)],
+  ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
+  ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
+  ["face-in-code visualizer present", faceCanvas === 1],
+  ["comms panel has voice + music controls", /VOICE|MUSIC/.test(commsText)],
   ["accept-code acknowledged", /acknowledged|roster|unlocked/i.test(terminalText)],
   ["header shows score", /SCORE/.test(headerText)],
   ["Escape closes Codex modal", codexClosed],

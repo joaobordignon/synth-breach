@@ -1,4 +1,4 @@
-import type { Episode, EngineApi, Line, LineKind, TelemetryState } from "./types";
+import type { CommsEntry, Episode, EngineApi, Line, LineKind, TelemetryState } from "./types";
 import { EPISODES, firstEpisodeId, nextEpisodeId } from "../chapters";
 import {
   type PlayerProfile,
@@ -7,6 +7,8 @@ import {
   defaultProfile,
 } from "../state/profile";
 import { playSuccessChime, playAlarmBuzzer, setMuted } from "../audio";
+import { startMusic, stopMusic, setMusicVolume } from "../music";
+import { setVoiceEnabled, cancelVoice } from "../voice";
 
 // ---------------------------------------------------------------------------
 // The game store is the single mutable heart of the engine. xterm (imperative)
@@ -19,6 +21,12 @@ import { playSuccessChime, playAlarmBuzzer, setMuted } from "../audio";
 type OutputListener = (lines: Line[]) => void;
 type StateListener = () => void;
 type FxListener = (effect: "glitch" | "fireworks" | "alarm") => void;
+type CommsListener = (entry: CommsEntry) => void;
+
+/** Strip the "[COMMS // HEX]:" prefix so the comms panel can render it cleanly. */
+function stripHexPrefix(text: string): string {
+  return text.replace(/^\[COMMS\s*\/\/\s*HEX\]:?\s*/i, "").trim();
+}
 
 function toLines(content: string | Line | Array<string | Line>, kind?: LineKind): Line[] {
   const arr = Array.isArray(content) ? content : [content];
@@ -45,7 +53,12 @@ class GameStore {
   private outputListeners = new Set<OutputListener>();
   private stateListeners = new Set<StateListener>();
   private fxListeners = new Set<FxListener>();
+  private commsListeners = new Set<CommsListener>();
   private timers = new Set<ReturnType<typeof setTimeout>>();
+
+  /** Rolling BBS comms history (HEX transmissions), capped. */
+  private commsLog: CommsEntry[] = [];
+  private commsSeq = 0;
 
   // ---- subscriptions ------------------------------------------------------
   onOutput(cb: OutputListener): () => void {
@@ -60,10 +73,34 @@ class GameStore {
     this.fxListeners.add(cb);
     return () => this.fxListeners.delete(cb);
   }
+  onComms(cb: CommsListener): () => void {
+    this.commsListeners.add(cb);
+    return () => this.commsListeners.delete(cb);
+  }
+  getComms(): CommsEntry[] {
+    return this.commsLog;
+  }
 
+  // HEX dialogue (kind "hex") is routed to the BBS comms side panel instead of
+  // the terminal; everything else prints to the terminal. A mixed batch is
+  // split so each stream keeps its own order.
   private emitOutput(lines: Line[]) {
     if (lines.length === 0) return;
-    for (const cb of this.outputListeners) cb(lines);
+    const terminalLines: Line[] = [];
+    for (const line of lines) {
+      if (line.kind === "hex") {
+        const text = stripHexPrefix(line.text);
+        if (!text) continue; // drop blank spacer lines in the comms feed
+        const entry: CommsEntry = { id: this.commsSeq++, text, episode: this.currentEpisodeId };
+        this.commsLog.push(entry);
+        if (this.commsLog.length > 300) this.commsLog.shift();
+        for (const cb of this.commsListeners) cb(entry);
+      } else {
+        terminalLines.push(line);
+      }
+    }
+    if (terminalLines.length === 0) return;
+    for (const cb of this.outputListeners) cb(terminalLines);
   }
   private emitState() {
     for (const cb of this.stateListeners) cb();
@@ -99,8 +136,31 @@ class GameStore {
     saveProfile(this.profile);
   }
   private patchProfile(patch: Partial<PlayerProfile>) {
-    this.profile = { ...this.profile, ...patch };
+    this.profile = { ...this.profile, ...patch, updatedAt: Date.now() };
     this.persist();
+    this.emitState();
+  }
+
+  /** Tag the local profile with a cloud account id, without bumping updatedAt. */
+  tagCloudUser(uid: string | null) {
+    this.profile = { ...this.profile, cloudUserId: uid };
+    this.persist();
+    this.emitState();
+  }
+
+  /** Replace the whole profile (used when a cloud save is loaded on sign-in). */
+  replaceProfile(next: PlayerProfile) {
+    this.profile = next;
+    this.persist();
+    // Re-apply audio/voice settings the new profile carries.
+    setMuted(next.audioMuted);
+    setVoiceEnabled(next.voiceEnabled);
+    if (next.musicEnabled) startMusic();
+    else stopMusic();
+    setMusicVolume(next.musicVolume);
+    // Resume at the furthest unlocked episode.
+    const resume = next.unlockedEpisodes.slice(-1)[0] ?? firstEpisodeId();
+    this.startEpisode(resume);
     this.emitState();
   }
 
@@ -111,6 +171,20 @@ class GameStore {
   setHandle(handle: string) {
     this.patchProfile({ handle });
   }
+  setMusicEnabled(on: boolean) {
+    this.patchProfile({ musicEnabled: on });
+    if (on) startMusic();
+    else stopMusic();
+  }
+  setMusicVolume(v: number) {
+    this.patchProfile({ musicVolume: v });
+    setMusicVolume(v);
+  }
+  setVoiceEnabled(on: boolean) {
+    this.patchProfile({ voiceEnabled: on });
+    setVoiceEnabled(on);
+    if (!on) cancelVoice();
+  }
 
   resetGame() {
     this.clearTimers();
@@ -118,6 +192,7 @@ class GameStore {
     this.persist();
     this.completed.clear();
     this.vars.clear();
+    this.commsLog = [];
     this.wardenScore = 0;
     this.wardenAction = "NONE";
     this.telemetry = null;
@@ -349,5 +424,8 @@ export function registerGlobalCommands(cmds: Record<string, import("./types").Ep
 }
 
 export const store = new GameStore();
-// Honor the persisted mute setting as soon as the store comes up.
+// Honor persisted audio/voice settings as soon as the store comes up. Music
+// can't autostart (browser autoplay policy) — App resumes it on first gesture.
 setMuted(store.profile.audioMuted);
+setVoiceEnabled(store.profile.voiceEnabled);
+setMusicVolume(store.profile.musicVolume);
