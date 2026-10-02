@@ -49,7 +49,7 @@ export const episode01: Episode = {
   beats: [
     {
       trigger: "objective:ping",
-      prompt: "Gateway's logged. Before we push on — one habit that keeps a run alive: bank it.",
+      prompt: "Before we push on — one habit that keeps a run alive: bank it. `save` it now!",
       replies: [
         {
           text: "How do I save?",
@@ -137,18 +137,16 @@ export const episode01: Episode = {
           { text: `4 packets transmitted, 4 received, 0% loss, rtt avg ≈ 3.93 ms`, kind: "normal" },
         ]);
         if (ip === GATEWAY_IP) {
-          api.printAfter(300 * (times.length + 2), [
-            {
-              text: "[COMMS // HEX]: ttl=64 — that's a Linux-family stack answering (Windows starts at 128).",
-              kind: "hex",
-            },
-            {
-              text: "[COMMS // HEX]: Sub-4ms RTT means it's one hop away. That's your gateway — our way into this subnet.",
-              kind: "hex",
-            },
+          const d = 300 * (times.length + 2);
+          api.printAfter(d, [
+            { text: "[COMMS // HEX]: Gateway's logged.", kind: "hex" },
+            { text: "[COMMS // HEX]: ttl=64 — that's a Linux-family stack answering (Windows starts at 128).", kind: "hex" },
+            { text: "[COMMS // HEX]: Sub-4ms RTT means it's one hop away. That's your gateway — our way into this subnet.", kind: "hex" },
           ]);
-          api.complete("ping");
           api.addScore(25);
+          // Complete AFTER the ping commentary prints, so the save nudge (a beat
+          // on objective:ping) follows it in order instead of jumping ahead.
+          setTimeout(() => api.complete("ping"), d + 60);
         }
       },
     },
