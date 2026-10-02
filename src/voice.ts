@@ -64,21 +64,57 @@ export function isVoiceEnabled(): boolean {
   return enabled;
 }
 
+// Chrome silently stops utterances longer than ~15s, so split a line into
+// sentence-ish chunks and queue them back to back.
+function chunk(text: string): string[] {
+  const parts = text.match(/[^.!?—]+[.!?—]*/g) ?? [text];
+  const out: string[] = [];
+  let cur = "";
+  for (const p of parts) {
+    if ((cur + p).length > 160) {
+      if (cur.trim()) out.push(cur.trim());
+      cur = p;
+    } else {
+      cur += p;
+    }
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
 export function speak(text: string): void {
   const s = synth();
   if (!enabled || !s) return;
   const spoken = clean(text);
   if (!spoken) return;
   try {
-    const u = new SpeechSynthesisUtterance(spoken);
-    if (chosenVoice) u.voice = chosenVoice;
-    u.rate = rate;
-    u.pitch = pitch;
-    u.volume = 0.9;
-    s.speak(u);
+    // Some engines get wedged in a paused state; nudge them first.
+    s.resume();
+    if (!chosenVoice) pickVoice();
+    for (const part of chunk(spoken)) {
+      const u = new SpeechSynthesisUtterance(part);
+      if (chosenVoice) u.voice = chosenVoice;
+      u.rate = rate;
+      u.pitch = pitch;
+      u.volume = 1;
+      s.speak(u);
+    }
   } catch {
     // Speech can throw if the engine is unavailable mid-session; ignore.
   }
+}
+
+/** Called from a click handler to unlock audio and confirm it works. */
+export function primeVoice(sample?: string): void {
+  const s = synth();
+  if (!s) return;
+  try {
+    s.resume();
+    if (!chosenVoice) pickVoice();
+  } catch {
+    /* ignore */
+  }
+  if (sample) speak(sample);
 }
 
 export function cancelVoice(): void {

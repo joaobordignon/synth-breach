@@ -346,6 +346,84 @@ body {
   font: inherit;
 }
 
+/* ---- Prologue briefing box ---- */
+.prologue-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(6, 0, 20, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(2px);
+}
+
+.prologue-modal {
+  width: min(680px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--synth-panel-bg, #150834);
+  border: 2px solid var(--neon-pink, #ff71ce);
+  border-radius: 6px;
+  padding: 22px 26px 26px;
+  box-shadow: 0 0 36px rgba(255, 113, 206, 0.4);
+}
+
+.prologue-modal h2 {
+  margin: 0 0 10px;
+  color: var(--neon-pink, #ff71ce);
+  text-shadow: 0 0 12px var(--neon-pink, #ff71ce);
+  letter-spacing: 1px;
+}
+
+.prologue-lead {
+  color: #cfe8ff;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--muted-lavender, #8a79a5);
+}
+
+.prologue-section {
+  margin: 14px 0;
+}
+
+.prologue-section h3 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+
+.prologue-section p {
+  margin: 3px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #d7e6ff;
+}
+
+.prologue-begin {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 11px;
+  background: rgba(5, 255, 161, 0.08);
+  border: 1px solid var(--neon-green, #05ffa1);
+  color: var(--neon-green, #05ffa1);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-shadow: 0 0 8px rgba(5, 255, 161, 0.5);
+  transition: background 0.2s ease;
+}
+
+.prologue-begin:hover {
+  background: rgba(5, 255, 161, 0.18);
+}
+
 /* ---- Full-screen FX ---- */
 .fx-canvas {
   position: fixed;
@@ -533,6 +611,15 @@ body {
   font-weight: bold;
 }
 
+.comms-cursor {
+  color: var(--neon-green, #05ffa1);
+  animation: blink 0.8s steps(2) infinite;
+}
+
+.comms-feed {
+  cursor: default;
+}
+
 .comms-controls {
   display: flex;
   gap: 6px;
@@ -563,10 +650,31 @@ body {
   cursor: not-allowed;
 }
 
-.comms-volume {
-  width: 100%;
+.comms-music-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 6px;
+}
+
+.comms-volume {
+  flex: 1;
   accent-color: var(--neon-green, #05ffa1);
+}
+
+.comms-skip {
+  background: rgba(13, 2, 33, 0.6);
+  border: 1px solid var(--muted-lavender, #8a79a5);
+  color: var(--neon-green, #05ffa1);
+  border-radius: 2px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.comms-skip:hover {
+  border-color: var(--neon-green, #05ffa1);
 }
 
 /* ---- Narrow / mobile fallback ---- */

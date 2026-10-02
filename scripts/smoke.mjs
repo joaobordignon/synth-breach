@@ -47,6 +47,14 @@ page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
 await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
 await page.waitForTimeout(800);
 
+// The Prologue opens as a briefing box; HEX stays offline until it's dismissed.
+const prologueShown = (await page.locator(".prologue-modal").count()) === 1;
+await page.locator(".prologue-begin").click();
+await page.waitForTimeout(300);
+const prologueDismissed = (await page.locator(".prologue-modal").count()) === 0;
+// Let HEX's first lines type out in the comms feed before asserting.
+await page.waitForTimeout(3200);
+
 // The xterm textarea receives keystrokes.
 async function type(cmd) {
   await page.locator(".xterm-helper-textarea").focus();
@@ -88,6 +96,7 @@ await browser.close();
 server.close();
 
 const checks = [
+  ["Prologue briefing box shown then dismissed", prologueShown && prologueDismissed],
   ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],

@@ -90,6 +90,16 @@ export interface EpisodeCommand {
   run: (args: string[], api: EngineApi) => void;
 }
 
+/** A full-screen briefing box (Codex-style) shown before an episode's intro. */
+export interface EpisodeModal {
+  title: string;
+  /** Short lead paragraph under the title. */
+  lead?: string;
+  sections: Array<{ heading?: string; lines: string[] }>;
+  /** Label for the dismiss button (default "BEGIN ▸"). */
+  dismissLabel?: string;
+}
+
 export interface Episode {
   /** 0 = Prologue, 1-12 = Episodes. */
   id: number;
@@ -99,6 +109,10 @@ export interface Episode {
   concepts: string[];
   /** One-line hook shown in the intel pane. */
   briefing: string;
+  /** Optional briefing box shown first; HEX's intro is held until it closes. */
+  modal?: EpisodeModal;
+  /** When true, hold the HEX intro until the modal is dismissed. */
+  gateIntro?: boolean;
   /** HEX comms / scene-setting printed when the episode starts. */
   intro: Array<string | Line>;
   objectives: Objective[];

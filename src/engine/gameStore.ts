@@ -48,6 +48,10 @@ class GameStore {
   /** Whether the current episode has emitted its outro / is ready to advance. */
   episodeCleared = false;
 
+  /** When an episode gates its intro behind a briefing box, the held lines. */
+  private heldIntro: Array<string | Line> | null = null;
+  introHeld = false;
+
   private telemetry: TelemetryState | null = null;
   private leaveCallbacks: Array<() => void> = [];
   private outputListeners = new Set<OutputListener>();
@@ -218,6 +222,8 @@ class GameStore {
     this.completed.clear();
     this.episodeCleared = false;
     this.telemetry = null;
+    this.heldIntro = null;
+    this.introHeld = false;
     this.vars.delete("prompt"); // reset any REPL/shell prompt from a prior episode
     this.emitState();
 
@@ -228,7 +234,25 @@ class GameStore {
       { text: "", kind: "normal" },
     ];
     this.emitOutput(header);
+
+    if (ep.gateIntro && ep.modal) {
+      // Hold HEX's transmission until the briefing box is dismissed.
+      this.heldIntro = ep.intro;
+      this.introHeld = true;
+      this.emitState();
+      return;
+    }
     this.emitOutput(toLines(ep.intro, "hex").map(normalizeHex));
+  }
+
+  /** Dismiss the gated briefing box and release the held HEX intro. */
+  releaseIntro() {
+    if (!this.introHeld) return;
+    const lines = this.heldIntro ?? [];
+    this.heldIntro = null;
+    this.introHeld = false;
+    this.emitState();
+    this.emitOutput(toLines(lines, "hex").map(normalizeHex));
   }
 
   /** Dispatch a line of player input. Returns false for empty input. */

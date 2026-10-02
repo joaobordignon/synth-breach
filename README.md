@@ -7,9 +7,10 @@ A cyberpunk synthwave TUI-style web game teaching cybersecurity fundamentals —
 **Playable end-to-end.** All 13 episodes (Prologue + Acts I–IV) run start-to-finish with the full command engine, the Netrunner Deck, neon/CRT visual FX, synthesized audio, the WARDEN anomaly escalation (0.02 → 10.0-CVSS finale), HEX's mid-campaign confession, the Act III honeypot near-miss, the real-time finale countdown, and both branching endings.
 
 Also included:
-- **HEX comms sidebar** — an old-BBS-style transmission feed with a Guy Fawkes / Anonymous **"Face in Code" visualizer**: the mask image (`public/hex-mask.png`) is sampled into a grid of green code glyphs that resolve only while HEX is transmitting or the voice is speaking. HEX dialogue is routed here instead of the terminal.
-- **Voice narration** — HEX's lines are read aloud via the browser's built-in SpeechSynthesis (toggle in the comms panel or `voice`).
-- **Generative synthwave music** — an evolving pad/bass/arp score synthesized live with Web Audio, no audio files (toggle in the comms panel or `music`).
+- **HEX comms sidebar** — an old-BBS-style transmission feed with a Guy Fawkes / Anonymous **"Face in Code" visualizer**: the mask image (`public/hex-mask.png`) is sampled into a grid of green code glyphs that resolve only while HEX is transmitting or the voice is speaking. HEX dialogue is routed here instead of the terminal, revealed with a **typewriter effect** (click the feed to skip).
+- **Prologue briefing box** — the Prologue opens as a Codex-style modal with the mission briefing; HEX's transmission is held until you dismiss it. (Any episode can gate its intro this way via `modal` + `gateIntro`.)
+- **Voice narration** — HEX's lines are read aloud via the browser's built-in SpeechSynthesis as they type (toggle in the comms panel or `voice`; the toggle primes audio within the click so it works on first use).
+- **Background music** — a **cycling, shuffled playlist** of royalty-free tracks dropped into `public/music/` (auto-listed at build time; ⏭ skips), with a live **generative synthwave** engine as the fallback when no files are present. See [public/music/README.md](public/music/README.md).
 - **Save file export / import** — `save` (or the ⇩ SAVE button) downloads a `.synthsave` file; `load` (⇧ LOAD) imports one to continue on any device. No account, fully offline.
 
 - **[docs/SPEC.md](docs/SPEC.md)** — full technical spec and game design document.

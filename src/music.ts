@@ -104,7 +104,7 @@ function loop() {
   }
 }
 
-export function startMusic(): void {
+function startGenerative(): void {
   if (playing) return;
   const ctx = getAudioContext();
   ensureGraph(ctx);
@@ -116,7 +116,7 @@ export function startMusic(): void {
   timer = setInterval(loop, LOOKAHEAD_MS);
 }
 
-export function stopMusic(): void {
+function stopGenerative(): void {
   if (!playing) return;
   playing = false;
   if (timer) {
@@ -127,18 +127,122 @@ export function stopMusic(): void {
   if (masterGain) masterGain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.3);
 }
 
+// ---------------------------------------------------------------------------
+// Public API: cycle through a playlist of bundled royalty-free tracks
+// (public/music/*.mp3, auto-listed in playlist.json by scripts/gen-playlist.mjs
+// — e.g. Pixabay synthwave, free for commercial use). The set is shuffled, each
+// track advances to the next when it ends, and the playlist loops. If no tracks
+// are present (or the browser can't play them), fall back to the generative
+// synthwave engine above so music always works.
+// ---------------------------------------------------------------------------
+let audioEl: HTMLAudioElement | null = null;
+let mode: "file" | "gen" | null = null;
+let playlist: string[] = [];
+let trackIndex = 0;
+let failures = 0;
+
+function base(): string {
+  return (import.meta.env.BASE_URL as string | undefined) ?? "./";
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function loadPlaylist(): Promise<string[]> {
+  try {
+    const res = await fetch(`${base()}music/playlist.json`, { cache: "no-cache" });
+    if (!res.ok) return [];
+    const list = (await res.json()) as unknown;
+    return Array.isArray(list) ? list.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function fallbackToGenerative() {
+  if (audioEl) {
+    audioEl.pause();
+    audioEl = null;
+  }
+  startGenerative();
+  mode = "gen";
+}
+
+function playTrack(i: number) {
+  if (playlist.length === 0) return;
+  trackIndex = ((i % playlist.length) + playlist.length) % playlist.length;
+  if (!audioEl) {
+    audioEl = new Audio();
+    audioEl.addEventListener("ended", () => playTrack(trackIndex + 1)); // cycle to next
+    audioEl.addEventListener("error", () => {
+      failures += 1;
+      if (failures >= playlist.length) fallbackToGenerative(); // none playable
+      else playTrack(trackIndex + 1);
+    });
+    audioEl.addEventListener("playing", () => {
+      failures = 0;
+    });
+  }
+  audioEl.src = `${base()}music/${playlist[trackIndex]}`;
+  audioEl.loop = false;
+  audioEl.volume = volume;
+  audioEl.play().catch(() => {
+    // Autoplay blocked before any gesture; leave it — App retries on gesture.
+  });
+}
+
+export function startMusic(): void {
+  if (mode) {
+    setMusicVolume(volume);
+    return;
+  }
+  mode = "file"; // optimistic; may flip to "gen" on fallback
+  failures = 0;
+  void loadPlaylist().then((list) => {
+    if (mode !== "file") return; // stopped meanwhile
+    if (list.length === 0) {
+      fallbackToGenerative();
+      return;
+    }
+    playlist = shuffle(list);
+    playTrack(0);
+  });
+}
+
+export function stopMusic(): void {
+  if (audioEl) {
+    audioEl.pause();
+    audioEl.src = "";
+    audioEl = null;
+  }
+  stopGenerative();
+  mode = null;
+}
+
+/** Skip to the next track in the playlist (no-op in generative mode). */
+export function nextTrack(): void {
+  if (mode === "file" && playlist.length > 0) playTrack(trackIndex + 1);
+}
+
 export function toggleMusic(): boolean {
-  if (playing) stopMusic();
+  if (mode) stopMusic();
   else startMusic();
-  return playing;
+  return mode !== null;
 }
 
 export function isMusicPlaying(): boolean {
-  return playing;
+  return mode !== null;
 }
 
 export function setMusicVolume(v: number): void {
   volume = Math.max(0, Math.min(1, v));
+  if (audioEl) audioEl.volume = volume;
   if (masterGain) {
     const ctx = getAudioContext();
     masterGain.gain.setTargetAtTime(playing ? volume : 0.0001, ctx.currentTime, 0.2);

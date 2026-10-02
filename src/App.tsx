@@ -5,12 +5,15 @@ import { TelemetryPane } from "./ui/TelemetryPane";
 import { TerminalPane } from "./ui/TerminalPane";
 import { CommsPane } from "./ui/CommsPane";
 import { CodexModal } from "./ui/CodexModal";
+import { PrologueModal } from "./ui/PrologueModal";
 import { FxLayer } from "./ui/FxLayer";
 import { store } from "./engine/gameStore";
+import { useGame } from "./state/useGame";
 import { startMusic } from "./music";
 import { HOTKEYS } from "./config";
 
 export function App() {
+  useGame(); // re-render when the gated-intro state changes
   const [codexOpen, setCodexOpen] = useState(false);
   const openCodex = useCallback(() => setCodexOpen(true), []);
   const closeCodex = useCallback(() => setCodexOpen(false), []);
@@ -69,6 +72,9 @@ export function App() {
         <CommsPane />
       </div>
       <CodexModal open={codexOpen} onClose={closeCodex} />
+      {store.introHeld && store.episode.modal && (
+        <PrologueModal modal={store.episode.modal} onClose={() => store.releaseIntro()} />
+      )}
       <FxLayer />
     </div>
   );
