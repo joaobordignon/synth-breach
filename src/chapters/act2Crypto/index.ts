@@ -43,7 +43,8 @@ export const episode04: Episode = {
     "[COMMS // HEX]: That session cookie — VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA== . Rookies think encoding",
     "text is the same as encrypting it. Encoding just reshapes data for transport; anyone reverses it",
     "in milliseconds with no secret key. Strip the padding and reveal what Aether's hiding.",
-    "[COMMS // HEX]: `decode --base64 <data>`, then `hexview --decode <stream>` on the exec log it unlocks.",
+    "[COMMS // HEX]: Decode the Base64 cookie, then hexview the exec-log dump it unlocks. `decode",
+    "--help` and `hexview --help` have the syntax; `codex` covers encoding-vs-encryption.",
     { text: "[COMMS // HEX]: ...Base64. Typical. I've seen worse out of shops that should know better.", kind: "hex" },
     { text: "Aether especially — they always dress up laziness as protocol. Trust me on that one.", kind: "hex" },
     // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
@@ -57,6 +58,7 @@ export const episode04: Episode = {
     { id: "b64", label: "Decode the intercepted session cookie" },
     { id: "hex", label: "Decode the executive hex log to a name" },
   ],
+  evidence: [{ label: "Session cookie (Base64)", value: "VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA==" }],
   hints: [
     "Base64 maps every 3 bytes to 4 printable chars; trailing '=' is padding. Hex writes each byte as " +
       "two 0-F digits. Both are reversible with zero key — that's the whole lesson: encoding ≠ secrecy.",
@@ -104,6 +106,7 @@ export const episode04: Episode = {
               { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
               { text: "  (select + copy those bytes, then run `hexview` — see `hexview --help`)", kind: "dim" },
             ]);
+            api.evidence("Executive log (hex dump)", KOVACS_HEX);
             api.print("[COMMS // HEX]: There's your dump. `hexview --decode` it — who's signing the exec channel?", "hex");
           }
         }
@@ -157,7 +160,8 @@ export const episode05: Episode = {
     { text: "[COMMS // HEX]: ...Vance. Haven't heard that name in a long time.", kind: "hex" },
     { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, Decker. Not the history lesson.", kind: "hex" },
     { text: "[COMMS // HEX]: Intercept's on your deck. Crack the Caesar layer first, then peel the XOR", kind: "hex" },
-    { text: "with the single-byte key I already pulled off the wire: 0x42.", kind: "hex" },
+    { text: "with the single-byte key I already pulled off the wire: 0x42. `cipher-crack --help` /", kind: "hex" },
+    { text: "`xor-decrypt --help` for syntax; `codex` for the symmetric-cipher theory.", kind: "hex" },
     // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
     { text: "", kind: "normal" },
     { text: "  ── INTERCEPT // CAESAR LAYER ───────────────────────────────", kind: "system" },
@@ -170,6 +174,11 @@ export const episode05: Episode = {
   objectives: [
     { id: "caesar", label: "Brute-force the Caesar shift to readable text" },
     { id: "xor", label: "Strip the single-byte XOR mask off the stream" },
+  ],
+  evidence: [
+    { label: "Caesar ciphertext", value: "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD" },
+    { label: "XOR stream (hex)", value: "0x53 0x59 0x4E" },
+    { label: "XOR key (recovered)", value: "0x42" },
   ],
   hints: [
     "A Caesar cipher shifts every letter by a fixed amount — only 25 possibilities, so you brute-force " +
@@ -291,11 +300,17 @@ export const episode06: Episode = {
     { text: "    admin_root: 21232f297a57a5a743894a0e4a801fc3", kind: "dim" },
     "[COMMS // HEX]: Kovacs. Vance. Same two names as the intercept. And 'admin_root' on a password of",
     "'admin' — some things never change in that building, no matter how many years go by.",
-    "[COMMS // HEX]: `hash-identify <hash>`, then `crack --hash <hash> --wordlist synth_rockyou.txt`.",
+    "[COMMS // HEX]: Fingerprint one of those hashes, then dictionary-attack the weak one. `hash-identify",
+    "--help` and `crack --help` have the syntax; `codex` explains hashing, salting, and rainbow tables.",
   ],
   objectives: [
     { id: "identify", label: "Fingerprint the hash algorithm" },
     { id: "crack", label: "Dictionary-attack the admin_root hash" },
+  ],
+  evidence: [
+    { label: "kovacs hash", value: "5d41402abc4b2a76b9719d911017c592" },
+    { label: "vance hash", value: "098f6bcd4621d373cade4e832627b4f6" },
+    { label: "admin_root hash", value: "21232f297a57a5a743894a0e4a801fc3" },
   ],
   hints: [
     "A 32-hex-char digest is 128 bits — the MD5 signature. Because MD5 is unsalted and fast, a dictionary " +

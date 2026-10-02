@@ -62,9 +62,32 @@ const commands: Record<string, EpisodeCommand> = {
 
   clear: {
     usage: "clear",
-    description: "Clear the terminal screen.",
+    description: "Clear the terminal screen (your Evidence Locker is kept — see `recall`).",
     // Intercepted by TerminalPane before dispatch; this entry is for `help`.
     run: () => {},
+  },
+
+  recall: {
+    usage: "recall",
+    description: "Reprint the Evidence Locker — recovered strings for this episode (survives `clear`).",
+    help: [
+      "The Evidence Locker holds this episode's key reference strings (cookies,",
+      "hex dumps, ciphertexts, hashes, checksums). It lives in the TELEMETRY pane",
+      "and is never wiped by `clear`. `recall` reprints it back into the terminal.",
+    ],
+    run: (_args, api) => {
+      const items = store.getEvidence();
+      if (items.length === 0) {
+        return api.print("[*] Evidence Locker is empty — nothing recovered yet this episode.", "system");
+      }
+      const lines: Line[] = [{ text: "═══ EVIDENCE LOCKER — RECOVERED DATA ═══", kind: "banner" }];
+      for (const it of items) {
+        lines.push({ text: `  ${it.label}:`, kind: "dim" });
+        lines.push({ text: `    ${it.value}`, kind: "normal" });
+      }
+      lines.push({ text: "[*] Also pinned in the TELEMETRY pane — it survives `clear`.", kind: "dim" });
+      api.print(lines);
+    },
   },
 
   intel: {

@@ -28,7 +28,8 @@ export const episode10: Episode = {
     "[COMMS // HEX]: You have root on Bastion, but the surveillance core lives in their cloud API.",
     "Their login gate stitches user input directly into SQL queries. If backend code treats your data",
     "as executable commands, the database becomes your puppet.",
-    "[COMMS // HEX]: `proxy-intercept --target cloud.aetherdyn.internal`, then `inject-sql --payload`.",
+    "[COMMS // HEX]: Intercept the login request to their cloud API, then inject a SQL tautology into",
+    "it. `proxy-intercept --help` and `inject-sql --help` for syntax; `codex` for how injection works.",
   ],
   objectives: [
     { id: "intercept", label: "Intercept the login request to the cloud API" },
@@ -154,7 +155,8 @@ export const episode11: Episode = {
     "[COMMS // HEX]: You're logged in on an operator token, but locked out of the classified index.",
     "Watch the API calls. Many backends authenticate WHO you are but forget to authorize WHAT you can",
     "view — they pass object IDs in the URL and blindly trust the client.",
-    "[COMMS // HEX]: `api-probe --endpoint /user/profile` for a baseline, then `tamper --param user_id=0001`.",
+    "[COMMS // HEX]: Baseline the profile API with your own token, then tamper the object id downward",
+    "to reach an exec's record. `api-probe --help` and `tamper --help` for syntax; `codex` for IDOR.",
   ],
   objectives: [
     { id: "probe", label: "Baseline the profile API with your own token" },
@@ -216,6 +218,7 @@ export const episode11: Episode = {
           hosts: [{ ip: CLOUD_HOST, label: "profile API", status: "OPEN", detail: "IDOR: no ownership check" }],
           block: ["GET /profile?user_id=1042", "-> trusts client-supplied id", "no session-ownership check"],
         });
+        api.evidence("Your user_id (operator)", "1042");
         api.complete("probe");
         api.addScore(35);
       },
@@ -289,8 +292,9 @@ export const episode12: Episode = {
     "built in years that might fix something instead of break it. Whatever happens, ECHO's record gets",
     "a chance. That's the only ending I care about. Let's finish it.",
     "",
-    "[COMMS // HEX]: `fetch-file --path ../../../../etc/aether/master_key.pem`. When the trace fires,",
-    "`verify-key` the real one against my memo checksum before the window closes. Then `bounty-report --compile`.",
+    "[COMMS // HEX]: Walk the file viewer out of its web root to the master key. The Warden plants a",
+    "decoy, so verify the real one against my memo checksum before the trace lands — then compile the",
+    "advisory. `fetch-file --help` / `verify-key --help` for syntax; `codex` for path traversal.",
   ],
   objectives: [
     { id: "traversal", label: "Escape the web root to the master key (path traversal)" },
@@ -366,6 +370,9 @@ export const episode12: Episode = {
           { text: "[!] Connection severed in 60s. One is a decoy. Verify the REAL key before the window closes.", kind: "warden" },
         ]);
         api.print("[COMMS // HEX]: My intercepted memo says the real key's checksum starts e3b0. `verify-key` them.", "hex");
+        api.evidence("Candidate A — sha", REAL_KEY_CHECKSUM);
+        api.evidence("Candidate B — sha", DECOY_KEY_CHECKSUM);
+        api.evidence("HEX memo: real key starts", "e3b0");
         api.warden(0.9, "TRACE_ACTIVE");
         api.fx("alarm");
         api.fx("glitch");

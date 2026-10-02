@@ -280,6 +280,61 @@ body {
   overflow-x: auto;
 }
 
+/* ---- Evidence Locker (persistent puzzle-input refs; survives `clear`) ---- */
+.evidence-locker {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255, 113, 206, 0.35);
+}
+
+.evidence-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--sunset-amber, #ffb86c);
+  text-shadow: 0 0 6px rgba(255, 184, 108, 0.4);
+}
+
+.evidence-title span {
+  opacity: 0.55;
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+.evidence-list {
+  margin: 0;
+}
+
+.evidence-item {
+  margin: 0 0 7px;
+}
+
+.evidence-item dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+}
+
+.evidence-item dd {
+  margin: 1px 0 0;
+  padding: 4px 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--neon-green, #05ffa1);
+  background: rgba(13, 2, 33, 0.7);
+  border-left: 2px solid var(--sunset-amber, #ffb86c);
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: all; /* one click-drag copies the whole string */
+}
+
+.evidence-hint {
+  margin: 4px 0 0;
+  font-size: 10px;
+  opacity: 0.45;
+}
+
 /* ---- Terminal ---- */
 .terminal-pane {
   padding: 4px 4px 0 8px;

@@ -74,6 +74,14 @@ export interface TelemetryState {
   block?: string[];
 }
 
+/** A recovered reference string kept in the Evidence Locker — the persistent
+ *  record of a puzzle's inputs (cookies, hex dumps, ciphertexts, hashes,
+ *  checksums, ids) so an accidental `clear` never loses them. */
+export interface EvidenceItem {
+  label: string;
+  value: string;
+}
+
 /** The surface area a command handler is allowed to touch. */
 export interface EngineApi {
   /** Print immediately (string = normal line, or tagged Line objects). */
@@ -93,6 +101,9 @@ export interface EngineApi {
   addScore(points: number): void;
   openCodex(query?: string): void;
   setTelemetry(state: TelemetryState | null): void;
+  /** Record a key reference into the persistent Evidence Locker (telemetry
+   *  pane) so it survives a terminal `clear`. Deduped by label+value. */
+  evidence(label: string, value: string): void;
   /** Player's chosen handle. */
   handle(): string;
   /** The flagged family member's name used in HEX's dialogue. */
@@ -156,4 +167,7 @@ export interface Episode {
   codexTopic?: string;
   /** Optional player-reply dialogue beats (see ReplyBeat). */
   beats?: ReplyBeat[];
+  /** Key reference strings surfaced at episode start (intercept data, cipher
+   *  text, etc.) — seeded into the Evidence Locker so `clear` never loses them. */
+  evidence?: EvidenceItem[];
 }

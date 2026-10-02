@@ -174,6 +174,12 @@ export function TerminalPane() {
     term.writeln(colorize({ text: "SYNTH // BREACH — Netrunner Virtual Shell", kind: "banner" }));
     term.writeln(colorize({ text: "Fully simulated · air-gapped · nothing here touches a real system.", kind: "dim" }));
     term.writeln(colorize({ text: "Type 'help' for commands, 'objectives' for your checklist.", kind: "dim" }));
+    term.writeln(
+      colorize({
+        text: "Progress is NOT auto-saved — run 'save' to bank your run, 'load' (or LOAD GAME) to continue.",
+        kind: "dim",
+      }),
+    );
     // Gate the first episode of the session behind a Jack In / Reconnect box so
     // HEX never talks until the player clicks (which also unlocks speech audio).
     store.startEpisode(store.currentEpisodeId, { bootGate: true });

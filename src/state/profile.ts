@@ -36,14 +36,47 @@ export function defaultProfile(): PlayerProfile {
   };
 }
 
+// Only these fields are restored from localStorage on boot. Campaign PROGRESS
+// (unlockedEpisodes, score, achievements, bond) is deliberately NOT restored —
+// the game never silently resumes an old run from browser storage. Progress
+// lives only in the downloadable .synthsave file; `load` / LOAD GAME continues.
+const SETTING_KEYS: (keyof PlayerProfile)[] = [
+  "handle",
+  "audioMuted",
+  "musicEnabled",
+  "musicVolume",
+  "voiceEnabled",
+  "voiceName",
+];
+
+/**
+ * Boot profile: a fresh campaign (Prologue, score 0, no badges) carrying only
+ * the player's persisted *settings* forward. Continuation across sessions is
+ * the save file, not localStorage.
+ */
+export function loadSettings(): PlayerProfile {
+  const base = defaultProfile();
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return base;
+    const stored = JSON.parse(raw) as Partial<PlayerProfile>;
+    for (const k of SETTING_KEYS) {
+      if (stored[k] !== undefined) (base[k] as unknown) = stored[k];
+    }
+  } catch {
+    // Corrupt or inaccessible storage (private window, quota, etc.) — ignore.
+  }
+  return base;
+}
+
+/** Full read of the stored profile (progress included). Used only where an
+ *  explicit, complete restore is intended — not on normal boot. */
 export function loadProfile(): PlayerProfile {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return defaultProfile();
     return { ...defaultProfile(), ...(JSON.parse(raw) as Partial<PlayerProfile>) };
   } catch {
-    // Corrupt or inaccessible storage (private window, quota, etc.) — fall
-    // back to a fresh profile rather than crashing the app.
     return defaultProfile();
   }
 }

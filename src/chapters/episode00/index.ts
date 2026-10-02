@@ -1,4 +1,14 @@
-import type { Episode } from "../../engine/types";
+import type { Episode, Line } from "../../engine/types";
+
+// The Null Pointer Collective's Operating Code — surfaced in the terminal when
+// the operator opens the `codex`, so it's read BEFORE `accept-code` signs it.
+const OPERATING_CODE: Line[] = [
+  { text: "═══ THE NULL POINTER COLLECTIVE — OPERATING CODE ═══", kind: "banner" },
+  { text: "  1. We breach only what we're cleared to breach.", kind: "normal" },
+  { text: "  2. This entire rig is a simulated, air-gapped training shard.", kind: "normal" },
+  { text: "  3. This knowledge used against a system you don't own is a felony, not heroism.", kind: "normal" },
+  { text: "  4. You're learning to be dangerous — responsibly.", kind: "normal" },
+];
 
 // Prologue: "First Boot" (docs/SPEC.md §11.0). Pure onboarding — no CVSS, no
 // target, cannot be failed. Teaches the shell, the command anatomy, and the
@@ -58,7 +68,8 @@ export const episode00: Episode = {
     "[COMMS // HEX]: You read the Code. Good. Now prove you can drive this rig — type `help` and",
     "let's see what you've got.",
     "[COMMS // HEX]: Then read the Operating Code in-shell and `accept-code`. Check the `codex`",
-    "anytime — it's free, always, no judgment. Set your handle with `handle <name>` if you like.",
+    "anytime — it's free, always, no judgment. You're on the deck as {handle} — change that tag",
+    "whenever you want with `handle <name>`, I'll keep up.",
     "[COMMS // HEX]: When you're squared away, I'll hand you your first live target.",
   ],
   objectives: [
@@ -97,16 +108,44 @@ export const episode00: Episode = {
     },
   ],
   commands: {
+    // Prologue-local override of the global `codex`: same reference library, but
+    // it also prints the Operating Code to the terminal so the operator reads it
+    // before signing with `accept-code`.
+    codex: {
+      usage: "codex [topic|command]",
+      description: "Open the reference library. `codex <command>` jumps to the matching concept.",
+      help: [
+        "No argument opens this episode's topic.",
+        "codex <topic>    networking · cryptography · pentesting · webSecurity",
+        "codex <command>  jumps to the concept behind a tool, e.g. `codex netmap`.",
+      ],
+      run: (args, api) => {
+        const query = args.join(" ").trim();
+        api.print(`[*] Opening CODEX reference library${query ? ` → ${query}` : ""}... (free, no penalty)`, "system");
+        api.openCodex(query || undefined);
+        api.complete("codex");
+        if (!api.getVar("codeShown")) {
+          api.setVar("codeShown", true);
+          api.print([
+            { text: "", kind: "normal" },
+            ...OPERATING_CODE,
+            { text: "", kind: "normal" },
+            { text: "[*] Read the Operating Code above, then `accept-code` to sign in.", kind: "system" },
+          ]);
+        }
+      },
+    },
     "accept-code": {
       usage: "accept-code",
       description: "Formally acknowledge the Null Pointer Collective's Operating Code.",
       run: (_args, api) => {
+        // If they jumped straight here without opening the codex, show the Code
+        // first — no one signs something they haven't been shown.
+        if (!api.getVar("codeShown")) {
+          api.setVar("codeShown", true);
+          api.print(OPERATING_CODE);
+        }
         api.print([
-          { text: "═══ THE NULL POINTER COLLECTIVE — OPERATING CODE ═══", kind: "banner" },
-          { text: "  1. We breach only what we're cleared to breach.", kind: "normal" },
-          { text: "  2. This entire rig is a simulated, air-gapped training shard.", kind: "normal" },
-          { text: "  3. This knowledge used against a system you don't own is a felony, not heroism.", kind: "normal" },
-          { text: "  4. You're learning to be dangerous — responsibly.", kind: "normal" },
           { text: "", kind: "normal" },
           { text: "[✓] Operating Code acknowledged. Signed in.", kind: "success" },
         ]);

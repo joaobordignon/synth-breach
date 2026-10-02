@@ -54,6 +54,8 @@ const prologueSetup =
   (await page.locator(".prologue-setup .setup-select").count()) === 1;
 // A returning operator can load a save straight from the boot screen.
 const prologueLoad = (await page.locator(".prologue-load").count()) === 1;
+// Set a distinctive handle so we can prove HEX speaks it back (token interpolation).
+await page.locator(".prologue-setup .setup-input").fill("TEST//RUNNER");
 await page.locator(".prologue-begin").click();
 await page.waitForTimeout(300);
 const prologueDismissed = (await page.locator(".prologue-modal").count()) === 0;
@@ -106,6 +108,25 @@ await type("ping 10.42.0.1");
 await page.waitForTimeout(2200);
 const telemetryText = await page.locator(".telemetry-pane").innerText();
 
+// Evidence Locker: play forward to Ep03, grab the banner (which pins the session
+// cookie), then prove it survives a terminal `clear` and that `recall` reprints
+// it — so an accidental clear never loses a hex string.
+await type("save"); // completes Ep01 (unlocks Ep02)
+await type("next");
+await type("portscan --inspect 10.42.0.1");
+await type("answer 8088"); // completes Ep02 (unlocks Ep03)
+await type("next");
+await type("banner-grab --target 10.42.0.1 --port 80");
+await page.waitForTimeout(400);
+const evidenceBefore = await page.locator(".evidence-locker .evidence-item").count();
+await type("clear");
+await page.waitForTimeout(300);
+const evidenceAfterClear = await page.locator(".evidence-locker .evidence-item").count();
+await type("recall");
+await page.waitForTimeout(300);
+const recalledText = await page.locator(".xterm-rows").innerText();
+await type("goto 1"); // back to Ep01 so the netmap --help checks below resolve
+
 // Re-enter the episode to trigger a fresh HEX transmission, then capture the
 // face while it's actively resolving (the reveal only shows while HEX speaks).
 await type("goto 1");
@@ -140,6 +161,7 @@ const checks = [
   ["player reply posts a YOU> line", youLine >= 1],
   ["HEX utterances aren't broken mid-sentence", coalesced],
   ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
+  ["HEX speaks the chosen handle (no {handle} leak)", /TEST\/\/RUNNER/.test(commsText) && !/\{handle\}/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],
   ["face resolves while HEX transmits", faceActive],
@@ -150,11 +172,15 @@ const checks = [
   ["tool chip inserts a command scaffold", /\$ netmap/.test(promptText)],
   ["comms panel has voice + music controls", /VOICE|MUSIC/.test(commsText)],
   ["header has save/load controls", /SAVE/.test(headerText) && /LOAD/.test(headerText)],
+  ["Operating Code printed in terminal (before accept)", /OPERATING CODE/.test(terminalText) && /cleared to breach/.test(terminalText)],
   ["accept-code acknowledged", /acknowledged|roster|unlocked/i.test(terminalText)],
   ["header shows score", /SCORE/.test(headerText)],
   ["Escape closes Codex modal", codexClosed],
   ["Codex links concepts to terminal commands", codexCmds >= 1],
   ["telemetry pane populated by netmap", /10\.42\.0\.1/.test(telemetryText)],
+  ["Evidence Locker captures a key ref", evidenceBefore >= 1],
+  ["Evidence Locker survives `clear`", evidenceAfterClear >= 1 && evidenceAfterClear === evidenceBefore],
+  ["`recall` reprints the evidence", /EVIDENCE LOCKER/.test(recalledText)],
   ["no console errors", errors.length === 0],
 ];
 

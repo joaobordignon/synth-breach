@@ -22,7 +22,8 @@ export const episode01: Episode = {
     "[COMMS // HEX]: Good. Aether severed standard DNS, thinks their perimeter's invisible. Cute.",
     "[COMMS // HEX]: Your subnet is 10.42.0.0/24. The /24 means the first 3 octets — 24 bits —",
     "belong to Aether. The last 8 bits are 254 possible hosts behind one gateway.",
-    "[COMMS // HEX]: Send a pulse across the wire. `netmap 10.42.0.0/24`, then `ping` the gateway.",
+    "[COMMS // HEX]: Send a pulse across the wire — netmap the subnet, then ping the gateway it",
+    "turns up. If the syntax trips you, `netmap --help` or `ping --help`; the theory's in the `codex`.",
   ],
   objectives: [
     { id: "sweep", label: "Map your /24 subnet and spot the live gateway" },
@@ -164,7 +165,8 @@ export const episode02: Episode = {
     "slammed shut, or silently dropped like it never heard you. Firewalls love that last one.",
     "[COMMS // HEX]: Run a packet capture while you scan. A server reveals its soul in the handshake —",
     "SYN, SYN-ACK, ACK, every time, unless something's actively lying to you.",
-    "[COMMS // HEX]: `portscan --inspect 10.42.0.1`. Then tell me which port is hiding: `answer <port>`.",
+    "[COMMS // HEX]: Scan the gateway with packet inspection on, read the flags, then `answer` me which",
+    "port's hiding. `portscan --help` for the syntax, `codex` for the three-way-handshake theory.",
   ],
   objectives: [
     { id: "scan", label: "Capture the TCP handshake against the gateway" },
@@ -263,7 +265,8 @@ export const episode03: Episode = {
     "[COMMS // HEX]: Legacy servers from the 80s love talking too much. They blab exact versions in",
     "every header and broadcast their payload in clear, unencrypted ASCII. No lock, no envelope —",
     "just a postcard anyone can read in transit.",
-    "[COMMS // HEX]: `banner-grab --target 10.42.0.1 --port 80`. Then `inspect --protocol http`.",
+    "[COMMS // HEX]: Grab the banner off the open web port, then inspect the transport. `banner-grab",
+    "--help` and `inspect --help` carry the syntax; `codex` has the cleartext-vs-encrypted theory.",
   ],
   objectives: [
     { id: "banner", label: "Grab the service banner on the web port" },
@@ -337,6 +340,7 @@ export const episode03: Episode = {
         // WARDEN ticks up, and this time HEX notices.
         api.warden(0.07, "LOG_ONLY");
         api.setVar("sessionCookie", COOKIE_B64);
+        api.evidence("Session cookie (Base64)", COOKIE_B64);
         api.complete("banner");
         api.addScore(30);
       },

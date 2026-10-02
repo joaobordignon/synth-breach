@@ -1,9 +1,9 @@
-import type { CommsEntry, CommsReply, Episode, EngineApi, Line, LineKind, TelemetryState } from "./types";
+import type { CommsEntry, CommsReply, Episode, EngineApi, EvidenceItem, Line, LineKind, TelemetryState } from "./types";
 import { EPISODES, firstEpisodeId, nextEpisodeId } from "../chapters";
 import { hasCodexForCommand } from "../codex";
 import {
   type PlayerProfile,
-  loadProfile,
+  loadSettings,
   saveProfile,
   defaultProfile,
 } from "../state/profile";
@@ -39,8 +39,10 @@ function toLines(content: string | Line | Array<string | Line>, kind?: LineKind)
 }
 
 class GameStore {
-  profile: PlayerProfile = loadProfile();
-  currentEpisodeId: number = this.profile.unlockedEpisodes.slice(-1)[0] ?? firstEpisodeId();
+  profile: PlayerProfile = loadSettings();
+  // Always boot to the Prologue — progress is never auto-resumed from storage;
+  // the player continues an earlier run with `load` / LOAD GAME (a save file).
+  currentEpisodeId: number = firstEpisodeId();
 
   /** anomaly_score currently shown on the WARDEN gauge (0.0 – 1.0+). */
   wardenScore = 0;
@@ -50,6 +52,9 @@ class GameStore {
   private completed = new Set<string>();
   /** Scratch vars shared across the session (ending choice, flags, etc). */
   private vars = new Map<string, unknown>();
+  /** Evidence Locker: key reference strings for the current episode. Lives in
+   *  the telemetry pane so it survives a terminal `clear`; reset per episode. */
+  private evidenceLog: EvidenceItem[] = [];
   /** Whether the current episode has emitted its outro / is ready to advance. */
   episodeCleared = false;
 
@@ -183,7 +188,7 @@ class GameStore {
     for (const line of lines) {
       if (line.kind === "hex") {
         const opensUtterance = HEX_PREFIX.test(line.text);
-        const text = stripHexPrefix(line.text);
+        const text = this.interpolate(stripHexPrefix(line.text));
         if (opensUtterance) {
           flushHex(); // a new utterance begins
           hexBuf = text;
@@ -194,7 +199,7 @@ class GameStore {
         }
       } else {
         flushHex(); // a terminal line ends any open HEX utterance
-        terminalLines.push(line);
+        terminalLines.push({ ...line, text: this.interpolate(line.text) });
       }
     }
     flushHex();
@@ -211,6 +216,10 @@ class GameStore {
   }
   getTelemetry(): TelemetryState | null {
     return this.telemetry;
+  }
+  /** The Evidence Locker for the current episode (persists across `clear`). */
+  getEvidence(): EvidenceItem[] {
+    return this.evidenceLog;
   }
   /** The shell prompt string; episodes can change it (REPL / shell escalation). */
   getPrompt(): string {
@@ -297,6 +306,7 @@ class GameStore {
     this.persist();
     this.completed.clear();
     this.vars.clear();
+    this.evidenceLog = [];
     this.commsLog = [];
     this.wardenScore = 0;
     this.wardenAction = "NONE";
@@ -343,6 +353,9 @@ class GameStore {
     this.firedBeats.clear();
     this.offerReplies([]); // clear any dialogue chips from the prior episode
     this.vars.delete("prompt"); // reset any REPL/shell prompt from a prior episode
+    // Reset the Evidence Locker and seed it with this episode's intro-surfaced
+    // reference data, so those strings are recoverable even after a `clear`.
+    this.evidenceLog = this.episode.evidence ? [...this.episode.evidence] : [];
     this.emitState();
 
     const ep = this.episode;
@@ -509,6 +522,11 @@ class GameStore {
       this.telemetry = state;
       this.emitState();
     },
+    evidence: (label, value) => {
+      if (this.evidenceLog.some((e) => e.label === label && e.value === value)) return;
+      this.evidenceLog.push({ label, value });
+      this.emitState();
+    },
     handle: () => this.profile.handle,
     sibling: () => (this.getVarPublic<string>("sibling") ?? "ECHO"),
     rapport: () => this.profile.bond ?? 0,
@@ -526,6 +544,15 @@ class GameStore {
 
   private getVarPublic<T>(key: string): T | undefined {
     return this.vars.get(key) as T | undefined;
+  }
+
+  /** Expand story tokens in dialogue so HEX can speak the player's own values:
+   *  {handle} → chosen handle, {sibling} → flagged family member's name. */
+  private interpolate(text: string): string {
+    if (text.indexOf("{") === -1) return text;
+    return text
+      .replace(/\{handle\}/g, this.profile.handle)
+      .replace(/\{sibling\}/g, this.getVarPublic<string>("sibling") ?? "ECHO");
   }
 
   // CodexModal open handler, injected by the React layer.
