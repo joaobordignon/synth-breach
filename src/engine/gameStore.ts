@@ -141,14 +141,7 @@ class GameStore {
     this.emitState();
   }
 
-  /** Tag the local profile with a cloud account id, without bumping updatedAt. */
-  tagCloudUser(uid: string | null) {
-    this.profile = { ...this.profile, cloudUserId: uid };
-    this.persist();
-    this.emitState();
-  }
-
-  /** Replace the whole profile (used when a cloud save is loaded on sign-in). */
+  /** Replace the whole profile (used when a save file is imported). */
   replaceProfile(next: PlayerProfile) {
     this.profile = next;
     this.persist();

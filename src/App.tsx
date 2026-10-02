@@ -8,7 +8,6 @@ import { CodexModal } from "./ui/CodexModal";
 import { FxLayer } from "./ui/FxLayer";
 import { store } from "./engine/gameStore";
 import { startMusic } from "./music";
-import { initCloud } from "./cloud";
 import { HOTKEYS } from "./config";
 
 export function App() {
@@ -23,11 +22,6 @@ export function App() {
       store.openCodexFn = null;
     };
   }, [openCodex]);
-
-  // Boot the cloud-save provider (no-op if unconfigured).
-  useEffect(() => {
-    void initCloud();
-  }, []);
 
   // Resume background music on the first user gesture if it was left on
   // (browsers block audio autoplay until an interaction).

@@ -1,6 +1,7 @@
 import type { EpisodeCommand, Line } from "./types";
 import { store, GLOBAL_COMMANDS, registerGlobalCommands } from "./gameStore";
 import { EPISODES } from "../chapters";
+import { exportSave, importSaveViaPicker } from "../state/saveFile";
 
 // Commands available in every episode. Episode-specific commands are merged
 // *over* these (an episode may override e.g. `whoami`). Reading hints or the
@@ -193,6 +194,24 @@ const commands: Record<string, EpisodeCommand> = {
       const next = !store.profile.voiceEnabled;
       store.setVoiceEnabled(next);
       api.print(`[*] HEX voice narration ${next ? "on" : "off"}.`, "system");
+    },
+  },
+
+  save: {
+    usage: "save",
+    description: "Download your progress as a .synthsave file (to continue elsewhere).",
+    run: (_args, api) => {
+      exportSave();
+      api.print("[✓] Save file downloaded. Keep it — `load` it on any device to continue.", "success");
+    },
+  },
+
+  load: {
+    usage: "load",
+    description: "Import a .synthsave file to continue a saved game.",
+    run: (_args, api) => {
+      api.print("[*] Choose a .synthsave file to import...", "system");
+      importSaveViaPicker((msg, ok) => api.print(`[${ok ? "✓" : "!"}] ${msg}`, ok ? "success" : "error"));
     },
   },
 

@@ -1,6 +1,6 @@
 import { store } from "../engine/gameStore";
 import { useGame } from "../state/useGame";
-import { AuthBar } from "./AuthBar";
+import { SaveBar } from "./SaveBar";
 
 const ACT_LABEL = ["PROLOGUE", "ACT I", "ACT II", "ACT III", "ACT IV"];
 
@@ -16,7 +16,7 @@ export function Header() {
         ⚡ SYNTH // BREACH [{ACT_LABEL[ep.act]} — {ep.title.toUpperCase()}]
       </span>
       <span className="header-right">
-        <AuthBar />
+        <SaveBar />
         <span className="glow-cyan">{store.profile.handle}</span>
         <span className="glow-cyan">SCORE {score}</span>
         <span title="audio">{muted ? "🔇" : "🔊"}</span>

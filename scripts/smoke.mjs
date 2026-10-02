@@ -67,7 +67,7 @@ const terminalText = await page.locator(".xterm-rows").innerText();
 const headerText = await page.locator(".header").innerText();
 // HEX dialogue is now routed to the BBS comms side panel, not the terminal.
 const commsText = await page.locator(".comms-pane").innerText();
-const faceCanvas = await page.locator(".hex-face-rain").count();
+const faceCanvas = await page.locator(".hex-face-canvas").count();
 
 // Play into Act I so the telemetry pane and a streamed scan are visible.
 await type("next");
@@ -76,6 +76,12 @@ await page.waitForTimeout(2000);
 await type("ping 10.42.0.1");
 await page.waitForTimeout(2200);
 const telemetryText = await page.locator(".telemetry-pane").innerText();
+
+// Re-enter the episode to trigger a fresh HEX transmission, then capture the
+// face while it's actively resolving (the reveal only shows while HEX speaks).
+await type("goto 1");
+await page.waitForTimeout(700);
+const faceActive = (await page.locator(".hex-face.active").count()) === 1;
 await page.screenshot({ path: "scripts/smoke-screenshot.png", fullPage: false });
 
 await browser.close();
@@ -85,7 +91,9 @@ const checks = [
   ["comms panel shows HEX transmissions", /HEX>/.test(commsText) && /Decker|ECHO/.test(commsText)],
   ["HEX routed OUT of terminal", !/COMMS \/\/ HEX/.test(terminalText)],
   ["face-in-code visualizer present", faceCanvas === 1],
+  ["face resolves while HEX transmits", faceActive],
   ["comms panel has voice + music controls", /VOICE|MUSIC/.test(commsText)],
+  ["header has save/load controls", /SAVE/.test(headerText) && /LOAD/.test(headerText)],
   ["accept-code acknowledged", /acknowledged|roster|unlocked/i.test(terminalText)],
   ["header shows score", /SCORE/.test(headerText)],
   ["Escape closes Codex modal", codexClosed],

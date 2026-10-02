@@ -11,9 +11,7 @@ export interface PlayerProfile {
   musicEnabled: boolean;
   musicVolume: number; // 0..1
   voiceEnabled: boolean;
-  /** Set once the save has been synced to a cloud account (uid). */
-  cloudUserId?: string | null;
-  /** Last local write time (ms) — used to resolve local-vs-cloud conflicts. */
+  /** Last local write time (ms). */
   updatedAt?: number;
 }
 
@@ -27,7 +25,6 @@ export function defaultProfile(): PlayerProfile {
     musicEnabled: false,
     musicVolume: 0.35,
     voiceEnabled: false,
-    cloudUserId: null,
     updatedAt: 0,
   };
 }
