@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original artwork for SYNTH // BREACH (MIT). A simplified, stylized
+     "anonymous mask" drawn from scratch as plain geometry — NOT a copy of any
+     specific existing mask artwork. White/gray on black so the in-game
+     "Face in Code" sampler reads the mask as bright glyphs and the features
+     (eyes, brows, moustache, goatee) as dark cut-outs. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320" width="300" height="320">
+  <rect x="0" y="0" width="300" height="320" fill="#000000"/>
+
+  <!-- face -->
+  <path d="M150 28 C205 32 250 70 252 120 C254 166 235 196 220 222 C205 252 180 292 150 308
+           C120 292 95 252 80 222 C65 196 46 166 48 120 C50 70 95 32 150 28 Z"
+        fill="#d9d9d9"/>
+
+  <!-- cheek highlights (brighter accents) -->
+  <circle cx="96" cy="180" r="15" fill="#ffffff" opacity="0.85"/>
+  <circle cx="204" cy="180" r="15" fill="#ffffff" opacity="0.85"/>
+
+  <!-- subtle nose ridge (slightly darker than the face) -->
+  <path d="M150 132 L140 184 C145 191 155 191 160 184 Z" fill="#b9b9b9"/>
+
+  <!-- eyebrows (arched, severe) -->
+  <path d="M74 112 C98 90 132 90 146 106" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/>
+  <path d="M226 112 C202 90 168 90 154 106" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- eyes (hollow) -->
+  <path d="M86 130 C104 116 130 118 142 132 C128 148 102 148 86 130 Z" fill="#0a0a0a"/>
+  <path d="M214 130 C196 116 170 118 158 132 C172 148 198 148 214 130 Z" fill="#0a0a0a"/>
+
+  <!-- handlebar moustache -->
+  <path d="M150 198 C128 198 108 190 86 174 C100 198 124 212 150 210
+           C176 212 200 198 214 174 C192 190 172 198 150 198 Z" fill="#141414"/>
+
+  <!-- smile -->
+  <path d="M116 214 C135 226 165 226 184 214" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- pointed goatee -->
+  <path d="M136 226 L164 226 L150 272 Z" fill="#141414"/>
+</svg>

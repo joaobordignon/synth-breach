@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "A cyberpunk synthwave TUI-style web game teaching cybersecurity fundamentals.",
   "license": "MIT",
-  "author": "joaobordignon",
+  "author": "John Bordignon (joaobordignon)",
   "homepage": "https://joaobordignon.github.io/synth-breach/",
   "repository": {
     "type": "git",

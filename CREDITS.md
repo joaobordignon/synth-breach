@@ -62,11 +62,12 @@ arpmedia, alex-morgan, zephiramusic.** (See [`public/music/README.md`](public/mu
 
 ## Imagery
 
-- **Guy Fawkes / Anonymous mask** (`public/hex-mask.png`) — a generic symbol
-  associated with the Anonymous movement, provided by the project owner and
-  downscaled to grayscale for the "Face in Code" sampler. If you redistribute
-  this project, please ensure the mask image you ship is one you have the rights
-  to use (e.g. a CC0 / public-domain source), or swap in your own.
+- **HEX mask** (`public/hex-mask.png`) — **original artwork** created for this
+  project and released under the project's MIT license. It is a simplified,
+  stylized "anonymous mask" drawn from scratch as plain vector geometry (see the
+  source at [`assets/hex-mask.svg`](assets/hex-mask.svg)); it is **not** a copy
+  of any specific existing mask artwork. Regenerate the PNG from the SVG with
+  `node scripts/make-mask.mjs`.
 
 ## Fonts
 
