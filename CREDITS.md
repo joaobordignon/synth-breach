@@ -62,12 +62,16 @@ arpmedia, alex-morgan, zephiramusic.** (See [`public/music/README.md`](public/mu
 
 ## Imagery
 
-- **HEX mask** (`public/hex-mask.png`) — **original artwork** created for this
-  project and released under the project's MIT license. It is a simplified,
-  stylized "anonymous mask" drawn from scratch as plain vector geometry (see the
-  source at [`assets/hex-mask.svg`](assets/hex-mask.svg)); it is **not** a copy
-  of any specific existing mask artwork. Regenerate the PNG from the SVG with
-  `node scripts/make-mask.mjs`.
+- **HEX "Face in Code"** (`public/hex-mask.png`) — derived from an
+  **AI-generated (Google Gemini) synthetic portrait** supplied by the project
+  author (not a real, identifiable person). The source is
+  [`assets/hex-source.jpg`](assets/hex-source.jpg); it is cropped, grayscaled and
+  inverted into the sampled source with `scripts/make-face.sh`. The sampler then
+  renders it as green code glyphs at runtime.
+- **Original anonymous mask** (`assets/hex-mask.svg`, `scripts/make-mask.mjs`) —
+  an earlier, from-scratch vector mask kept in the repo as an MIT-clean
+  alternative face (not a copy of any specific existing mask artwork). Run
+  `node scripts/make-mask.mjs` to use it as the face instead.
 
 ## Fonts
 

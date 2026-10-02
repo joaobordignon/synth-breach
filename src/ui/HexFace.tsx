@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 
 // HEX's "Face in Code" visualizer — the jaredrhod/ai-visualizer approach:
-// an original stylized "anonymous netrunner" mask (public/hex-mask.png, drawn
-// from assets/hex-mask.svg — MIT, not the trademarked V-mask) is sampled into a
-// grid and re-rendered as green ASCII/code glyphs whose density follows the
-// image's brightness. The
+// an AI-generated (Gemini) synthetic portrait, processed to a grayscale source
+// (public/hex-mask.png, from assets/hex-source.jpg via scripts/make-face.sh), is
+// sampled into a grid and re-rendered as green ASCII/code glyphs whose density
+// follows the image's brightness. The
 // face only resolves while HEX is transmitting or the voice is speaking; when
 // idle it fades to black ("awaiting signal"). A generic Anonymous symbol, not
 // a depiction of any real person.
