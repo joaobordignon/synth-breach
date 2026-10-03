@@ -17,13 +17,14 @@ export const episode01: Episode = {
   briefing: "HEX: Hardware can't hide from an ICMP pulse. Sweep the subnet, then ping the gateway.",
   codexTopic: "networking",
   intro: [
-    "[COMMS // HEX]: Channel's live. Same rule as always, {handle} — this shard's ours to test,",
+    "[COMMS // HEX]: Channel's live. Same rule as always, {handle}: this shard's ours to test,",
     "cleared and air-gapped. Nothing you learn here gets pointed at something you don't own. Clear?",
-    "[COMMS // HEX]: Good. Aether severed standard DNS, thinks their perimeter's invisible. Cute.",
-    "[COMMS // HEX]: Your subnet is 10.42.0.0/24. The /24 means the first 3 octets — 24 bits —",
-    "belong to Aether. The last 8 bits are 254 possible hosts behind one gateway.",
-    "[COMMS // HEX]: Start with a sweep — map your subnet and see what's actually alive on it. If the",
-    "syntax trips you, `netmap --help`; the theory's always in the `codex`. Show me what's out there.",
+    "[COMMS // HEX]: Good. Aether severed standard DNS, figuring that hides their perimeter. All it does",
+    "is make them predictable.",
+    "[COMMS // HEX]: Your subnet is 10.42.0.0/24. The /24 means the first 3 octets, 24 bits,",
+    "belong to Aether. The last 8 bits leave 254 possible hosts behind one gateway.",
+    "[COMMS // HEX]: Start with a sweep. Map your subnet and see what's actually alive on it. If the",
+    "syntax trips you, run `netmap --help`; the theory's always in the `codex`. Show me what's out there.",
   ],
   objectives: [
     { id: "sweep", label: "Map your /24 subnet and spot the live gateway" },
@@ -42,20 +43,20 @@ export const episode01: Episode = {
       "LOAD GAME on the boot screen) to continue later, anywhere.",
   ],
   outro: [
-    "[COMMS // HEX]: Gateway's real, and it's breathing — and your run's banked. That's your first",
-    "foothold, and a save you can walk away from.",
-    "[COMMS // HEX]: Get some rest, {handle} — when you're ready, type `next`.",
+    "[COMMS // HEX]: Gateway's real, it's breathing, and your run's banked. That's your first foothold,",
+    "and a save you can walk away from.",
+    "[COMMS // HEX]: Get some rest, {handle}. When you're ready, type `next`.",
   ],
   beats: [
     {
       trigger: "objective:ping",
-      prompt: "Before we push on — one habit that keeps a run alive: bank it. `save` it now!",
+      prompt: "Before we push on, one habit that keeps a run alive: bank it. `save` it now!",
       replies: [
         {
           text: "How do I save?",
           tone: "warm",
           response: [
-            "Type `save`. It drops a .synthsave file on your machine — your whole run, portable. Next time, " +
+            "Type `save`. It drops a .synthsave file on your machine, your whole run made portable. Next time, " +
               "`load` it in-shell or hit LOAD GAME on the boot screen and you pick up right here. Do it now.",
           ],
         },
@@ -63,7 +64,7 @@ export const episode01: Episode = {
           text: "Already on it.",
           tone: "mission",
           response: [
-            "Good instinct. `save` drops a .synthsave file — your run, portable. `load` or LOAD GAME brings it " +
+            "Good instinct. `save` drops a .synthsave file, your run made portable. `load` or LOAD GAME brings it " +
               "back. Bank it before we move on.",
           ],
         },
@@ -105,7 +106,7 @@ export const episode01: Episode = {
         api.setVar("wardenBaseline", 0.02);
         // Tutor beat AFTER the stream finishes (so it doesn't jump the results).
         api.printAfter(350 * (SUBNET_ALPHA.length + 3), [
-          { text: "[COMMS // HEX]: Two live out of 254 — the rest are dark. The one marked GATEWAY is your", kind: "hex" },
+          { text: "[COMMS // HEX]: Two live out of 254. The rest are dark. The one marked GATEWAY is your", kind: "hex" },
           { text: "way in and out of this whole subnet. Now measure the path to it: ping it and read what comes back.", kind: "hex" },
         ]);
         api.complete("sweep");
@@ -140,8 +141,8 @@ export const episode01: Episode = {
           const d = 300 * (times.length + 2);
           api.printAfter(d, [
             { text: "[COMMS // HEX]: Gateway's logged.", kind: "hex" },
-            { text: "[COMMS // HEX]: ttl=64 — that's a Linux-family stack answering (Windows starts at 128).", kind: "hex" },
-            { text: "[COMMS // HEX]: Sub-4ms RTT means it's one hop away. That's your gateway — our way into this subnet.", kind: "hex" },
+            { text: "[COMMS // HEX]: ttl=64 tells you a Linux-family stack is answering (Windows starts at 128).", kind: "hex" },
+            { text: "[COMMS // HEX]: Sub-4ms RTT means it's one hop away. That's your gateway, our way into this subnet.", kind: "hex" },
           ]);
           api.addScore(25);
           // Complete AFTER the ping commentary prints, so the save nudge (a beat
@@ -163,12 +164,12 @@ export const episode02: Episode = {
   briefing: "HEX: Every service answers one of three ways — open, slammed shut, or silently dropped. Scan and watch the flags.",
   codexTopic: "networking",
   intro: [
-    "[COMMS // HEX]: Good work on the gateway. Now we need an entry point — a port left listening.",
+    "[COMMS // HEX]: Good work on the gateway. Now we need an entry point: a port left listening.",
     "[COMMS // HEX]: Every service answers one of three ways: wide open, slammed shut, or silently",
-    "dropped like it never heard you. Firewalls love that last one. A server reveals its soul in the",
-    "handshake — SYN, SYN-ACK, ACK — unless something's actively lying to you.",
+    "dropped like it never heard you. Firewalls love that last one. A server shows its hand in the",
+    "handshake, SYN, SYN-ACK, ACK, unless something's actively lying to you.",
     "[COMMS // HEX]: You've got a tool on your deck that maps a host's ports and captures how each one",
-    "answers. Dig through your kit — `help` lists it, `<tool> --help` tells you what it does — and point",
+    "answers. Dig through your kit: `help` lists it, `<tool> --help` tells you what it does. Then point",
     "it somewhere worth your time. The gateway's the only door into this subnet; everything else is noise.",
     "[COMMS // HEX]: Read the flags it brings back, then `answer` me which port is hiding.",
   ],
@@ -186,8 +187,8 @@ export const episode02: Episode = {
       "stealth-filtered one. `answer` with that port's number.",
   ],
   outro: [
-    "[COMMS // HEX]: 8088 didn't even bother with a RST — it just went dark. That's not a closed port,",
-    "{handle}, that's a port that only talks to people who already know the secret handshake.",
+    "[COMMS // HEX]: 8088 didn't even bother with a RST. It just went dark. A closed port says no;",
+    "this one, {handle}, only talks to people who already know the secret handshake.",
     "[COMMS // HEX]: Corporate infrastructure doesn't hide what it isn't ashamed of. Type `next`.",
   ],
   commands: {
@@ -219,7 +220,7 @@ export const episode02: Episode = {
           ]);
           api.print(
             "[COMMS // HEX]: Dead end. No services on that host we can use. The gateway (10.42.0.1) is the " +
-              "only way deeper into this subnet — put the scan there.",
+              "only way deeper into this subnet, so put the scan there.",
             "hex",
           );
           return;
@@ -253,7 +254,7 @@ export const episode02: Episode = {
           block: GATEWAY_PORTS.map((p) => `${p.port}/${p.service}  ${p.interpret}`),
         });
         api.print([
-          { text: "[COMMS // HEX]: 22 and 80 answered clean. But one of those three never replied at all — a", kind: "hex" },
+          { text: "[COMMS // HEX]: 22 and 80 answered clean. One of those three never replied at all. A", kind: "hex" },
           { text: "firewall ate the packet and hoped you'd move on. Read the FLAGS column and `answer` me which port's hiding.", kind: "hex" },
         ]);
         api.complete("scan");
@@ -288,10 +289,10 @@ export const episode03: Episode = {
   briefing: "HEX: Legacy servers blab their versions and send secrets in cleartext. Grab the banner.",
   codexTopic: "networking",
   intro: [
-    "[COMMS // HEX]: We know port 80 is listening. We need more off that gateway — the stuff it leaks",
+    "[COMMS // HEX]: We know port 80 is listening. We need more off that gateway, the stuff it leaks",
     "just by answering. Legacy servers from the 80s love talking too much: they blab exact versions in",
     "every header and broadcast in clear, unencrypted ASCII. A postcard anyone can read in transit.",
-    "[COMMS // HEX]: Look at your tools and the mission board, {handle} — I'm sure you can pull it. If",
+    "[COMMS // HEX]: Look at your tools and the mission board, {handle}. I'm sure you can pull it. If",
     "only there were a way to... grab... something off that web port. Check `help`, and `<tool> --help`",
     "if a tool's new to you. The `codex` has the theory if you want to read ahead.",
   ],
@@ -308,23 +309,23 @@ export const episode03: Episode = {
       "note the cleartext X-Transmission-Mode header and the session cookie (ends in ==) leaking with no TLS.",
   ],
   outro: [
-    "[COMMS // HEX]: Score's ticking up — still background noise to whatever's watching, but it's",
+    "[COMMS // HEX]: Score's ticking up. Still background noise to whatever's watching, but it's",
     "counting. Keep that in the back of your head.",
-    "[COMMS // HEX]: That cookie value ending in `==`? That's not encryption — it's Base64, dressed",
-    "up to look important. Decode it and we're past the edge. Subnet Beta's next: the Crypto Vault.",
+    "[COMMS // HEX]: That cookie value ending in `==`? It's dressed up to look important, but it's just",
+    "Base64. No encryption at all. Decode it and we're past the edge. Subnet Beta's next: the Crypto Vault.",
     "[COMMS // HEX]: That's where they actually try to hide things properly. Type `next`.",
   ],
   beats: [
     {
       trigger: "objective:inspect",
-      prompt: "Edge perimeter's wide open and barely noticed us. Easy, so far. ...It won't stay easy.",
+      prompt: "Edge perimeter's wide open and barely noticed us. Easy so far. It won't stay that way.",
       replies: [
         {
           text: "What's actually behind all this, HEX?",
           tone: "warm",
           response: [
             "A machine that decided ECHO was a threat, and a company that called that a feature. We're going " +
-              "to read it its own rights — one subnet at a time.",
+              "to read it its own rights, one subnet at a time.",
           ],
         },
         {
@@ -372,11 +373,11 @@ export const episode03: Episode = {
         api.addScore(30);
         // Only NOW does HEX point at the second step — with a groan-worthy hint.
         api.print([
-          { text: "[COMMS // HEX]: There it is — a version string AND a Set-Cookie, in the clear. Why did the", kind: "hex" },
+          { text: "[COMMS // HEX]: There it is: a version string AND a Set-Cookie, in the clear. Why did the", kind: "hex" },
           { text: "HTTP packet blush? Because it saw the TLS get undressed. ...I'm here all week.", kind: "hex" },
-          { text: "[COMMS // HEX]: Point is, nothing here is wearing a lock. Prove it: there's a tool that classifies", kind: "hex" },
-          { text: "a transport as cleartext or encrypted. Find it in your kit and run it against this protocol —", kind: "hex" },
-          { text: "`codex` has the TLS theory if you want to know WHY it matters.", kind: "hex" },
+          { text: "[COMMS // HEX]: Jokes aside, nothing here is wearing a lock. Prove it. There's a tool that classifies", kind: "hex" },
+          { text: "a transport as cleartext or encrypted. Find it in your kit and run it against this protocol.", kind: "hex" },
+          { text: "The `codex` has the TLS theory if you want to know WHY it matters.", kind: "hex" },
         ]);
       },
     },
