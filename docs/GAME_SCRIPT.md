@@ -379,7 +379,7 @@ HEX responds:
     HEX> Readable now — a fixed-shift cipher never survives 25 guesses. But look: there's a second layer buried under it, an XOR bitmask. I just pulled the stream and the key onto your deck (they're in your Evidence Locker too). Peel that layer off next.
 ```
 
-**▶ COMMAND:** `xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42`
+**▶ COMMAND:** `xor-decrypt --stream "0x12 0x10 0x07 0x01 0x0D 0x05" --key 0x42`
 
 ```
     USAGE   xor-decrypt --stream "0x.. 0x.." --key 0x..
@@ -391,6 +391,7 @@ HEX responds:
 ```
 HEX responds:
 ```
+    HEX> PRECOG. ...So that's what they named it — the machine that scored ECHO. The project moving to Subnet Gamma IS PRECOG. Now we know exactly what we're hunting.
     HEX> 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet — Bastion Core.
     HEX> And did you catch that log? That channel didn't have a second layer yesterday. Something in there is watching what we break and patching around it in real time. Type `next`.
 ```

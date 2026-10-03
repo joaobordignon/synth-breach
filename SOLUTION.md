@@ -89,7 +89,7 @@ Then `next`.
 **EP05 · The Caesar & XOR Anomaly**
 ```
 cipher-crack --type caesar --text "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD"
-xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42
+xor-decrypt --stream "0x12 0x10 0x07 0x01 0x0D 0x05" --key 0x42
 ```
 > Caesar resolves to `THE PROJECT IS MOVING TO SUBNET GAMMA`.
 Then `next`.
@@ -224,7 +224,7 @@ decode --base64 "VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA=="
 hexview --decode "44 49 52 45 43 54 4f 52 5f 4b 4f 56 41 43 53"
 next
 cipher-crack --type caesar --text "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD"
-xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42
+xor-decrypt --stream "0x12 0x10 0x07 0x01 0x0D 0x05" --key 0x42
 next
 hash-identify 21232f297a57a5a743894a0e4a801fc3
 crack --hash 21232f297a57a5a743894a0e4a801fc3 --wordlist synth_rockyou.txt

@@ -244,11 +244,11 @@ export const episode05: Episode = {
           api.print([
             { text: "", kind: "normal" },
             { text: "  ── TELEMETRY // XOR STREAM  (recovered key: 0x42) ──────────", kind: "system" },
-            { text: "  0x53 0x59 0x4E", kind: "normal" },
+            { text: "  0x12 0x10 0x07 0x01 0x0D 0x05", kind: "normal" },
             { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
             { text: "  (feed this stream + the key to `xor-decrypt` — see `xor-decrypt --help`)", kind: "dim" },
           ]);
-          api.evidence("XOR stream (hex)", "0x53 0x59 0x4E");
+          api.evidence("XOR stream (hex)", "0x12 0x10 0x07 0x01 0x0D 0x05");
           api.evidence("XOR key (recovered)", "0x42");
         }
         api.complete("caesar");
@@ -286,10 +286,18 @@ export const episode05: Episode = {
           });
         });
         api.print(lines);
-        api.print({
-          text: "[✓] XOR is symmetric: the same operation that masked the stream reveals it. One key, both ways.",
-          kind: "success",
-        });
+        // Show the payoff: the decrypted bytes as readable ASCII.
+        const text = bytes.map((b) => (b >= 32 && b < 127 ? String.fromCharCode(b) : "·")).join("");
+        api.print([
+          { text: `[✓] Decrypted bytes → ASCII: "${text}"`, kind: "success" },
+          { text: "[✓] XOR is symmetric: the same operation that masked the stream reveals it. One key, both ways.", kind: "success" },
+        ]);
+        if (text === "PRECOG") {
+          api.print([
+            { text: "[COMMS // HEX]: PRECOG. ...So that's what they named it — the machine that scored ECHO.", kind: "hex" },
+            { text: "The project moving to Subnet Gamma IS PRECOG. Now we know exactly what we're hunting.", kind: "hex" },
+          ]);
+        }
         api.complete("xor");
         api.addScore(45);
       },

@@ -14,7 +14,7 @@ export const SOLUTIONS: Record<number, string[]> = {
   ],
   5: [
     'cipher-crack --type caesar --text "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD"',
-    'xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42',
+    'xor-decrypt --stream "0x12 0x10 0x07 0x01 0x0D 0x05" --key 0x42',
   ],
   6: [
     "hash-identify 21232f297a57a5a743894a0e4a801fc3",

@@ -82,7 +82,9 @@ So "1.3.3c" + "CVE-2010-4221" + "backdoor" is internally contradictory (that CVE
 
 Either is a one-constant edit in `src/engine/simulator.ts`.
 
-### ⚠️ Content-quality note — the XOR demo decrypts to non-printable bytes (EP05)
+### ⚠️ Content-quality note — the XOR demo decrypts to non-printable bytes (EP05)  —  ✅ FIXED
+*Resolution: the XOR stream now decrypts to the readable word **PRECOG** (the AI's codename), the handler prints the decoded ASCII, and HEX reacts — turning the demo into a plot reveal ("the project moving to Subnet Gamma IS PRECOG").*
+
 The XOR stream `0x53 0x59 0x4E` is literally the ASCII `"SYN"`, and `^ 0x42` yields control characters (0x11, 0x1B, 0x0C), not readable text. The episode only demonstrates "XOR is its own inverse" (which is correct and fine), but the payoff lands harder for a learner if the XOR *result* spells something. Optional polish: choose a stream + key whose output is a readable word.
 
 ---
