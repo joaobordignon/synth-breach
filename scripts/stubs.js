@@ -23,4 +23,28 @@ if (typeof globalThis.localStorage === "undefined") {
     clear: () => mem.clear(),
   };
 }
+// The Ep01 `save` command downloads a .synthsave file via the DOM; stub just
+// enough of document/URL/Blob for exportSave() to run without a browser.
+if (typeof globalThis.document === "undefined") {
+  const makeEl = () => ({
+    click() {},
+    remove() {},
+    setAttribute() {},
+    addEventListener() {},
+    style: {},
+    href: "",
+    download: "",
+    type: "",
+    accept: "",
+    files: [],
+  });
+  globalThis.document = {
+    createElement: () => makeEl(),
+    body: { appendChild() {}, removeChild() {} },
+  };
+}
+if (typeof globalThis.Blob === "undefined") globalThis.Blob = class Blob {};
+if (typeof globalThis.URL === "undefined") globalThis.URL = {};
+if (typeof globalThis.URL.createObjectURL !== "function") globalThis.URL.createObjectURL = () => "blob:stub";
+if (typeof globalThis.URL.revokeObjectURL !== "function") globalThis.URL.revokeObjectURL = () => {};
 export {};

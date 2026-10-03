@@ -34,7 +34,7 @@
       "body": "IDOR happens when an application exposes a direct reference to an internal object (a database row ID, a file name, a record number) — often right in the URL or request body — and fails to verify that the currently authenticated user actually owns or is authorized to access that specific object. Authentication ('who are you?') passes fine; authorization ('are you allowed to see THIS one?') is simply never checked. This is what makes IDOR dangerous even for a fully legitimate, correctly-logged-in user: they don't need to break the login at all, only guess or increment an ID they were never supposed to be able to reach.",
       "example": "-- VULNERABLE:\nGET /api/v1/profile?user_id=1042      <- your own record, returns fine\nGET /api/v1/profile?user_id=0001      <- someone else's record — server never checks ownership, returns it anyway\n\n@app.route(\"/api/v1/profile\")\ndef profile():\n    user_id = request.args.get(\"user_id\")\n    return db.get_user(user_id)          # no check that user_id belongs to the requester\n\n-- SECURE:\n@app.route(\"/api/v1/profile\")\ndef profile():\n    user_id = request.args.get(\"user_id\")\n    if user_id != current_session.user_id and not current_session.is_admin:\n        return \"403 Forbidden\", 403\n    return db.get_user(user_id)",
       "relatedEpisodes": [11],
-      "relatedCommands": ["api-probe", "tamper-id"],
+      "relatedCommands": ["api-probe", "tamper"],
       "seeAlso": ["horizontal-vertical-privesc"]
     },
     {
@@ -44,7 +44,7 @@
       "summary": "Horizontal: gaining access to another user's data at your same privilege level. Vertical: gaining a higher privilege level than you were ever granted.",
       "body": "Horizontal privilege escalation means accessing another user's data or resources while remaining at the same overall permission level — a regular user reading another regular user's private profile is horizontal (IDOR is the classic mechanism for this). Vertical privilege escalation means actually gaining a higher permission tier than you were ever granted — a regular user gaining administrator rights. The two aren't mutually exclusive: an IDOR flaw on an admin-only endpoint, reachable by tampering with a role parameter, can escalate both horizontally and vertically at once.",
       "relatedEpisodes": [11],
-      "relatedCommands": ["tamper-id"],
+      "relatedCommands": ["tamper"],
       "seeAlso": ["idor"]
     },
     {
@@ -65,7 +65,7 @@
       "body": "Path traversal happens when a server takes a user-supplied filename and hands it directly to a filesystem read operation without first confirming the resolved path actually stays inside the intended directory. Each `../` in the input walks one directory level up; enough of them chained together escape the web root entirely and reach anywhere the server process has read permission — commonly system configuration or credential files. The fix is path canonicalization: resolve the final absolute path (`realpath()`) and explicitly verify it still starts with the intended base directory before ever opening the file.",
       "example": "-- VULNERABLE:\nGET /api/v1/view?file=report.pdf                       <- intended use\nGET /api/v1/view?file=../../../../etc/aether/master_key.pem   <- escapes the web root entirely\n\ndef view(filename):\n    return open(f\"/var/www/reports/{filename}\").read()   # no validation of the resolved path at all\n\n-- SECURE:\nimport os\ndef view(filename):\n    base = \"/var/www/reports\"\n    full_path = os.path.realpath(os.path.join(base, filename))\n    if not full_path.startswith(base):\n        return \"403 Forbidden\", 403                        # resolved path escaped the base dir — reject it\n    return open(full_path).read()",
       "relatedEpisodes": [12],
-      "relatedCommands": [],
+      "relatedCommands": ["fetch-file"],
       "seeAlso": ["input-validation-vs-parameterized"]
     },
     {

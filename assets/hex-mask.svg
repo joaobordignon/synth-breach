@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original artwork for SYNTH // BREACH (MIT). A stylized "anonymous netrunner
+     mask" drawn from scratch as plain geometry. Inspired by the generic pale-
+     theatrical-mask silhouette, but intentionally NOT a copy of the trademarked
+     V-for-Vendetta / Guy Fawkes mask design (different brows, eyes, moustache
+     and a plain vertical chin stripe rather than the iconic curled features).
+     White/gray on black so the in-game "Face in Code" sampler reads the mask as
+     bright glyphs and the features (eyes, brows, moustache, goatee) as dark
+     cut-outs. Regenerate the PNG with: node scripts/make-mask.mjs -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320" width="300" height="320">
+  <rect x="0" y="0" width="300" height="320" fill="#000000"/>
+
+  <!-- face: broad shield, tapering to a soft-pointed chin -->
+  <path d="M150 24 C212 28 258 68 258 126 C258 172 239 200 223 228
+           C207 258 180 300 150 314 C120 300 93 258 77 228 C61 200 42 172 42 126
+           C42 68 88 28 150 24 Z"
+        fill="#dcdcdc"/>
+
+  <!-- soft highlights: forehead + cheeks (brighter = denser glyphs) -->
+  <ellipse cx="150" cy="74" rx="46" ry="26" fill="#ffffff" opacity="0.5"/>
+  <circle cx="98" cy="188" r="17" fill="#ffffff" opacity="0.8"/>
+  <circle cx="202" cy="188" r="17" fill="#ffffff" opacity="0.8"/>
+
+  <!-- nose: slim ridge shadow -->
+  <path d="M150 128 L138 188 C144 197 156 197 162 188 Z" fill="#c2c2c2"/>
+
+  <!-- eyebrows: thick, high, arched -->
+  <path d="M70 108 C96 82 134 84 150 102" fill="none" stroke="#111111" stroke-width="10" stroke-linecap="round"/>
+  <path d="M230 108 C204 82 166 84 150 102" fill="none" stroke="#111111" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- eyes: almond, hollow, with an outer liner flick -->
+  <path d="M84 132 C104 116 132 118 146 134 C130 150 102 150 84 136 Z" fill="#0a0a0a"/>
+  <path d="M216 132 C196 116 168 118 154 134 C170 150 198 150 216 136 Z" fill="#0a0a0a"/>
+  <path d="M82 130 C96 120 120 120 140 130" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M218 130 C204 120 180 120 160 130" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- moustache: trimmed, gently upturned (not the iconic curl) -->
+  <path d="M150 204 C127 204 106 195 86 180 C101 203 127 216 150 212
+           C173 216 199 203 214 180 C194 195 173 204 150 204 Z" fill="#121212"/>
+
+  <!-- smile: wide, calm -->
+  <path d="M114 216 C135 230 165 230 186 216" fill="none" stroke="#121212" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- chin stripe: a thin tapering soul-patch line -->
+  <path d="M146 228 L154 228 L150 290 Z" fill="#121212"/>
+</svg>

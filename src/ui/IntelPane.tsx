@@ -10,6 +10,9 @@ export function IntelPane() {
   const objectives = store.objectiveStatus();
   const warden = store.wardenScore;
   const wardenPct = Math.min(100, Math.round(warden * 100));
+  // Episode tools: the command NAMES only — a scaffold to insert, not the
+  // answer. Flags/values are for the player to work out (try `<cmd> --help`).
+  const tools = Object.keys(ep.commands).filter((n) => !ep.commands[n].hidden);
 
   return (
     <div className="panel intel-pane">
@@ -25,6 +28,25 @@ export function IntelPane() {
           </li>
         ))}
       </ul>
+
+      {tools.length > 0 && (
+        <>
+          <h4 className="glow-cyan">Tools (click to insert · try <code>&lt;cmd&gt; --help</code>)</h4>
+          <div className="tool-chips">
+            {tools.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className="tool-chip"
+                title={`Insert "${name} " — then add the flags/values yourself (or ${name} --help)`}
+                onClick={() => store.fillInput(name + " ")}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <h4 className="glow-cyan">Concepts</h4>
       <ul className="concept-list">
@@ -44,7 +66,10 @@ export function IntelPane() {
       </div>
 
       <p className="hint-tip">
-        Type <code>intel</code> for a Tier-1 hint · <code>intel 2</code>/<code>3</code> for more · <code>codex</code> is free.
+        <code>&lt;cmd&gt; --help</code> explains a tool · <code>intel</code> → theory · <code>intel 2</code> → syntax · <code>intel 3</code> → deep walkthrough.
+      </p>
+      <p className="hint-tip">
+        Select text + Ctrl/Cmd+C to copy · Ctrl/Cmd+V (or right-click) to paste values into the terminal.
       </p>
     </div>
   );

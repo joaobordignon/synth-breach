@@ -2,19 +2,31 @@
   "name": "synth-breach",
   "private": true,
   "version": "0.1.0",
+  "description": "A cyberpunk synthwave TUI-style web game teaching cybersecurity fundamentals.",
+  "license": "MIT",
+  "author": "John Bordignon (joaobordignon)",
+  "homepage": "https://joaobordignon.github.io/synth-breach/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joaobordignon/synth-breach.git"
+  },
   "type": "module",
   "scripts": {
+    "predev": "node scripts/gen-playlist.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/gen-playlist.mjs",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "playtest": "esbuild scripts/playtest.ts --bundle --platform=node --format=esm --loader:.json=json --inject:scripts/stubs.js --outfile=node_modules/.cache/playtest.mjs && node node_modules/.cache/playtest.mjs"
+    "playtest": "esbuild scripts/playtest.ts --bundle --platform=node --format=esm --loader:.json=json --inject:scripts/stubs.js --outfile=node_modules/.cache/playtest.mjs && node node_modules/.cache/playtest.mjs",
+    "script": "esbuild scripts/make-script.ts --bundle --platform=node --format=esm --loader:.json=json --inject:scripts/stubs.js --outfile=node_modules/.cache/make-script.mjs && node node_modules/.cache/make-script.mjs"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "sam-js": "^0.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

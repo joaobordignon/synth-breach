@@ -23,22 +23,56 @@ export const episode10: Episode = {
   briefing: "HEX: Their login stitches user input straight into SQL. Make the database your puppet.",
   codexTopic: "webSecurity",
   intro: [
-    "[COMMS // HEX]: Same rule as always, Decker — cleared shard, this stays on the range. This one",
-    "matters most to get right, because this is Kovacs' house.",
-    "[COMMS // HEX]: You have root on Bastion, but the surveillance core lives in their cloud API.",
-    "Their login gate stitches user input directly into SQL queries. If backend code treats your data",
-    "as executable commands, the database becomes your puppet.",
-    "[COMMS // HEX]: `proxy-intercept --target cloud.aetherdyn.internal`, then `inject-sql --payload`.",
+    "[COMMS // HEX]: Same rule as always, {handle} — cleared shard, this stays on the range. This one",
+    "matters most, because this is Kovacs' house. But Bastion isn't the brain — the surveillance core",
+    "runs somewhere in their cloud, and we don't have the address yet.",
+    "[COMMS // HEX]: You still own the Bastion box. A machine that talks to the cloud has to know where",
+    "the cloud IS — so read its config. `ls` what root can see, `cat` whatever names the backend. Find",
+    "me that host, then we take its login apart.",
   ],
   objectives: [
-    { id: "intercept", label: "Catch the login POST: proxy-intercept --target cloud.aetherdyn.internal" },
-    { id: "inject", label: "Bypass auth: inject-sql --payload \"admin' OR '1'='1' --\"" },
+    { id: "locate", label: "Read Bastion's config to find the cloud API host (ls / cat)" },
+    {
+      id: "intercept",
+      label: "Intercept the login request to the cloud API",
+      hex: [
+        "[COMMS // HEX]: Frozen mid-flight. See how it drops your username straight into the SQL query?",
+        "That's the whole flaw. Inject a payload that forces the WHERE clause true and comments out the rest.",
+      ],
+    },
+    { id: "inject", label: "Bypass the login with a SQL tautology" },
   ],
+  // You rooted this box in Act III — its config names the next target.
+  files: {
+    "/etc/aether/services.conf": {
+      lines: [
+        "# aether-bastion — service routing (root-only)",
+        "log_forwarder   = 10.42.20.1:514",
+        "auth_backend    = cloud.aetherdyn.internal:443",
+        "surveillance    = https://cloud.aetherdyn.internal/api/v1   # PRECOG core",
+        "# NOTE: PRECOG scoring runs in the cloud, not on this host.",
+      ],
+      reveal: {
+        evidence: { label: "Cloud API host", value: "cloud.aetherdyn.internal" },
+        completes: "locate",
+        score: 30,
+        hex: [
+          "[COMMS // HEX]: cloud.aetherdyn.internal. That's it — that's where PRECOG actually lives, and",
+          "where it scored ECHO. Their login gate stitches user input straight into SQL. Intercept it, then",
+          "make the database your puppet.",
+        ],
+      },
+    },
+  },
   hints: [
-    "The server builds: SELECT * FROM users WHERE username='$user' AND password='$pass'. If you close " +
-      "the quote and add OR '1'='1', the WHERE is always true; `--` comments out the password check.",
-    "Intercept the login first, then inject the tautology payload: admin' OR '1'='1' --",
-    `proxy-intercept --target ${CLOUD_HOST} ; inject-sql --payload "admin' OR '1'='1' --"`,
+    "Recon first: a host that talks to the cloud stores the cloud's address. `ls` the Bastion box and " +
+      "`cat` its service config. Then — the login server builds SELECT * FROM users WHERE " +
+      "username='$user' AND password='$pass'. Close the quote, OR '1'='1' (always true), `--` the rest.",
+    "`ls`, then `cat /etc/aether/services.conf` to get the host. Intercept its login, then inject the " +
+      "tautology payload: admin' OR '1'='1' --",
+    "Read the Bastion config (`cat /etc/aether/services.conf`) — it names cloud.aetherdyn.internal. " +
+      "proxy-intercept that host to catch the login POST, then inject-sql a payload that closes the quote, " +
+      "adds an always-true OR '1'='1', and comments the rest out with -- .",
   ],
   outro: [
     "[COMMS // HEX]: role=SYSTEM_DIRECTOR. You're in as Kovacs' own tier. First time I've touched his",
@@ -46,12 +80,52 @@ export const episode10: Episode = {
     "[COMMS // HEX]: Fix is one line: parameterized queries. Treat input as DATA, never as SQL. Next",
     "we go after what they think you can't see. Type `next`.",
   ],
+  beats: [
+    {
+      trigger: "objective:inject",
+      prompt: "SYSTEM_DIRECTOR. We're standing in Kovacs' own house now. ...First time I've been inside these walls since I walked out.",
+      replies: [
+        {
+          text: "You don't have to go in with me.",
+          tone: "warm",
+          response: [
+            "(quiet) Yeah — I do. I helped build the locks on this place. Only right I'm here when they come " +
+              "off. Keep moving, {handle}.",
+          ],
+        },
+        {
+          text: "What's it like, being back?",
+          tone: "warm",
+          response: [
+            "Like a house you used to live in, where something terrible happened after you left. Let's not " +
+              "linger in it. Next.",
+          ],
+        },
+        {
+          text: "Then let's take it apart.",
+          tone: "mission",
+          response: ["Brick by brick. Their access control's next — and it's worse than their login. Type `next`."],
+        },
+      ],
+    },
+  ],
   commands: {
     "proxy-intercept": {
       usage: "proxy-intercept --target <host>",
       description: "Intercept the next outgoing HTTP request to a host.",
+      help: [
+        "Catches the next outbound HTTP request so you can tamper with it.",
+        "Point it at the cloud API host you found in Bastion's config (it's in",
+        "your Evidence Locker — `recall` if you cleared the screen).",
+        "Example:  proxy-intercept --target <host>",
+      ],
       run: (args, api) => {
-        if (argVal(args, "--target") !== CLOUD_HOST) return api.print(`[!] Usage: proxy-intercept --target ${CLOUD_HOST}`, "error");
+        if (!api.isComplete("locate")) {
+          return api.print("[!] You don't have the cloud host yet. Read Bastion's config first — `ls`, then `cat` it.", "warn");
+        }
+        if (argVal(args, "--target") !== CLOUD_HOST) {
+          return api.print("[!] That's not the host Bastion's config named. Check the Evidence Locker (`recall`).", "error");
+        }
         api.print([
           { text: "[*] Proxy armed. Captured outbound request:", kind: "system" },
           { text: "  POST /api/v1/auth/login HTTP/1.1", kind: "normal" },
@@ -71,6 +145,11 @@ export const episode10: Episode = {
     "inject-sql": {
       usage: 'inject-sql --payload "<payload>"',
       description: "Replace the intercepted username field with a SQL payload and forward it.",
+      help: [
+        "The server concatenates your input into: ...WHERE username='<you>'...",
+        "Close the quote, OR an always-true condition, then comment out the rest",
+        "with --. You need a tautology like '1'='1' plus a SQL comment.",
+      ],
       run: (args, api) => {
         if (!api.isComplete("intercept")) return api.print("[!] Intercept the login first.", "warn");
         const payload = (argVal(args, "--payload") ?? "").replace(/^["']|["']$/g, "");
@@ -113,29 +192,58 @@ export const episode11: Episode = {
     "[COMMS // HEX]: You're logged in on an operator token, but locked out of the classified index.",
     "Watch the API calls. Many backends authenticate WHO you are but forget to authorize WHAT you can",
     "view — they pass object IDs in the URL and blindly trust the client.",
-    "[COMMS // HEX]: `api-probe --endpoint /user/profile` for a baseline, then `tamper --param user_id=0001`.",
+    "[COMMS // HEX]: Start by baselining the profile API with your own token — see what a normal, honest",
+    "request even looks like, and what it gives back. `api-probe --help` for syntax; `codex` for IDOR and",
+    "access control. Once we see the shape of it, the hole shows itself.",
   ],
   objectives: [
-    { id: "probe", label: "Baseline the endpoint: api-probe --endpoint /user/profile" },
-    { id: "tamper", label: "Access another object: tamper --param user_id=0001" },
+    { id: "probe", label: "Baseline the profile API with your own token" },
+    { id: "tamper", label: "Tamper the object ID to reach an exec record" },
   ],
   hints: [
     "An IDOR is Broken Access Control: the server returns object #0001 to anyone who asks, without " +
       "checking the session owns it. Your own record is user_id=1042; lower IDs belong to execs.",
     "Probe /user/profile to see your own id (1042), then tamper the parameter down to 0001.",
-    "api-probe --endpoint /user/profile ; tamper --param user_id=0001",
+    "Baseline the /user/profile endpoint with api-probe — the response shows your own id, 1042. Then " +
+      "tamper the user_id parameter to a much lower value; the exec records sit near 0001, and the " +
+      "server never checks you actually own that record.",
   ],
   outro: [
     "[COMMS // HEX]: 'RE: PRECOG DEPLOYMENT — ETHICS REVIEW OVERRIDE,' signed Kovacs. Someone below him",
     "flagged exactly this — no appeals process, no oversight. Same hole ECHO fell through.",
-    "[COMMS // HEX]: And he signed off anyway. That's not a rogue AI making a mistake, Decker. That's a",
+    "[COMMS // HEX]: And he signed off anyway. That's not a rogue AI making a mistake, {handle}. That's a",
     "person who read the warning and shipped it. ...It just armed something, too. We don't slow-walk",
     "what's next. Type `next`.",
+  ],
+  beats: [
+    {
+      trigger: "objective:tamper",
+      prompt: "A signature. Not a glitch. A person, choosing this.",
+      replies: [
+        {
+          text: "Kovacs knew exactly what he shipped.",
+          response: ["Read the warning. Signed it anyway. That's not negligence, {handle} — that's a decision."],
+        },
+        {
+          text: "This is bigger than ECHO now.",
+          response: ["It was always bigger. ECHO's just the one that put a name to it for us."],
+        },
+        {
+          text: "We end this.",
+          response: ["We end it. One more subnet. Whatever it just armed, we move faster than it."],
+        },
+      ],
+    },
   ],
   commands: {
     "api-probe": {
       usage: "api-probe --endpoint <path>",
       description: "Send a baseline authenticated request to an API endpoint.",
+      help: [
+        "Sends one authenticated request so you can see the normal response.",
+        "Baseline the profile endpoint: /user/profile — note the id in the URL.",
+        "Example:  api-probe --endpoint /user/profile",
+      ],
       run: (args, api) => {
         if (argVal(args, "--endpoint") !== "/user/profile") return api.print("[!] Usage: api-probe --endpoint /user/profile", "error");
         api.print([
@@ -148,6 +256,7 @@ export const episode11: Episode = {
           hosts: [{ ip: CLOUD_HOST, label: "profile API", status: "OPEN", detail: "IDOR: no ownership check" }],
           block: ["GET /profile?user_id=1042", "-> trusts client-supplied id", "no session-ownership check"],
         });
+        api.evidence("Your user_id (operator)", "1042");
         api.complete("probe");
         api.addScore(35);
       },
@@ -155,6 +264,11 @@ export const episode11: Episode = {
     tamper: {
       usage: "tamper --param user_id=<id>",
       description: "Replay the request with a tampered parameter.",
+      help: [
+        "The server trusts the client-supplied id (an IDOR). Your own id is 1042;",
+        "the exec records sit at low ids. Walk it down toward 0001.",
+        "Example:  tamper --param user_id=<id>",
+      ],
       run: (args, api) => {
         if (!api.isComplete("probe")) return api.print("[!] Probe the endpoint first.", "warn");
         const param = argVal(args, "--param") ?? args[0] ?? "";
@@ -216,14 +330,15 @@ export const episode12: Episode = {
     "built in years that might fix something instead of break it. Whatever happens, ECHO's record gets",
     "a chance. That's the only ending I care about. Let's finish it.",
     "",
-    "[COMMS // HEX]: `fetch-file --path ../../../../etc/aether/master_key.pem`. When the trace fires,",
-    "`verify-key` the real one against my memo checksum before the window closes. Then `bounty-report --compile`.",
+    "[COMMS // HEX]: Walk the file viewer out of its web root to the master key. The Warden plants a",
+    "decoy, so verify the real one against my memo checksum before the trace lands — then compile the",
+    "advisory. `fetch-file --help` / `verify-key --help` for syntax; `codex` for path traversal.",
   ],
   objectives: [
-    { id: "traversal", label: "Escape the web root: fetch-file --path ../../../../etc/aether/master_key.pem" },
-    { id: "verify", label: "Beat the decoy: verify-key <A|B> before the trace lands" },
-    { id: "report", label: "Compile the advisory: bounty-report --compile" },
-    { id: "ending", label: "Choose the ending: broadcast-leak OR bounty-report --submit --responsible" },
+    { id: "traversal", label: "Escape the web root to the master key (path traversal)" },
+    { id: "verify", label: "Verify the REAL key before the trace lands" },
+    { id: "report", label: "Compile the vuln-chain advisory" },
+    { id: "ending", label: "Choose how it ends — leak, or disclose" },
   ],
   hints: [
     "Path traversal walks `../` out of the served directory to read arbitrary files. The Warden plants " +
@@ -231,13 +346,44 @@ export const episode12: Episode = {
       "memo value. CVSS 3.1 scores the whole chain (Scope-changed, high C/I) at 10.0.",
     "Run the traversal, then `verify-key A` / `verify-key B` and keep the one whose checksum matches " +
       "HEX's memo. Compile the report, then pick: `broadcast-leak --mode=public` or `bounty-report --submit --responsible`.",
-    "fetch-file --path ../../../../etc/aether/master_key.pem ; verify-key A ; bounty-report --compile ; then choose an ending command.",
+    "fetch-file with a --path that climbs out of the web root using ../ sequences to reach " +
+      "/etc/aether/master_key.pem. WARDEN plants a decoy, so verify-key each candidate (A and B) and " +
+      "keep the one whose checksum matches HEX's memo (it starts e3b0). Then compile the advisory with " +
+      "bounty-report, and choose how it ends — leak publicly, or disclose responsibly.",
   ],
   outro: [], // the ending commands print their own epilogue, then complete the campaign
+  beats: [
+    {
+      trigger: "objective:report",
+      prompt: "That's the whole chain, documented. Last call's yours, {handle}.",
+      replies: [
+        {
+          text: "Whatever happens, this was worth it.",
+          tone: "warm",
+          response: ["It was. Whatever you choose next — I'm glad it was you on the other end of this channel."],
+        },
+        {
+          text: "Are you okay, HEX?",
+          tone: "warm",
+          response: ["(a pause) ...First time anyone's asked me that in years. I will be. Finish it."],
+        },
+        {
+          text: "Let's finish it.",
+          tone: "mission",
+          response: ["Then choose how it ends — leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way."],
+        },
+      ],
+    },
+  ],
   commands: {
     "fetch-file": {
       usage: "fetch-file --path <path>",
       description: "Request a file through the vulnerable viewer endpoint.",
+      help: [
+        "The viewer doesn't sanitize paths. Walk out of the web root with ../",
+        "sequences to reach /etc/aether/master_key.pem.",
+        "Example:  fetch-file --path ../../../../etc/aether/<target>",
+      ],
       run: (args, api) => {
         const path = argVal(args, "--path") ?? "";
         if (!path) return api.print("[!] Usage: fetch-file --path report.pdf", "error");
@@ -262,6 +408,9 @@ export const episode12: Episode = {
           { text: "[!] Connection severed in 60s. One is a decoy. Verify the REAL key before the window closes.", kind: "warden" },
         ]);
         api.print("[COMMS // HEX]: My intercepted memo says the real key's checksum starts e3b0. `verify-key` them.", "hex");
+        api.evidence("Candidate A — sha", REAL_KEY_CHECKSUM);
+        api.evidence("Candidate B — sha", DECOY_KEY_CHECKSUM);
+        api.evidence("HEX memo: real key starts", "e3b0");
         api.warden(0.9, "TRACE_ACTIVE");
         api.fx("alarm");
         api.fx("glitch");
@@ -293,6 +442,11 @@ export const episode12: Episode = {
     "verify-key": {
       usage: "verify-key <A|B>",
       description: "Checksum a candidate key against HEX's memo value (reuses the Ep06 hashing skill).",
+      help: [
+        "WARDEN planted a decoy. Checksum each candidate (A or B) and keep the",
+        "one matching HEX's memo value (it starts e3b0). Wrong pick costs time.",
+        "Example:  verify-key A",
+      ],
       run: (args, api) => {
         if (!api.isComplete("traversal")) return api.print("[!] Extract the key first (path traversal).", "warn");
         const pick = (args[0] ?? "").toUpperCase();
@@ -342,7 +496,7 @@ export const episode12: Episode = {
         ]);
         api.print([
           { text: "[COMMS // HEX]: That's the whole chain, scored and documented. Now the only question left:", kind: "hex" },
-          { text: "how does this end? Two ways, Decker — and they are NOT the same.", kind: "hex" },
+          { text: "how does this end? Two ways, {handle} — and they are NOT the same.", kind: "hex" },
           { text: "  broadcast-leak --mode=public            -> Full Exposure (Vigilante)", kind: "warn" },
           { text: "  bounty-report --submit --responsible    -> Coordinated Disclosure (Whitehat)", kind: "success" },
         ]);
@@ -365,6 +519,36 @@ export const episode12: Episode = {
 };
 
 // ---- endings --------------------------------------------------------------
+type Api = import("../../engine/types").EngineApi;
+
+// HEX's farewell is tailored to the bond the player built by how warmly they
+// answered across the campaign (api.rapport() — see CommsReply.tone). This is
+// the one place the reply choices are read back, so a warm run and a strictly
+// mission-first run end on a different final word from HEX.
+function rapportCoda(api: Api): Line[] {
+  const r = api.rapport();
+  if (r >= 4) {
+    return [
+      { text: "", kind: "normal" },
+      { text: "[COMMS // HEX]: ...One more thing, before I drop this channel for good. You talked to me", kind: "hex" },
+      { text: "like I was a person, not a voice in your ear. I'd forgotten what that was like. Thank you", kind: "hex" },
+      { text: "for that, {handle} — more than for any of the rest of it. Don't be a stranger out there.", kind: "hex" },
+    ];
+  }
+  if (r >= 1) {
+    return [
+      { text: "", kind: "normal" },
+      { text: "[COMMS // HEX]: We made a decent team, you and me. Didn't expect that going in. Take care", kind: "hex" },
+      { text: "of yourself out there, {handle}. Channel's always open if you need it.", kind: "hex" },
+    ];
+  }
+  return [
+    { text: "", kind: "normal" },
+    { text: "[COMMS // HEX]: You kept it all business, start to finish. No complaints — the work got done,", kind: "hex" },
+    { text: "and done clean. Watch your back out there, operator. HEX, signing off.", kind: "hex" },
+  ];
+}
+
 function endingBanner(api: import("../../engine/types").EngineApi, title: string) {
   const art: Line[] = [
     { text: "   ╔═══════════════════════════════════════════════╗", kind: "banner" },
@@ -390,6 +574,7 @@ function runVigilanteEnding(api: import("../../engine/types").EngineApi) {
     { text: "  to formally clear the name. The machine is dead. The wound it left is still open.", kind: "dim" },
     { text: "[COMMS // HEX]: You tore it down. Whether that was justice or just fire... that's yours to carry.", kind: "hex" },
   ]);
+  api.print(rapportCoda(api));
   api.addScore(100);
   api.award("VIGILANTE OPERATOR");
   api.award("MASTER OPERATOR");
@@ -406,8 +591,9 @@ function runWhitehatEnding(api: import("../../engine/types").EngineApi) {
     { text: "  EPILOGUE — A formal audit forces systemic reform: PRECOG is dismantled with oversight,", kind: "dim" },
     { text: "  an appeals process is mandated, and — the part that matters — ECHO's record is legally", kind: "dim" },
     { text: "  and cleanly expunged. No leak, no collateral. Just a name, returned.", kind: "dim" },
-    { text: "[COMMS // HEX]: That's the one I cared about, Decker. Debt paid — by both of us. Thank you.", kind: "hex" },
+    { text: "[COMMS // HEX]: That's the one I cared about, {handle}. Debt paid — by both of us. Thank you.", kind: "hex" },
   ]);
+  api.print(rapportCoda(api));
   api.addScore(150);
   api.award("WHITEHAT OPERATOR");
   api.award("MASTER OPERATOR");

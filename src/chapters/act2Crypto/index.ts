@@ -39,23 +39,34 @@ export const episode04: Episode = {
   briefing: "HEX: Encoding is not encryption — anyone can reverse it with no key. Strip the padding.",
   codexTopic: "cryptography",
   intro: [
-    "[COMMS // HEX]: Same rule as always, Decker — cleared shard, nothing leaves the range.",
-    "[COMMS // HEX]: That session cookie — VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA== . Rookies think encoding",
-    "text is the same as encrypting it. Encoding just reshapes data for transport; anyone reverses it",
-    "in milliseconds with no secret key. Strip the padding and reveal what Aether's hiding.",
-    "[COMMS // HEX]: `decode --base64 <data>`, then `hexview --decode <stream>` on the exec log.",
-    { text: "[COMMS // HEX]: ...Base64. Typical. I've seen worse out of shops that should know better.", kind: "hex" },
-    { text: "Aether especially — they always dress up laziness as protocol. Trust me on that one.", kind: "hex" },
+    "[COMMS // HEX]: Same rule as always, {handle} — cleared shard, nothing leaves the range.",
+    "[COMMS // HEX]: I pulled that session cookie off the wire and dropped it on your deck. See how it",
+    "ends in == ? ...Base64. Typical. I've seen worse out of shops that should know better — Aether",
+    "especially. They always dress up laziness as protocol.",
+    "[COMMS // HEX]: Here's the lesson rookies miss: encoding is not encryption. Base64 just reshapes",
+    "data for transport — anyone reverses it in milliseconds, no key required. So reverse it, and let's",
+    "read what Aether thinks it's hiding.",
+    "[COMMS // HEX]: Start by stripping the padding off that cookie — reverse the Base64 and see what",
+    "falls out. `decode --help` if you need the syntax; `codex` has the encoding-vs-encryption theory.",
+    // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
+    { text: "", kind: "normal" },
+    { text: "  ── INTERCEPT // SESSION COOKIE ─────────────────────────────", kind: "system" },
+    { text: "  AETHER_SESSION=VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA==", kind: "normal" },
+    { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+    { text: "  (select + copy the value after '=', then run `decode` — see `decode --help`)", kind: "dim" },
   ],
   objectives: [
-    { id: "b64", label: "Decode the cookie: decode --base64 <data>" },
-    { id: "hex", label: "Decode the exec log: hexview --decode <stream>" },
+    { id: "b64", label: "Decode the intercepted session cookie" },
+    { id: "hex", label: "Decode the executive hex log to a name" },
   ],
+  evidence: [{ label: "Session cookie (Base64)", value: "VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA==" }],
   hints: [
     "Base64 maps every 3 bytes to 4 printable chars; trailing '=' is padding. Hex writes each byte as " +
       "two 0-F digits. Both are reversible with zero key — that's the whole lesson: encoding ≠ secrecy.",
     "Decode the cookie string with `decode --base64 \"...\"`, then feed the hex bytes to `hexview --decode \"...\"`.",
-    `Run: decode --base64 "VFlQRS0wNC1PUkVPTi1QUk9UT0NPTA==" then hexview --decode "${KOVACS_HEX}"`,
+    "First decode the Base64 session cookie printed in your terminal (the value after '=', ending in " +
+      "==) with decode --base64. That reveals a protocol token AND prints an EXEC-LOG hex dump — feed " +
+      "those hex bytes to hexview --decode to read the name signing the exec channel.",
   ],
   outro: [
     "[COMMS // HEX]: TYPE-04-OREON-PROTOCOL, and DIRECTOR_KOVACS signing the exec channel. Good.",
@@ -66,6 +77,11 @@ export const episode04: Episode = {
     decode: {
       usage: 'decode --base64 "<data>"',
       description: "Decode a Base64 string back to ASCII.",
+      help: [
+        "Base64 ends in '=' padding and is reversible with no key.",
+        "You captured the cookie value in the Episode 03 banner (select+copy it).",
+        'Example:  decode --base64 "<the cookie value>"',
+      ],
       run: (args, api) => {
         if (argVal(args, "--base64") === undefined && args[0] !== "--base64") {
           return api.print('[!] Usage: decode --base64 "<data>"', "error");
@@ -81,12 +97,30 @@ export const episode04: Episode = {
           api.print("[COMMS // HEX]: There it is — a protocol token, in plain text. No key required.", "hex");
           api.complete("b64");
           api.addScore(40);
+          // The token unlocks the executive hex log — surface it to decode next.
+          if (!api.isComplete("hex")) {
+            api.print([
+              { text: "", kind: "normal" },
+              { text: "[*] Token OREON-PROTOCOL accepted — pulling the executive hex log it unlocks:", kind: "system" },
+              { text: "  ── EXEC-LOG // HEX DUMP ────────────────────────────────────", kind: "system" },
+              { text: `  ${KOVACS_HEX}`, kind: "warn" },
+              { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+              { text: "  (select + copy those bytes, then run `hexview` — see `hexview --help`)", kind: "dim" },
+            ]);
+            api.evidence("Executive log (hex dump)", KOVACS_HEX);
+            api.print("[COMMS // HEX]: There's your dump. `hexview --decode` it — who's signing the exec channel?", "hex");
+          }
         }
       },
     },
     hexview: {
       usage: 'hexview --decode "<hex bytes>"',
       description: "Interpret a hex byte stream as ASCII.",
+      help: [
+        "Each byte is two hex digits (0-9, a-f); decode them to ASCII characters.",
+        "HEX hands you the exec log's hex bytes in the briefing — paste them in.",
+        'Example:  hexview --decode "44 49 52 ..."',
+      ],
       run: (args, api) => {
         const data = (argVal(args, "--decode") ?? "").replace(/^["']|["']$/g, "");
         if (!data) return api.print('[!] Usage: hexview --decode "44 49 52 ..."', "error");
@@ -125,29 +159,69 @@ export const episode05: Episode = {
     "They know someone's sniffing, so they ran it through a classical rotation cipher, then an XOR",
     "bitmask. Let's break their math.",
     { text: "[COMMS // HEX]: ...Vance. Haven't heard that name in a long time.", kind: "hex" },
-    { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, Decker. Not the history lesson.", kind: "hex" },
+    { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, {handle}. Not the history lesson.", kind: "hex" },
+    { text: "[COMMS // HEX]: Intercept's on your deck. Start with the outer layer — it's a classic rotation", kind: "hex" },
+    { text: "cipher, the oldest trick there is. Crack that first and let's see if it reads. `cipher-crack --help`", kind: "hex" },
+    { text: "for syntax; `codex` for the cipher theory.", kind: "hex" },
+    // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
+    { text: "", kind: "normal" },
+    { text: "  ── INTERCEPT // CAESAR LAYER ───────────────────────────────", kind: "system" },
+    { text: "  WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD", kind: "normal" },
+    { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+    { text: "  (copy the ciphertext above into `cipher-crack` — see `cipher-crack --help`)", kind: "dim" },
   ],
   objectives: [
-    { id: "caesar", label: "Brute-force the shift: cipher-crack --type caesar --text \"...\"" },
-    { id: "xor", label: "Strip the XOR mask: xor-decrypt --stream \"...\" --key 0x42" },
+    {
+      id: "caesar",
+      label: "Brute-force the Caesar shift to readable text",
+      hex: [
+        "[COMMS // HEX]: Readable now — a fixed-shift cipher never survives 25 guesses. But look: there's a",
+        "second layer buried under it, an XOR bitmask. I just pulled the stream and the key onto your deck",
+        "(they're in your Evidence Locker too). Peel that layer off next.",
+      ],
+    },
+    { id: "xor", label: "Strip the single-byte XOR mask off the stream" },
   ],
+  evidence: [{ label: "Caesar ciphertext", value: "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD" }],
   hints: [
     "A Caesar cipher shifts every letter by a fixed amount — only 25 possibilities, so you brute-force " +
       "all of them and eyeball which reads as English (frequency analysis). XOR is its own inverse: " +
       "ciphertext ^ key = plaintext, bit by bit.",
     `Run cipher-crack on the intercept, read the shift that yields English, then xor-decrypt the ` +
       `telemetry stream with --key 0x42.`,
-    `cipher-crack --type caesar --text "${CAESAR_CIPHERTEXT}"  then  xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42`,
+    "Caesar first: pass the intercepted ciphertext shown on your deck to cipher-crack --type caesar — " +
+      "it tries all 25 shifts and flags the English one. Then peel the XOR layer: give xor-decrypt the " +
+      "hex stream from your deck and the recovered --key 0x42 (XOR is its own inverse).",
   ],
   outro: [
     "[COMMS // HEX]: 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet — Bastion Core.",
     "[COMMS // HEX]: And did you catch that log? That channel didn't have a second layer yesterday.",
     "Something in there is watching what we break and patching around it in real time. Type `next`.",
   ],
+  beats: [
+    {
+      trigger: "intro",
+      prompt: "...You caught that, didn't you. The way I said her name.",
+      replies: [
+        {
+          text: "Who's Vance to you?",
+          tone: "warm",
+          response: ["(a long pause) Someone I worked beside, a lifetime ago. Leave it there for now. Please.", "...We'll get to it. Just not tonight."],
+        },
+        { text: "Focus. Got it.", tone: "mission", response: ["...Thank you, {handle}. Crack the Caesar layer first."] },
+        { text: "You can tell me when you're ready.", tone: "warm", response: ["(quiet) ...Yeah. I know. Let's work."] },
+      ],
+    },
+  ],
   commands: {
     "cipher-crack": {
       usage: 'cipher-crack --type caesar --text "<ciphertext>"',
       description: "Brute-force all 25 Caesar/ROT shifts and flag the English one.",
+      help: [
+        "Tries every shift and highlights the one that reads as English.",
+        "Feed it the intercepted ciphertext from HEX's briefing (copy it).",
+        'Example:  cipher-crack --type caesar --text "WKH SURMHFW ..."',
+      ],
       run: (args, api) => {
         if (argVal(args, "--type") !== "caesar") return api.print("[!] Only --type caesar is wired up here.", "error");
         const text = (argVal(args, "--text") ?? "").replace(/^["']|["']$/g, "") || CAESAR_CIPHERTEXT;
@@ -164,6 +238,19 @@ export const episode05: Episode = {
           text: `[✓] ROT-${best.shift} reads as English: "${best.text}"`,
           kind: "success",
         });
+        // Staggered reveal: cracking the Caesar layer surfaces the XOR layer's
+        // stream + key — so the second step's data appears only now.
+        if (!api.isComplete("xor")) {
+          api.print([
+            { text: "", kind: "normal" },
+            { text: "  ── TELEMETRY // XOR STREAM  (recovered key: 0x42) ──────────", kind: "system" },
+            { text: "  0x12 0x10 0x07 0x01 0x0D 0x05", kind: "normal" },
+            { text: "  ────────────────────────────────────────────────────────────", kind: "system" },
+            { text: "  (feed this stream + the key to `xor-decrypt` — see `xor-decrypt --help`)", kind: "dim" },
+          ]);
+          api.evidence("XOR stream (hex)", "0x12 0x10 0x07 0x01 0x0D 0x05");
+          api.evidence("XOR key (recovered)", "0x42");
+        }
         api.complete("caesar");
         api.addScore(45);
         // The instant the Caesar layer falls, WARDEN adapts (first real reaction).
@@ -175,8 +262,14 @@ export const episode05: Episode = {
       },
     },
     "xor-decrypt": {
-      usage: 'xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42',
+      usage: 'xor-decrypt --stream "0x.. 0x.." --key 0x..',
       description: "XOR a hex stream against a single-byte key, with live bit-flip view.",
+      help: [
+        "XOR is its own inverse: ciphertext ^ key = plaintext, byte by byte.",
+        "Pass the hex --stream and the single-byte --key — both are on your deck",
+        "(check the intercept / Evidence Locker).",
+        'Example:  xor-decrypt --stream "0x.. 0x.." --key 0x..',
+      ],
       run: (args, api) => {
         const stream = (argVal(args, "--stream") ?? "").replace(/^["']|["']$/g, "");
         const keyStr = argVal(args, "--key") ?? "";
@@ -193,10 +286,18 @@ export const episode05: Episode = {
           });
         });
         api.print(lines);
-        api.print({
-          text: "[✓] XOR is symmetric: the same operation that masked the stream reveals it. One key, both ways.",
-          kind: "success",
-        });
+        // Show the payoff: the decrypted bytes as readable ASCII.
+        const text = bytes.map((b) => (b >= 32 && b < 127 ? String.fromCharCode(b) : "·")).join("");
+        api.print([
+          { text: `[✓] Decrypted bytes → ASCII: "${text}"`, kind: "success" },
+          { text: "[✓] XOR is symmetric: the same operation that masked the stream reveals it. One key, both ways.", kind: "success" },
+        ]);
+        if (text === "PRECOG") {
+          api.print([
+            { text: "[COMMS // HEX]: PRECOG. ...So that's what they named it — the machine that scored ECHO.", kind: "hex" },
+            { text: "The project moving to Subnet Gamma IS PRECOG. Now we know exactly what we're hunting.", kind: "hex" },
+          ]);
+        }
         api.complete("xor");
         api.addScore(45);
       },
@@ -222,19 +323,34 @@ export const episode06: Episode = {
     { text: "    kovacs:     5d41402abc4b2a76b9719d911017c592", kind: "dim" },
     { text: "    vance:      098f6bcd4621d373cade4e832627b4f6", kind: "dim" },
     { text: "    admin_root: 21232f297a57a5a743894a0e4a801fc3", kind: "dim" },
-    "[COMMS // HEX]: Kovacs. Vance. Same two names as the intercept. And 'admin_root' on a password of",
-    "'admin' — some things never change in that building, no matter how many years go by.",
-    "[COMMS // HEX]: `hash-identify <hash>`, then `crack --hash <hash> --wordlist synth_rockyou.txt`.",
+    "[COMMS // HEX]: Kovacs. Vance. Same two names from the intercept — and an 'admin_root' account that",
+    "should've been locked down years ago. Some things never change in that building.",
+    "[COMMS // HEX]: Start by fingerprinting one of those hashes — what are we even dealing with? `hash-identify",
+    "--help` for syntax; `codex` explains hashing, salting, and rainbow tables.",
   ],
   objectives: [
-    { id: "identify", label: "Fingerprint the algorithm: hash-identify <hash>" },
-    { id: "crack", label: "Dictionary-attack admin_root: crack --hash <hash> --wordlist synth_rockyou.txt" },
+    {
+      id: "identify",
+      label: "Fingerprint the hash algorithm",
+      hex: [
+        "[COMMS // HEX]: 32 hex characters — that's MD5, broken for password storage for twenty years. You",
+        "can't reverse a hash, but you don't have to: hash a wordlist and compare. Crack the weak one.",
+      ],
+    },
+    { id: "crack", label: "Dictionary-attack the admin_root hash" },
+  ],
+  evidence: [
+    { label: "kovacs hash", value: "5d41402abc4b2a76b9719d911017c592" },
+    { label: "vance hash", value: "098f6bcd4621d373cade4e832627b4f6" },
+    { label: "admin_root hash", value: "21232f297a57a5a743894a0e4a801fc3" },
   ],
   hints: [
     "A 32-hex-char digest is 128 bits — the MD5 signature. Because MD5 is unsalted and fast, a dictionary " +
       "attack hashes every word in a list and compares. 'admin_root' hashes to the MD5 of 'admin'.",
     "Run `hash-identify 21232f297a57a5a743894a0e4a801fc3`, then crack that same hash with the wordlist.",
-    "hash-identify 21232f297a57a5a743894a0e4a801fc3  then  crack --hash 21232f297a57a5a743894a0e4a801fc3 --wordlist synth_rockyou.txt",
+    "Fingerprint a hash with hash-identify (32 hex chars = MD5). Then copy the admin_root hash from " +
+      "the dump in your terminal and run crack on it with --wordlist synth_rockyou.txt — it hashes " +
+      "each word and compares until one matches.",
   ],
   outro: [
     "[COMMS // HEX]: ...Hold on. Before we move on Bastion Core, there's something you should know.",
@@ -243,14 +359,42 @@ export const episode06: Episode = {
     "the lab two floors up. I wrote some of the early pattern-matching logic — the stuff still running",
     "under whatever flagged ECHO. I told myself for a long time I didn't know what it would grow into.",
     "[COMMS // HEX]: I don't tell myself that anymore. I left when I saw what shipped. Getting you into",
-    "this system isn't activism for me, Decker. It's the closest thing I've got to fixing what I broke.",
+    "this system isn't activism for me, {handle}. It's the closest thing I've got to fixing what I broke.",
     "[COMMS // HEX]: Every hint I've handed you — call it paying a debt.",
     { text: "[COMMS // HEX]: (a long pause) ...Anyway. Bastion Core's waiting. You ready? Type `next`.", kind: "hex" },
+  ],
+  beats: [
+    {
+      trigger: "objective:crack",
+      prompt: "...So now you know. All of it.",
+      replies: [
+        {
+          text: "You built it — and now you're tearing it down.",
+          tone: "mission",
+          response: ["That's the only math that lets me sleep. Barely. But it's enough to keep moving."],
+        },
+        {
+          text: "Doesn't change anything between us.",
+          tone: "warm",
+          response: ["(a breath) ...It changes plenty for me. But I'll take it. Thank you, {handle}."],
+        },
+        {
+          text: "We'll fix it. Together.",
+          tone: "warm",
+          response: ["(quiet) Yeah. Together. Bastion Core's waiting when you are."],
+        },
+      ],
+    },
   ],
   commands: {
     "hash-identify": {
       usage: "hash-identify <hash>",
       description: "Fingerprint a hash by length/signature.",
+      help: [
+        "Length gives it away: 32 hex chars = MD5, 40 = SHA-1, 64 = SHA-256.",
+        "The dump in the briefing lists each user's hash — copy one in.",
+        "Example:  hash-identify <32-hex-char-hash>",
+      ],
       run: (args, api) => {
         const h = args[0];
         if (!h) return api.print("[!] Usage: hash-identify <hash>", "error");
@@ -267,6 +411,11 @@ export const episode06: Episode = {
     crack: {
       usage: "crack --hash <hash> --wordlist <file>",
       description: "Run a dictionary attack against a hash.",
+      help: [
+        "Hashes each word in the list and compares — no 'decrypting' a hash.",
+        "Target the admin_root hash; the wordlist file is synth_rockyou.txt.",
+        "Example:  crack --hash <hash> --wordlist synth_rockyou.txt",
+      ],
       run: (args, api) => {
         const hash = argVal(args, "--hash");
         const wordlist = argVal(args, "--wordlist");

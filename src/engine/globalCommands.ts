@@ -1,6 +1,8 @@
 import type { EpisodeCommand, Line } from "./types";
 import { store, GLOBAL_COMMANDS, registerGlobalCommands } from "./gameStore";
 import { EPISODES } from "../chapters";
+import { exportSave, importSaveViaPicker } from "../state/saveFile";
+import { SOLUTIONS, GIVE_UP_FLAGS } from "./solutions";
 
 // Commands available in every episode. Episode-specific commands are merged
 // *over* these (an episode may override e.g. `whoami`). Reading hints or the
@@ -60,35 +62,164 @@ const commands: Record<string, EpisodeCommand> = {
 
   clear: {
     usage: "clear",
-    description: "Clear the terminal screen.",
+    description: "Clear the terminal screen (your Evidence Locker is kept — see `recall`).",
     // Intercepted by TerminalPane before dispatch; this entry is for `help`.
     run: () => {},
   },
 
+  ls: {
+    usage: "ls [path]",
+    description: "List readable files on the host you're on (recon).",
+    help: [
+      "Lists the files the current foothold exposes. `cat <path>` reads one.",
+      "Recon artifacts (configs, captures, logs) often leak your next target.",
+    ],
+    run: (args, api) => {
+      const files = store.episode.files ?? {};
+      const keys = Object.keys(files);
+      if (keys.length === 0) return api.print("[*] Nothing readable from here.", "dim");
+      const prefix = args.find((a) => !a.startsWith("-"));
+      const shown = prefix ? keys.filter((k) => k.startsWith(prefix) || k.startsWith(prefix.replace(/\/$/, ""))) : keys;
+      if (shown.length === 0) return api.print(`ls: ${prefix}: No such file or directory`, "error");
+      api.print([
+        { text: "[*] Readable from this foothold:", kind: "system" },
+        ...shown.map((k) => ({ text: `  ${k}`, kind: "normal" as const })),
+        { text: "    (cat <path> to read one)", kind: "dim" },
+      ]);
+    },
+  },
+
+  cat: {
+    usage: "cat <path>",
+    description: "Read a file's contents (recon).",
+    help: [
+      "Prints a file. `ls` first to see what's readable here.",
+      "A config or capture often names the host/IP you need next.",
+    ],
+    run: (args, api) => {
+      const path = args.find((a) => !a.startsWith("-"));
+      if (!path) return api.print("[!] Usage: cat <path>", "error");
+      const files = store.episode.files ?? {};
+      // Exact path, then a forgiving basename match (so `cat services.conf` works).
+      const base = path.replace(/^\.?\//, "");
+      const key =
+        files[path] ? path :
+        files[base] ? base :
+        Object.keys(files).find((k) => k === path || k.endsWith(`/${base}`) || k.split("/").pop() === base);
+      const f = key ? files[key] : undefined;
+      if (!f) return api.print(`cat: ${path}: No such file or directory`, "error");
+      api.print(f.lines.map((l) => ({ text: `  ${l}`, kind: "normal" as const })));
+      const r = f.reveal;
+      if (r) {
+        if (r.evidence) api.evidence(r.evidence.label, r.evidence.value);
+        if (r.hex) api.print(r.hex.map((h) => ({ text: h, kind: "hex" as const })));
+        if (typeof r.score === "number") api.addScore(r.score);
+        if (r.completes) api.complete(r.completes);
+      }
+    },
+  },
+
+  recall: {
+    usage: "recall",
+    description: "Reprint the Evidence Locker — recovered strings for this episode (survives `clear`).",
+    help: [
+      "The Evidence Locker holds this episode's key reference strings (cookies,",
+      "hex dumps, ciphertexts, hashes, checksums). It lives in the TELEMETRY pane",
+      "and is never wiped by `clear`. `recall` reprints it back into the terminal.",
+    ],
+    run: (_args, api) => {
+      const items = store.getEvidence();
+      if (items.length === 0) {
+        return api.print("[*] Evidence Locker is empty — nothing recovered yet this episode.", "system");
+      }
+      const lines: Line[] = [{ text: "═══ EVIDENCE LOCKER — RECOVERED DATA ═══", kind: "banner" }];
+      for (const it of items) {
+        lines.push({ text: `  ${it.label}:`, kind: "dim" });
+        lines.push({ text: `    ${it.value}`, kind: "normal" });
+      }
+      lines.push({ text: "[*] Also pinned in the TELEMETRY pane — it survives `clear`.", kind: "dim" });
+      api.print(lines);
+    },
+  },
+
   intel: {
     usage: "intel [1|2|3]",
-    description: "Decker Intel hint — Tier 1 theory (default), 2 syntax nudge, 3 full solution.",
+    description: "Operator intel hint — Tier 1 theory (default), 2 syntax nudge, 3 deep walkthrough.",
     run: (args, api) => {
       const tier = (Number(args[0]) || 1) as 1 | 2 | 3;
       if (tier < 1 || tier > 3) return api.print("[!] Tier must be 1, 2, or 3.", "error");
       const ep = store.episode;
       const prev = highestTier.get(ep.id) ?? 1;
       if (tier > prev) highestTier.set(ep.id, tier);
-      const labels = ["THEORY PRIMER", "SYNTAX NUDGE", "TERMINAL OVERRIDE"];
+      const labels = ["THEORY PRIMER", "SYNTAX NUDGE", "DEEP WALKTHROUGH"];
       api.print([
         { text: `[DECKER INTEL // TIER ${tier} — ${labels[tier - 1]}]`, kind: "warn" },
         { text: ep.hints[tier - 1] || "No hint available for this tier.", kind: "normal" },
       ]);
-      if (tier === 3) api.print("  (Full solution viewed — clean-solve bonus forfeited.)", "dim");
+      if (tier === 3) {
+        api.print([
+          { text: "  (Deepest hint viewed — clean-solve bonus forfeited. The exact command is not shown.)", kind: "dim" },
+          {
+            text: `  Still stuck and want it typed for you? Admit defeat: \`stuck ${GIVE_UP_FLAGS[0]}\` drops the exact command in your prompt.`,
+            kind: "dim",
+          },
+        ]);
+      }
+    },
+  },
+
+  stuck: {
+    usage: "stuck --<give-up-flag>",
+    description: "Last resort (unlocks after `intel 3`): drops the exact next command into your prompt.",
+    hidden: true, // revealed by the intel 3 output, not the help list
+    help: [
+      "Only works once you've read the full solution (`intel 3`).",
+      "Append one of the (deliberately ridiculous) surrender flags, e.g.:",
+      `  stuck ${GIVE_UP_FLAGS[0]}`,
+      "Each use drops the next command of the solution into your prompt; press Enter to run it.",
+    ],
+    run: (args, api) => {
+      const epId = store.episode.id;
+      if (!usedFullSolution(epId)) {
+        return api.print(
+          "[!] `stuck` is locked. Work it — `intel` (theory), `intel 2` (syntax), then `intel 3`. It unlocks after you've read the full solution.",
+          "warn",
+        );
+      }
+      const flag = args.find((a) => a.startsWith("--"))?.toLowerCase();
+      if (!flag || !GIVE_UP_FLAGS.includes(flag)) {
+        return api.print([
+          { text: "[*] To formally admit defeat, append one of these:", kind: "warn" },
+          ...GIVE_UP_FLAGS.map((f) => ({ text: `    stuck ${f}`, kind: "dim" as const })),
+        ]);
+      }
+      const sol = SOLUTIONS[epId] ?? [];
+      if (sol.length === 0) {
+        return api.print("[*] No canned solution for this one — you're on your own, {handle}.", "dim");
+      }
+      const idx = Math.min(sol.length - 1, store.getStuckIndex());
+      const cmd = sol[idx];
+      store.bumpStuckIndex();
+      api.print([
+        { text: `[*] ${flag.replace(/^--/, "")}. Fine. Here — just run this:`, kind: "warn" },
+        { text: `  ${cmd}`, kind: "success" },
+      ]);
+      store.fillInput(cmd);
     },
   },
 
   codex: {
-    usage: "codex [topic]",
-    description: "Open the in-game reference library (networking / cryptography / pentesting / web).",
-    run: (_args, api) => {
-      api.print("[*] Opening CODEX reference library... (free, no penalty)", "system");
-      api.openCodex();
+    usage: "codex [topic|command]",
+    description: "Open the reference library. `codex <command>` jumps to the matching concept.",
+    help: [
+      "No argument opens this episode's topic.",
+      "codex <topic>    networking · cryptography · pentesting · webSecurity",
+      "codex <command>  jumps to the concept behind a tool, e.g. `codex netmap`.",
+    ],
+    run: (args, api) => {
+      const query = args.join(" ").trim();
+      api.print(`[*] Opening CODEX reference library${query ? ` → ${query}` : ""}... (free, no penalty)`, "system");
+      api.openCodex(query || undefined);
       api.complete("codex");
     },
   },
@@ -166,13 +297,69 @@ const commands: Record<string, EpisodeCommand> = {
     },
   },
 
+  credits: {
+    usage: "credits",
+    description: "Show credits, acknowledgments, and license.",
+    run: (_args, api) => {
+      api.print([
+        { text: "SYNTH // BREACH — free & open source (MIT). See LICENSE + CREDITS.md.", kind: "banner" },
+        { text: "  Curriculum inspired by freeCodeCamp — freecodecamp.org (not affiliated).", kind: "normal" },
+        { text: "  Concept nods: cliamp (github.com/bjarneo/cliamp) · ai-visualizer (github.com/jaredrhod/ai-visualizer).", kind: "normal" },
+        { text: "  Built with xterm.js · React · Vite (MIT). Retro voice: SAM / sam-js (abandonware — see CREDITS).", kind: "dim" },
+        { text: "  Music: royalty-free synthwave from Pixabay (delosound, nickpanek, lofidreams, hitslab,", kind: "dim" },
+        { text: "         turtlebeats, lnplusmusic, arpmedia, alex-morgan, zephiramusic).", kind: "dim" },
+        { text: "  An educational project. Not affiliated with any organization listed. Trademarks belong to their owners.", kind: "system" },
+      ]);
+    },
+  },
+
   mute: {
     usage: "mute",
-    description: "Toggle audio on/off (also Alt+M).",
+    description: "Toggle sound effects on/off (also Alt+M).",
     run: (_args, api) => {
       const next = !store.profile.audioMuted;
       store.setMuted(next);
-      api.print(`[*] Audio ${next ? "muted" : "unmuted"}.`, "system");
+      api.print(`[*] Sound effects ${next ? "muted" : "unmuted"}.`, "system");
+    },
+  },
+
+  music: {
+    usage: "music",
+    description: "Toggle the synthwave background music.",
+    run: (_args, api) => {
+      const next = !store.profile.musicEnabled;
+      store.setMusicEnabled(next);
+      api.print(`[*] Background music ${next ? "on" : "off"}.`, "system");
+    },
+  },
+
+  voice: {
+    usage: "voice",
+    description: "Toggle HEX voice narration (reads comms aloud).",
+    run: (_args, api) => {
+      const next = !store.profile.voiceEnabled;
+      store.setVoiceEnabled(next);
+      api.print(`[*] HEX voice narration ${next ? "on" : "off"}.`, "system");
+    },
+  },
+
+  save: {
+    usage: "save",
+    description: "Download your progress as a .synthsave file (to continue elsewhere).",
+    run: (_args, api) => {
+      exportSave();
+      api.print("[✓] Save file downloaded. Keep it — `load` it on any device, or hit LOAD GAME on the boot screen, to continue.", "success");
+      // Ticks the Episode 01 onboarding objective (harmless no-op elsewhere).
+      api.complete("save");
+    },
+  },
+
+  load: {
+    usage: "load",
+    description: "Import a .synthsave file to continue a saved game.",
+    run: (_args, api) => {
+      api.print("[*] Choose a .synthsave file to import...", "system");
+      importSaveViaPicker((msg, ok) => api.print(`[${ok ? "✓" : "!"}] ${msg}`, ok ? "success" : "error"));
     },
   },
 
