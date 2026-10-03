@@ -39,7 +39,7 @@ const SCRIPTS: Record<number, string[]> = {
   5: ['cipher-crack --type caesar --text "WKH SURMHFW LV PRYLQJ WR VXEQHW JDPPD"', 'xor-decrypt --stream "0x53 0x59 0x4E" --key 0x42'],
   6: ["hash-identify 21232f297a57a5a743894a0e4a801fc3", "crack --hash 21232f297a57a5a743894a0e4a801fc3 --wordlist synth_rockyou.txt"],
   7: ["trace --pattern caught-cell-01 --compare hex-contact-log", "cat gamma-recon.cap", "vulnscan --host 10.42.20.10", 'searchsploit "ProFTPD 1.3.3c"'],
-  8: ["use exploit/unix/ftp/proftpd_backdoor", "set RHOST 10.42.20.10", "set PAYLOAD cmd/unix/reverse", "exploit"],
+  8: ["use exploit/unix/ftp/proftpd_133c_backdoor", "set RHOST 10.42.20.10", "set PAYLOAD cmd/unix/reverse", "exploit"],
   9: ["enumerate", "find / -perm -u=s -type f", "strings /opt/aether/bin/system-backup", "priv-esc --vector path-hijack"],
   10: ["cat /etc/aether/services.conf", "proxy-intercept --target cloud.aetherdyn.internal", `inject-sql --payload "admin' OR '1'='1' --"`],
   11: ["api-probe --endpoint /user/profile", "tamper --param user_id=0001"],

@@ -572,7 +572,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> CVE-2010-4221, 9.8 critical. Unpatched legacy software — still the #1 way real enterprises get breached. Nothing exotic. Just something nobody updated.
+    HEX> A planted backdoor in the 1.3.3c source itself — the real ProFTPD got trojaned at the distribution server back in 2010. Unauth remote root. Supply-chain compromise is still one of the ugliest ways real systems fall: nobody wrote a bug, someone poisoned the well.
     HEX> Load it up next episode and catch a shell. Type `next`.
 ```
 
@@ -607,16 +607,16 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> That ProFTPD version has an infamous supply-chain backdoor — CVE-2010-4221, one of the ugliest in the book. Aether's own team flagged it internally and got told to patch it 'next quarter.' Next quarter never came.
+    HEX> That ProFTPD version has an infamous supply-chain backdoor — the 1.3.3c source was trojaned at the distribution server in 2010, one of the ugliest in the book. Aether's own team flagged the version internally and got told to replace it 'next quarter.' Next quarter never came.
     HEX> Start by loading that backdoor module into your cyberdeck — the one searchsploit named for the CVE (it's in your Evidence Locker). `use --help` if you need the syntax; `codex` covers reverse-vs-bind shells. Get it loaded and I'll walk you through arming it.
 ```
 
 **On your deck / Evidence Locker:**
-- Exploit module (from searchsploit): `exploit/unix/ftp/proftpd_backdoor`
+- Exploit module (from searchsploit): `exploit/unix/ftp/proftpd_133c_backdoor`
 - Target host (Bastion): `10.42.20.10`
 
 ### Walkthrough
-**▶ COMMAND:** `use exploit/unix/ftp/proftpd_backdoor`
+**▶ COMMAND:** `use exploit/unix/ftp/proftpd_133c_backdoor`
 
 ```
     USAGE   use <exploit/module/path>

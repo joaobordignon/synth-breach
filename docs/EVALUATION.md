@@ -59,7 +59,9 @@ Verdict: **accurate overall, with two fixable errors and one content-quality not
 - **Path traversal** (`../`); canonicalization + RBAC as the fix. ✔
 - **CVSS** 0.0–10.0, 9.0+ = Critical; coordinated/responsible disclosure vs full disclosure. ✔
 
-### ❗ Finding 1 — ProFTPD: the CVE and the "backdoor" are two different things (EP07/EP08)
+### ❗ Finding 1 — ProFTPD: the CVE and the "backdoor" are two different things (EP07/EP08)  —  ✅ FIXED
+*Resolution: kept the supply-chain backdoor story; module is now the real `exploit/unix/ftp/proftpd_133c_backdoor`; the `CVE-2010-4221` label was removed (the backdoor has no CVE) and the codex CVE example now uses Log4Shell (CVE-2021-44228).*
+
 The game labels the target *"ProFTPD 1.3.3c … CVE-2010-4221 … Remote **Backdoor** Command Execution … module `exploit/unix/ftp/proftpd_backdoor`"*. That conflates two separate real-world ProFTPD 1.3.3-era events:
 
 - **CVE-2010-4221** is the ProFTPD **Telnet IAC stack buffer overflow** (remote, pre-auth RCE). It affects **1.3.2rc3 – 1.3.3b** and was **fixed in 1.3.3c**. It is *not* a backdoor. ([NVD](https://nvd.nist.gov/vuln/detail/CVE-2010-4221), [xorl writeup](https://xorl.wordpress.com/2010/11/15/cve-2010-4221-proftpd-telnet_iac-remote-stack-overflow/))
@@ -69,7 +71,9 @@ So "1.3.3c" + "CVE-2010-4221" + "backdoor" is internally contradictory (that CVE
 
 **Recommended fix (keeps the backdoor story, makes it real):** keep version **1.3.3c**; use module **`exploit/unix/ftp/proftpd_133c_backdoor`** (add the `133c`); and **drop the `CVE-2010-4221` label** (replace with "supply-chain backdoor, Nov 2010" — it genuinely has no distinct CVE). Keep "9.8 critical / RCE" as flavor if you like. This is a 3-line data edit in `act3Pentest` + `searchsploit` output and actually makes the episode *more* authentic (it's a famous real incident).
 
-### ❗ Finding 2 — Finale CVSS score is 9.9, not 10.0 (EP12)
+### ❗ Finding 2 — Finale CVSS score is 9.9, not 10.0 (EP12)  —  ✅ FIXED
+*Resolution: changed the vector's `A:N` → `A:H`, so the printed 10.0 now matches the canonical CVSS 3.1 maximum vector.*
+
 `FINALE_CVSS_VECTOR = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N"` but `FINALE_CVSS_SCORE = 10.0` and the advisory prints "**BASE SCORE 10.0 — MAXIMUM CRITICAL**". For that exact vector (Availability = **None**), the CVSS 3.1 base score is **9.9**, not 10.0. A true **10.0** requires **A:H** (the canonical 10.0 vector `…S:C/C:H/I:H/A:H`, e.g. the XZ-Utils backdoor CVE-2024-3094). ([CVSS scoring reference](https://secportal.io/blog/cvss-scoring-explained), [XZ backdoor 10.0 vector](https://en.wikipedia.org/wiki/XZ_Utils_backdoor))
 
 **Two clean fixes — pick one:**

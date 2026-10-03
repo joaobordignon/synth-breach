@@ -124,7 +124,9 @@ export function crackFromDump(hash: string): HashEntry | null {
 }
 
 // ---- CVSS (Act IV, Ep 12) -------------------------------------------------
-/** The finale's fixed worst-case vector resolves to 10.0. */
-export const FINALE_CVSS_VECTOR = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N";
+/** The finale's fixed worst-case vector. A:H (rooting the surveillance core can
+ *  take it down) makes this the canonical CVSS 3.1 maximum — a true 10.0.
+ *  (With A:N the same vector scores 9.9, not 10.0.) */
+export const FINALE_CVSS_VECTOR = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H";
 export const FINALE_CVSS_SCORE = 10.0;
 

