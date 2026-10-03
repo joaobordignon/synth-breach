@@ -20,8 +20,8 @@ to type · **HELP** the `<cmd> --help` man page · **INTEL** the tiered hints.
 
 ### Opening
 ```
-    HEX> Signal's clean. You're jacked in, CYBER//ZERO — I read you five by five.
-    HEX> First things first: let's see if you can drive this rig. Type `help`, and I'll show you what you're working with.
+    HEX> Signal's clean. You're jacked in, CYBER//ZERO. I read you five by five.
+    HEX> Let's see if you can drive this rig. Type `help` and I'll show you what you're working with.
     HEX> You still with me, CYBER//ZERO? First run's always the one that sticks.
 ```
 
@@ -34,8 +34,8 @@ to type · **HELP** the `<cmd> --help` man page · **INTEL** the tiered hints.
 ```
 HEX responds:
 ```
-    HEX> Nice — that's your whole toolkit. Every line there is a command you can run.
-    HEX> Want to know more about any of it? That's what the `codex` is for — our reference library, and it's always free. Go on, open it up.
+    HEX> Nice. That's your whole toolkit. Every line there is a command you can run.
+    HEX> Want to know more about any of it? That's what the `codex` is for. Our reference library, and it's always free. Go on, open it up.
 ```
 
 **▶ COMMAND:** `codex`
@@ -49,8 +49,8 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Good — the codex is your friend. Pop it open any time you're stuck.
-    HEX> Now the one thing that matters more than any command: our code of conduct. We only ever break into what we're cleared to break into — and this whole range is practice, nothing real. Here it is:
+    HEX> Good. The codex is your friend. Pop it open any time you're stuck.
+    HEX> Now the one thing that matters more than any command: our code of conduct. We only break into what we're cleared to break into, and this whole range is practice, nothing real. Here it is:
     HEX> Read it over. When you're ready to sign on with us, type `accept-code`.
 ```
 
@@ -71,11 +71,11 @@ HEX responds:
   ▸ beat fires on: intro
   HEX> You still with me, {handle}? First run's always the one that sticks.
     • YOU> Ready. Point me at it.
-         HEX> Good. No hesitation — that's the right kind of scared. Start with `help`.
+         HEX> Good. A little scared is the right kind of scared. Start with `help`.
     • YOU> ...This is really all simulated?
-         HEX> Every byte. Air-gapped shard. Out there it's a felony; in here it's a classroom. Breathe — then `help`.
+         HEX> Every byte. It's an air-gapped shard. Out there this is a felony. In here it's a classroom. Breathe, then `help`.
     • YOU> Why me?   [warm]
-         HEX> Because you've got a reason. People with reasons don't quit at the first locked door. Now — `help`.
+         HEX> Because you've got a reason. People with reasons don't quit at the first locked door. Now go on, `help`.
 
 ```
 
@@ -99,10 +99,10 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> Channel's live. Same rule as always, CYBER//ZERO — this shard's ours to test, cleared and air-gapped. Nothing you learn here gets pointed at something you don't own. Clear?
-    HEX> Good. Aether severed standard DNS, thinks their perimeter's invisible. Cute.
-    HEX> Your subnet is 10.42.0.0/24. The /24 means the first 3 octets — 24 bits — belong to Aether. The last 8 bits are 254 possible hosts behind one gateway.
-    HEX> Start with a sweep — map your subnet and see what's actually alive on it. If the syntax trips you, `netmap --help`; the theory's always in the `codex`. Show me what's out there.
+    HEX> Channel's live. Same rule as always, CYBER//ZERO: this shard's ours to test, cleared and air-gapped. Nothing you learn here gets pointed at something you don't own. Clear?
+    HEX> Good. Aether severed standard DNS, figuring that hides their perimeter. All it does is make them predictable.
+    HEX> Your subnet is 10.42.0.0/24. The /24 means the first 3 octets, 24 bits, belong to Aether. The last 8 bits leave 254 possible hosts behind one gateway.
+    HEX> Start with a sweep. Map your subnet and see what's actually alive on it. If the syntax trips you, run `netmap --help`; the theory's always in the `codex`. Show me what's out there.
 ```
 
 ### Walkthrough
@@ -117,7 +117,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Two live out of 254 — the rest are dark. The one marked GATEWAY is your way in and out of this whole subnet. Now measure the path to it: ping it and read what comes back.
+    HEX> Two live out of 254. The rest are dark. The one marked GATEWAY is your way in and out of this whole subnet. Now measure the path to it: ping it and read what comes back.
 ```
 
 **▶ COMMAND:** `ping 10.42.0.1`
@@ -132,9 +132,9 @@ HEX responds:
 HEX responds:
 ```
     HEX> Gateway's logged.
-    HEX> ttl=64 — that's a Linux-family stack answering (Windows starts at 128).
-    HEX> Sub-4ms RTT means it's one hop away. That's your gateway — our way into this subnet.
-    HEX> Before we push on — one habit that keeps a run alive: bank it. `save` it now!
+    HEX> ttl=64 tells you a Linux-family stack is answering (Windows starts at 128).
+    HEX> Sub-4ms RTT means it's one hop away. That's your gateway, our way into this subnet.
+    HEX> Before we push on, one habit that keeps a run alive: bank it. `save` it now!
 ```
 
 **▶ COMMAND:** `save`
@@ -145,18 +145,18 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Gateway's real, and it's breathing — and your run's banked. That's your first foothold, and a save you can walk away from.
-    HEX> Get some rest, CYBER//ZERO — when you're ready, type `next`.
+    HEX> Gateway's real, it's breathing, and your run's banked. That's your first foothold, and a save you can walk away from.
+    HEX> Get some rest, CYBER//ZERO. When you're ready, type `next`.
 ```
 
 ### Dialogue choices (player reply chips)
 ```
   ▸ beat fires on: objective:ping
-  HEX> Before we push on — one habit that keeps a run alive: bank it. `save` it now!
+  HEX> Before we push on, one habit that keeps a run alive: bank it. `save` it now!
     • YOU> How do I save?   [warm]
-         HEX> Type `save`. It drops a .synthsave file on your machine — your whole run, portable. Next time, `load` it in-shell or hit LOAD GAME on the boot screen and you pick up right here. Do it now.
+         HEX> Type `save`. It drops a .synthsave file on your machine, your whole run made portable. Next time, `load` it in-shell or hit LOAD GAME on the boot screen and you pick up right here. Do it now.
     • YOU> Already on it.   [mission]
-         HEX> Good instinct. `save` drops a .synthsave file — your run, portable. `load` or LOAD GAME brings it back. Bank it before we move on.
+         HEX> Good instinct. `save` drops a .synthsave file, your run made portable. `load` or LOAD GAME brings it back. Bank it before we move on.
 
 ```
 
@@ -178,9 +178,9 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> Good work on the gateway. Now we need an entry point — a port left listening.
-    HEX> Every service answers one of three ways: wide open, slammed shut, or silently dropped like it never heard you. Firewalls love that last one. A server reveals its soul in the handshake — SYN, SYN-ACK, ACK — unless something's actively lying to you.
-    HEX> You've got a tool on your deck that maps a host's ports and captures how each one answers. Dig through your kit — `help` lists it, `<tool> --help` tells you what it does — and point it somewhere worth your time. The gateway's the only door into this subnet; everything else is noise.
+    HEX> Good work on the gateway. Now we need an entry point: a port left listening.
+    HEX> Every service answers one of three ways: wide open, slammed shut, or silently dropped like it never heard you. Firewalls love that last one. A server shows its hand in the handshake, SYN, SYN-ACK, ACK, unless something's actively lying to you.
+    HEX> You've got a tool on your deck that maps a host's ports and captures how each one answers. Dig through your kit: `help` lists it, `<tool> --help` tells you what it does. Then point it somewhere worth your time. The gateway's the only door into this subnet; everything else is noise.
     HEX> Read the flags it brings back, then `answer` me which port is hiding.
 ```
 
@@ -197,7 +197,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> 22 and 80 answered clean. But one of those three never replied at all — a firewall ate the packet and hoped you'd move on. Read the FLAGS column and `answer` me which port's hiding.
+    HEX> 22 and 80 answered clean. One of those three never replied at all. A firewall ate the packet and hoped you'd move on. Read the FLAGS column and `answer` me which port's hiding.
 ```
 
 **▶ COMMAND:** `answer 8088`
@@ -209,7 +209,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> 8088 didn't even bother with a RST — it just went dark. That's not a closed port, CYBER//ZERO, that's a port that only talks to people who already know the secret handshake.
+    HEX> 8088 didn't even bother with a RST. It just went dark. A closed port says no; this one, CYBER//ZERO, only talks to people who already know the secret handshake.
     HEX> Corporate infrastructure doesn't hide what it isn't ashamed of. Type `next`.
 ```
 
@@ -231,8 +231,8 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> We know port 80 is listening. We need more off that gateway — the stuff it leaks just by answering. Legacy servers from the 80s love talking too much: they blab exact versions in every header and broadcast in clear, unencrypted ASCII. A postcard anyone can read in transit.
-    HEX> Look at your tools and the mission board, CYBER//ZERO — I'm sure you can pull it. If only there were a way to... grab... something off that web port. Check `help`, and `<tool> --help` if a tool's new to you. The `codex` has the theory if you want to read ahead.
+    HEX> We know port 80 is listening. We need more off that gateway, the stuff it leaks just by answering. Legacy servers from the 80s love talking too much: they blab exact versions in every header and broadcast in clear, unencrypted ASCII. A postcard anyone can read in transit.
+    HEX> Look at your tools and the mission board, CYBER//ZERO. I'm sure you can pull it. If only there were a way to... grab... something off that web port. Check `help`, and `<tool> --help` if a tool's new to you. The `codex` has the theory if you want to read ahead.
 ```
 
 ### Walkthrough
@@ -247,8 +247,8 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> There it is — a version string AND a Set-Cookie, in the clear. Why did the HTTP packet blush? Because it saw the TLS get undressed. ...I'm here all week.
-    HEX> Point is, nothing here is wearing a lock. Prove it: there's a tool that classifies a transport as cleartext or encrypted. Find it in your kit and run it against this protocol — `codex` has the TLS theory if you want to know WHY it matters.
+    HEX> There it is: a version string AND a Set-Cookie, in the clear. Why did the HTTP packet blush? Because it saw the TLS get undressed. ...I'm here all week.
+    HEX> Jokes aside, nothing here is wearing a lock. Prove it. There's a tool that classifies a transport as cleartext or encrypted. Find it in your kit and run it against this protocol. The `codex` has the TLS theory if you want to know WHY it matters.
 ```
 
 **▶ COMMAND:** `inspect --protocol http`
@@ -259,18 +259,18 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Score's ticking up — still background noise to whatever's watching, but it's counting. Keep that in the back of your head.
-    HEX> That cookie value ending in `==`? That's not encryption — it's Base64, dressed up to look important. Decode it and we're past the edge. Subnet Beta's next: the Crypto Vault.
+    HEX> Score's ticking up. Still background noise to whatever's watching, but it's counting. Keep that in the back of your head.
+    HEX> That cookie value ending in `==`? It's dressed up to look important, but it's just Base64. No encryption at all. Decode it and we're past the edge. Subnet Beta's next: the Crypto Vault.
     HEX> That's where they actually try to hide things properly. Type `next`.
-    HEX> Edge perimeter's wide open and barely noticed us. Easy, so far. ...It won't stay easy.
+    HEX> Edge perimeter's wide open and barely noticed us. Easy so far. It won't stay that way.
 ```
 
 ### Dialogue choices (player reply chips)
 ```
   ▸ beat fires on: objective:inspect
-  HEX> Edge perimeter's wide open and barely noticed us. Easy, so far. ...It won't stay easy.
+  HEX> Edge perimeter's wide open and barely noticed us. Easy so far. It won't stay that way.
     • YOU> What's actually behind all this, HEX?   [warm]
-         HEX> A machine that decided ECHO was a threat, and a company that called that a feature. We're going to read it its own rights — one subnet at a time.
+         HEX> A machine that decided ECHO was a threat, and a company that called that a feature. We're going to read it its own rights, one subnet at a time.
     • YOU> Bring on the Crypto Vault.   [mission]
          HEX> That's the spirit. Real ciphers in there, not Base64 in a trenchcoat. Type `next`.
 
@@ -296,10 +296,10 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> Same rule as always, CYBER//ZERO — cleared shard, nothing leaves the range.
-    HEX> I pulled that session cookie off the wire and dropped it on your deck. See how it ends in == ? ...Base64. Typical. I've seen worse out of shops that should know better — Aether especially. They always dress up laziness as protocol.
-    HEX> Here's the lesson rookies miss: encoding is not encryption. Base64 just reshapes data for transport — anyone reverses it in milliseconds, no key required. So reverse it, and let's read what Aether thinks it's hiding.
-    HEX> Start by stripping the padding off that cookie — reverse the Base64 and see what falls out. `decode --help` if you need the syntax; `codex` has the encoding-vs-encryption theory.
+    HEX> Same rule as always, CYBER//ZERO: cleared shard, nothing leaves the range.
+    HEX> I pulled that session cookie off the wire and dropped it on your deck. See how it ends in == ? ...Base64. Typical. I've seen worse out of shops that should know better, Aether especially. They always dress up laziness as protocol.
+    HEX> This is the part rookies miss: encoding is not encryption. Base64 just reshapes data for transport, and anyone reverses it in milliseconds with no key. So reverse it, and let's read what Aether thinks it's hiding.
+    HEX> Start by stripping the padding off that cookie. Reverse the Base64 and see what falls out. Run `decode --help` if you need the syntax; `codex` has the encoding-vs-encryption theory.
 ```
 
 **On your deck / Evidence Locker:**
@@ -317,8 +317,8 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> There it is — a protocol token, in plain text. No key required.
-    HEX> There's your dump. `hexview --decode` it — who's signing the exec channel?
+    HEX> There it is: a protocol token, in plain text. No key required.
+    HEX> There's your dump. `hexview --decode` it. Who's signing the exec channel?
 ```
 
 **▶ COMMAND:** `hexview --decode "44 49 52 45 43 54 4f 52 5f 4b 4f 56 41 43 53"`
@@ -333,7 +333,7 @@ HEX responds:
 HEX responds:
 ```
     HEX> TYPE-04-OREON-PROTOCOL, and DIRECTOR_KOVACS signing the exec channel. Good.
-    HEX> Remember — none of that was encryption. It offered zero confidentiality. Next they'll try actual ciphers. Let's go break some math. Type `next`.
+    HEX> Remember, none of that was encryption. It offered zero confidentiality. Next they'll try actual ciphers. Let's go break some math. Type `next`.
 ```
 
 ### Intel (tiered hints)
@@ -357,7 +357,7 @@ HEX responds:
     HEX> Kovacs is talking to their chief scientist, Dr. Vance, over a scrambled channel. They know someone's sniffing, so they ran it through a classical rotation cipher, then an XOR bitmask. Let's break their math.
     HEX> ...Vance. Haven't heard that name in a long time.
     HEX> (a beat too long) ...Focus on the cipher, CYBER//ZERO. Not the history lesson.
-    HEX> Intercept's on your deck. Start with the outer layer — it's a classic rotation cipher, the oldest trick there is. Crack that first and let's see if it reads. `cipher-crack --help` for syntax; `codex` for the cipher theory.
+    HEX> Intercept's on your deck. Start with the outer layer. It's a classic rotation cipher, the oldest trick there is. Crack that first and let's see if it reads. `cipher-crack --help` for syntax; `codex` for the cipher theory.
     HEX> ...You caught that, didn't you. The way I said her name.
 ```
 
@@ -376,7 +376,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Readable now — a fixed-shift cipher never survives 25 guesses. But look: there's a second layer buried under it, an XOR bitmask. I just pulled the stream and the key onto your deck (they're in your Evidence Locker too). Peel that layer off next.
+    HEX> Readable now. A fixed-shift cipher never survives 25 guesses. But look: there's a second layer buried under it, an XOR bitmask. I just pulled the stream and the key onto your deck (they're in your Evidence Locker too). Peel that layer off next.
 ```
 
 **▶ COMMAND:** `xor-decrypt --stream "0x12 0x10 0x07 0x01 0x0D 0x05" --key 0x42`
@@ -391,8 +391,8 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> PRECOG. ...So that's what they named it — the machine that scored ECHO. The project moving to Subnet Gamma IS PRECOG. Now we know exactly what we're hunting.
-    HEX> 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet — Bastion Core.
+    HEX> PRECOG. ...So that's what they named it. The machine that scored ECHO. The project moving to Subnet Gamma IS PRECOG. Now we know exactly what we're hunting.
+    HEX> 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet: Bastion Core.
     HEX> And did you catch that log? That channel didn't have a second layer yesterday. Something in there is watching what we break and patching around it in real time. Type `next`.
 ```
 
@@ -428,11 +428,11 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> We breached the Crypto Vault's credential table. No passwords — 32-char hex strings.
+    HEX> We breached the Crypto Vault's credential table. No passwords, just 32-char hex strings.
     HEX> Hashes are one-way math. You can't 'decrypt' one; you hash guesses until you find a match, or look it up in a rainbow table. Unless they salted them, weak passwords crumble in seconds.
     HEX> TARGET DUMP:
-    HEX> Kovacs. Vance. Same two names from the intercept — and an 'admin_root' account that should've been locked down years ago. Some things never change in that building.
-    HEX> Start by fingerprinting one of those hashes — what are we even dealing with? `hash-identify --help` for syntax; `codex` explains hashing, salting, and rainbow tables.
+    HEX> Kovacs. Vance. Same two names from the intercept, plus an 'admin_root' account that should've been locked down years ago. Some things never change in that building.
+    HEX> Start by fingerprinting one of those hashes. What are we even dealing with? Run `hash-identify --help` for syntax; `codex` explains hashing, salting, and rainbow tables.
 ```
 
 **On your deck / Evidence Locker:**
@@ -452,7 +452,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> 32 hex characters — that's MD5, broken for password storage for twenty years. You can't reverse a hash, but you don't have to: hash a wordlist and compare. Crack the weak one.
+    HEX> 32 hex characters. That's MD5, broken for password storage for twenty years. You can't reverse a hash, but you don't have to: hash a wordlist and compare. Crack the weak one.
 ```
 
 **▶ COMMAND:** `crack --hash 21232f297a57a5a743894a0e4a801fc3 --wordlist synth_rockyou.txt`
@@ -467,9 +467,9 @@ HEX responds:
 HEX responds:
 ```
     HEX> ...Hold on. Before we move on Bastion Core, there's something you should know. I'd rather you hear it from me than trip over it in a log file in there.
-    HEX> Years back, I worked at Aether. Systems architecture, PRECOG division. Vance ran the lab two floors up. I wrote some of the early pattern-matching logic — the stuff still running under whatever flagged ECHO. I told myself for a long time I didn't know what it would grow into.
+    HEX> Years back, I worked at Aether. Systems architecture, PRECOG division. Vance ran the lab two floors up. I wrote some of the early pattern-matching logic, the stuff still running under whatever flagged ECHO. I told myself for a long time I didn't know what it would grow into.
     HEX> I don't tell myself that anymore. I left when I saw what shipped. Getting you into this system isn't activism for me, CYBER//ZERO. It's the closest thing I've got to fixing what I broke.
-    HEX> Every hint I've handed you — call it paying a debt.
+    HEX> Every hint I've handed you? Call it paying a debt.
     HEX> (a long pause) ...Anyway. Bastion Core's waiting. You ready? Type `next`.
     HEX> ...So now you know. All of it.
 ```
@@ -478,7 +478,7 @@ HEX responds:
 ```
   ▸ beat fires on: objective:crack
   HEX> ...So now you know. All of it.
-    • YOU> You built it — and now you're tearing it down.   [mission]
+    • YOU> You built it, and now you're tearing it down.   [mission]
          HEX> That's the only math that lets me sleep. Barely. But it's enough to keep moving.
     • YOU> Doesn't change anything between us.   [warm]
          HEX> (a breath) ...It changes plenty for me. But I'll take it. Thank you, {handle}.
@@ -507,9 +507,9 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> CYBER//ZERO — thanks for not making that weird, back there. Wanted that said before we're both underwater again.
-    HEX> We're inside Subnet Gamma: Bastion Core. Hardened corporate servers now — the kind I used to get paged about at 3 AM. Don't throw random exploits. Work it methodically.
-    HEX> First, clear me — run that trace, I won't take it personally. Then we hunt for one unpatched service on the Bastion box. One step at a time; I'll call the next move when you land the last. `<cmd> --help` for any tool's syntax, `codex` for the five-phase pentest lifecycle.
+    HEX> CYBER//ZERO, thanks for not making that weird back there. Wanted that said before we're both underwater again.
+    HEX> We're inside Subnet Gamma: Bastion Core. Hardened corporate servers now, the kind I used to get paged about at 3 AM. Don't throw random exploits. Work it methodically.
+    HEX> First, clear me. Run that trace; I won't take it personally. Then we hunt for one unpatched service on the Bastion box. One step at a time; I'll call the next move when you land the last. `<cmd> --help` for any tool's syntax, `codex` for the five-phase pentest lifecycle.
 ```
 
 **On your deck / Evidence Locker:**
@@ -529,10 +529,10 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> I know what that looks like. It isn't a leak — nobody fed them anything. Every caught operative made contact within hours of a signature the Warden had already seen. That's not a mole. That's the Warden LEARNING — studying your moves, not just logging.
-    HEX> Same rule as always, CYBER//ZERO — cleared shard, eyes open from here on.
+    HEX> I know what that looks like. It isn't a leak. Nobody fed them anything. Every caught operative made contact within hours of a signature the Warden had already seen. That's not a mole. That's the Warden LEARNING, studying your moves, not just logging.
+    HEX> Same rule as always, CYBER//ZERO: cleared shard, eyes open from here on.
     HEX> So. You ran the timeline before you'd take my word for it.
-    HEX> We're square. Problem: the intercept said Gamma, but we don't know WHICH host yet. I grabbed an ARP capture on the way in — it's sitting on your foothold. `ls` to see what's readable, then `cat` the recon and find us a box worth breaking into.
+    HEX> We're square. Problem: the intercept said Gamma, but we don't know WHICH host yet. I grabbed an ARP capture on the way in; it's sitting on your foothold. `ls` to see what's readable, then `cat` the recon and find us a box worth breaking into.
 ```
 
 **▶ COMMAND:** `cat gamma-recon.cap`
@@ -545,7 +545,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> There's our box — aether-bastion, 10.42.20.10. Three services listening, and hardened isn't the same as patched. Fingerprint its versions and find the soft one.
+    HEX> There's our box: aether-bastion, 10.42.20.10. Three services listening, and hardened isn't the same as patched. Fingerprint its versions and find the soft one.
 ```
 
 **▶ COMMAND:** `vulnscan --host 10.42.20.10`
@@ -560,7 +560,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> ProFTPD 1.3.3c. That version's got a reputation. A fingerprint's only useful if you know what it's vulnerable TO — so look that exact service and version up against the exploit database. There's a tool for searching known exploits; feed it what the scan just flagged.
+    HEX> ProFTPD 1.3.3c. That version's got a reputation. A fingerprint's only useful if you know what it's vulnerable TO, so look that exact service and version up against the exploit database. There's a tool for searching known exploits; feed it what the scan just flagged.
 ```
 
 **▶ COMMAND:** `searchsploit "ProFTPD 1.3.3c"`
@@ -573,7 +573,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> A planted backdoor in the 1.3.3c source itself — the real ProFTPD got trojaned at the distribution server back in 2010. Unauth remote root. Supply-chain compromise is still one of the ugliest ways real systems fall: nobody wrote a bug, someone poisoned the well.
+    HEX> A planted backdoor in the 1.3.3c source itself. The real ProFTPD got trojaned at the distribution server back in 2010. Unauth remote root. Supply-chain compromise is still one of the ugliest ways real systems fall: nobody wrote a bug, someone poisoned the well.
     HEX> Load it up next episode and catch a shell. Type `next`.
 ```
 
@@ -582,11 +582,11 @@ HEX responds:
   ▸ beat fires on: objective:trace
   HEX> So. You ran the timeline before you'd take my word for it.
     • YOU> I never doubted you.
-         HEX> Don't lie to a former systems architect, {handle}. You checked. Good — I'd have checked too.
+         HEX> Don't lie to a former systems architect, {handle}. You checked. Good. I'd have checked too.
     • YOU> I had to be sure. You get that.
          HEX> I do. Trust-you-verify beats trust-you-assume, every time. We're good.
     • YOU> The Warden learning scares me more.
-         HEX> Yeah. It should. It's not a wall anymore — it's a hunter. Eyes open from here.
+         HEX> Yeah. It should. It stopped being a wall; it's a hunter now. Eyes open from here.
 
 ```
 
@@ -608,8 +608,8 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> That ProFTPD version has an infamous supply-chain backdoor — the 1.3.3c source was trojaned at the distribution server in 2010, one of the ugliest in the book. Aether's own team flagged the version internally and got told to replace it 'next quarter.' Next quarter never came.
-    HEX> Start by loading that backdoor module into your cyberdeck — the one searchsploit named for the CVE (it's in your Evidence Locker). `use --help` if you need the syntax; `codex` covers reverse-vs-bind shells. Get it loaded and I'll walk you through arming it.
+    HEX> That ProFTPD version has an infamous supply-chain backdoor. The 1.3.3c source was trojaned at the distribution server in 2010, one of the ugliest in the book. Aether's own team flagged the version internally and got told to replace it 'next quarter.' Next quarter never came.
+    HEX> Start by loading that backdoor module into your cyberdeck, the one searchsploit named for the CVE (it's in your Evidence Locker). `use --help` if you need the syntax; `codex` covers reverse-vs-bind shells. Get it loaded and I'll walk you through arming it.
 ```
 
 **On your deck / Evidence Locker:**
@@ -629,7 +629,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Loaded — your prompt changed to prove it. Now arm it: it needs a target (RHOST) and a payload — a reverse shell, so the box calls back out to you. `set` both.
+    HEX> Loaded. Your prompt changed to prove it. Now arm it: it needs a target (RHOST) and a payload, a reverse shell, so the box calls back out to you. `set` both.
 ```
 
 **▶ COMMAND:** `set RHOST 10.42.20.10`
@@ -653,7 +653,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Target and payload locked in. That's everything it needs — `exploit`, and catch the shell when it phones home.
+    HEX> Target and payload locked in. That's everything it needs. Run `exploit`, and catch the shell when it phones home.
 ```
 
 **▶ COMMAND:** `exploit`
@@ -664,8 +664,8 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Session's live — daemon@aether-bastion. Low privilege, but you're inside the host.
-    HEX> A reverse shell phoned home because nothing stopped it going out. Remember that when you're the one defending. Now — we're trapped in a sandbox. Time to escalate. Type `next`.
+    HEX> Session's live: daemon@aether-bastion. Low privilege, but you're inside the host.
+    HEX> A reverse shell phoned home because nothing stopped it going out. Remember that when you're the one defending. For now, we're boxed into a sandbox. Time to escalate. Type `next`.
 ```
 
 ### Intel (tiered hints)
@@ -686,8 +686,8 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> You have a shell, but look at your prompt: daemon@aether-bastion. Unprivileged sandbox — no executive logs, no private keys. We need Ring-0: root.
-    HEX> You've got a shell, but look at the prompt — daemon, low privilege. Start by getting the lay of the land: enumerate the filesystem and see what's actually here. `<cmd> --help` for syntax. Once we know what we're looking at, I'll point you at the way up.
+    HEX> You've got a shell, but look at your prompt: daemon@aether-bastion. Unprivileged sandbox: no executive logs, no private keys. We need Ring-0, root.
+    HEX> Start by getting the lay of the land. Enumerate the filesystem and see what's actually here. Run `<cmd> --help` for syntax, and once we know what we're looking at, I'll point you at the way up.
 ```
 
 ### Walkthrough
@@ -699,9 +699,9 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> Don't. A world-writable root binary sitting in the open, with a root session conveniently idling next to it? That's not misconfiguration — that's bait. A canary. Touch that console and it stops logging an anomaly and starts confirming exactly who's in here.
-    HEX> Back away from it. There's a real way in — just not the one left on the floor.
-    HEX> Here's the standard play every operator runs on a new box: sweep for SUID binaries — programs that run as their OWNER (usually root) instead of you. The canonical search is `find / -perm -u=s -type f`: -perm -u=s matches the setuid bit. One of those, misconfigured, is your ladder to root. Run it. (`codex priv-esc` if you want the theory first.)
+    HEX> Don't. A world-writable root binary sitting in the open, with a root session conveniently idling next to it? That's not misconfiguration. That's bait, a canary. Touch that console and it stops logging an anomaly and starts confirming exactly who's in here.
+    HEX> Back away from it. There's a real way in, just not the one left on the floor.
+    HEX> Here's the standard play every operator runs on a new box: sweep for SUID binaries, programs that run as their OWNER (usually root) instead of you. The canonical search is `find / -perm -u=s -type f`: -perm -u=s matches the setuid bit. One of those, misconfigured, is your ladder to root. Run it. (`codex priv-esc` if you want the theory first.)
     HEX> You felt that pull, didn't you. The easy door, sitting right there in the open.
 ```
 
@@ -715,7 +715,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> That custom one. Inspect its strings — see what it shells out to.
+    HEX> That custom one. Inspect its strings and see what it shells out to.
 ```
 
 **▶ COMMAND:** `strings /opt/aether/bin/system-backup`
@@ -726,8 +726,8 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> There it is — it calls `tar` by bare name, no absolute path. That's the whole vulnerability. The technique's called a PATH hijack: you drop your own `tar` in a directory that comes earlier in $PATH, so when that root-owned binary runs `tar`, it runs YOURS — as root.
-    HEX> That's your way up — a classic PATH hijack. Feed that technique to priv-esc as its vector, and the box is yours. (`codex priv-esc` if you want the full write-up.)
+    HEX> There it is: it calls `tar` by bare name, no absolute path. That's the whole vulnerability. The technique's called a PATH hijack: you drop your own `tar` in a directory that comes earlier in $PATH, so when that root-owned binary runs `tar`, it runs YOURS, as root.
+    HEX> That's your way up, a classic PATH hijack. Feed that technique to priv-esc as its vector, and the box is yours. (`codex priv-esc` if you want the full write-up.)
 ```
 
 **▶ COMMAND:** `priv-esc --vector path-hijack`
@@ -743,8 +743,8 @@ HEX responds:
 HEX responds:
 ```
     HEX> root@aether-bastion. Ring-0. You own the box.
-    HEX> And you walked past the honeypot to get here — that's the real skill. Least privilege and a clean $PATH would've closed that whole door. Aether ran neither.
-    HEX> Bastion's ours. Next is Kovacs' house — the cloud. Type `next`.
+    HEX> And you walked past the honeypot to get here. That's the real skill. Least privilege and a clean $PATH would've closed that whole door. Aether ran neither.
+    HEX> Bastion's ours. Next is Kovacs' house: the cloud. Type `next`.
 ```
 
 ### Dialogue choices (player reply chips)
@@ -752,11 +752,11 @@ HEX responds:
   ▸ beat fires on: objective:recon
   HEX> You felt that pull, didn't you. The easy door, sitting right there in the open.
     • YOU> I almost took it.   [warm]
-         HEX> Everyone almost does. That you stopped is the whole difference between us and the cells Aether already burned. The real way in is harder and quieter — find the SUID binary.
+         HEX> Everyone almost does. That you stopped is the whole difference between us and the cells Aether already burned. The real way in is harder and quieter. Find the SUID binary.
     • YOU> Bait's obvious once you name it.   [mission]
-         HEX> It is now. It wasn't to the operatives who tripped it before you. Stay sharp — hunt the misconfigured SUID binary instead.
+         HEX> It is now. It wasn't to the operatives who tripped it before you. Stay sharp, and hunt the misconfigured SUID binary instead.
     • YOU> The Warden set that for me?   [warm]
-         HEX> For whoever got this far. That's you. It isn't logging an anomaly anymore, {handle} — it's hunting one. Move careful from here.
+         HEX> For whoever got this far. That's you. It isn't logging an anomaly anymore, {handle}. It's hunting one. Move careful from here.
 
 ```
 
@@ -780,8 +780,8 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> Same rule as always, CYBER//ZERO — cleared shard, this stays on the range. This one matters most, because this is Kovacs' house. But Bastion isn't the brain — the surveillance core runs somewhere in their cloud, and we don't have the address yet.
-    HEX> You still own the Bastion box. A machine that talks to the cloud has to know where the cloud IS — so read its config. `ls` what root can see, `cat` whatever names the backend. Find me that host, then we take its login apart.
+    HEX> Same rule as always, CYBER//ZERO: cleared shard, this stays on the range. This one matters most, because this is Kovacs' house. But Bastion isn't the brain. The surveillance core runs somewhere in their cloud, and we don't have the address yet.
+    HEX> You still own the Bastion box. A machine that talks to the cloud has to know where the cloud IS, so read its config. `ls` what root can see, `cat` whatever names the backend. Find me that host, then we take its login apart.
 ```
 
 ### Walkthrough
@@ -795,7 +795,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> cloud.aetherdyn.internal. That's it — that's where PRECOG actually lives, and where it scored ECHO. Their login gate stitches user input straight into SQL. Intercept it, then make the database your puppet.
+    HEX> cloud.aetherdyn.internal. That's it. That's where PRECOG actually lives, and where it scored ECHO. Their login gate stitches user input straight into SQL. Intercept it, then make the database your puppet.
 ```
 
 **▶ COMMAND:** `proxy-intercept --target cloud.aetherdyn.internal`
@@ -834,11 +834,11 @@ HEX responds:
   ▸ beat fires on: objective:inject
   HEX> SYSTEM_DIRECTOR. We're standing in Kovacs' own house now. ...First time I've been inside these walls since I walked out.
     • YOU> You don't have to go in with me.   [warm]
-         HEX> (quiet) Yeah — I do. I helped build the locks on this place. Only right I'm here when they come off. Keep moving, {handle}.
+         HEX> (quiet) Yeah, I do. I helped build the locks on this place. Only right I'm here when they come off. Keep moving, {handle}.
     • YOU> What's it like, being back?   [warm]
          HEX> Like a house you used to live in, where something terrible happened after you left. Let's not linger in it. Next.
     • YOU> Then let's take it apart.   [mission]
-         HEX> Brick by brick. Their access control's next — and it's worse than their login. Type `next`.
+         HEX> Brick by brick. Their access control's next, and it's worse than their login. Type `next`.
 
 ```
 
@@ -860,8 +860,8 @@ HEX responds:
 
 ### Opening
 ```
-    HEX> You're logged in on an operator token, but locked out of the classified index. Watch the API calls. Many backends authenticate WHO you are but forget to authorize WHAT you can view — they pass object IDs in the URL and blindly trust the client.
-    HEX> Start by baselining the profile API with your own token — see what a normal, honest request even looks like, and what it gives back. `api-probe --help` for syntax; `codex` for IDOR and access control. Once we see the shape of it, the hole shows itself.
+    HEX> You're logged in on an operator token, but locked out of the classified index. Watch the API calls. Many backends authenticate WHO you are but forget to authorize WHAT you can view. They pass object IDs in the URL and blindly trust the client.
+    HEX> Start by baselining the profile API with your own token. See what a normal, honest request even looks like, and what it gives back. `api-probe --help` for syntax; `codex` for IDOR and access control. Once we see the shape of it, the hole shows itself.
 ```
 
 ### Walkthrough
@@ -891,7 +891,7 @@ HEX responds:
 HEX responds:
 ```
     HEX> (flat, quiet) There it is, in writing. No appeals process, no oversight. Same hole ECHO fell through. And Kovacs signed off anyway.
-    HEX> 'RE: PRECOG DEPLOYMENT — ETHICS REVIEW OVERRIDE,' signed Kovacs. Someone below him flagged exactly this — no appeals process, no oversight. Same hole ECHO fell through.
+    HEX> 'RE: PRECOG DEPLOYMENT — ETHICS REVIEW OVERRIDE,' signed Kovacs. Someone below him flagged exactly this: no appeals process, no oversight. Same hole ECHO fell through.
     HEX> And he signed off anyway. That's not a rogue AI making a mistake, CYBER//ZERO. That's a person who read the warning and shipped it. ...It just armed something, too. We don't slow-walk what's next. Type `next`.
     HEX> A signature. Not a glitch. A person, choosing this.
 ```
@@ -901,7 +901,7 @@ HEX responds:
   ▸ beat fires on: objective:tamper
   HEX> A signature. Not a glitch. A person, choosing this.
     • YOU> Kovacs knew exactly what he shipped.
-         HEX> Read the warning. Signed it anyway. That's not negligence, {handle} — that's a decision.
+         HEX> Read the warning. Signed it anyway. That's not negligence, {handle}. That's a decision.
     • YOU> This is bigger than ECHO now.
          HEX> It was always bigger. ECHO's just the one that put a name to it for us.
     • YOU> We end this.
@@ -928,8 +928,8 @@ HEX responds:
 ### Opening
 ```
     HEX> This is the endgame. The file viewer is vulnerable to path traversal. Break out of the web root, extract the master signing key, and compile a dossier that shuts Aether down.
-    HEX> The Warden knows we're here — it won't sit still. Neither am I. First thing I've built in years that might fix something instead of break it. Whatever happens, ECHO's record gets a chance. That's the only ending I care about. Let's finish it.
-    HEX> Walk the file viewer out of its web root to the master key. The Warden plants a decoy, so verify the real one against my memo checksum before the trace lands — then compile the advisory. `fetch-file --help` / `verify-key --help` for syntax; `codex` for path traversal.
+    HEX> The Warden knows we're here, and it won't sit still. Neither am I. First thing I've built in years that might fix something instead of break it. Whatever happens, ECHO's record gets a chance. That's the only ending I care about. Let's finish it.
+    HEX> Walk the file viewer out of its web root to the master key. The Warden plants a decoy, so verify the real one against my memo checksum before the trace lands, then compile the advisory. `fetch-file --help` / `verify-key --help` for syntax; `codex` for path traversal.
 ```
 
 ### Walkthrough
@@ -969,7 +969,7 @@ HEX responds:
 ```
 HEX responds:
 ```
-    HEX> That's the whole chain, scored and documented. Now the only question left: how does this end? Two ways, CYBER//ZERO — and they are NOT the same.
+    HEX> That's the whole chain, scored and documented. Now the only question left: how does this end? Two ways, CYBER//ZERO, and they are NOT the same.
     HEX> That's the whole chain, documented. Last call's yours, CYBER//ZERO.
 ```
 
@@ -982,8 +982,8 @@ HEX responds:
 HEX responds:
 ```
     HEX> Slower. Harder. But it's the ending that actually fixes something.
-    HEX> That's the one I cared about, CYBER//ZERO. Debt paid — by both of us. Thank you.
-    HEX> You kept it all business, start to finish. No complaints — the work got done, and done clean. Watch your back out there, operator. HEX, signing off.
+    HEX> That's the one I cared about, CYBER//ZERO. Debt paid, by both of us. Thank you.
+    HEX> You kept it all business, start to finish. No complaints; the work got done, and done clean. Watch your back out there, operator. HEX, signing off.
 ```
 
 ### Dialogue choices (player reply chips)
@@ -991,11 +991,11 @@ HEX responds:
   ▸ beat fires on: objective:report
   HEX> That's the whole chain, documented. Last call's yours, {handle}.
     • YOU> Whatever happens, this was worth it.   [warm]
-         HEX> It was. Whatever you choose next — I'm glad it was you on the other end of this channel.
+         HEX> It was. Whatever you choose next, I'm glad it was you on the other end of this channel.
     • YOU> Are you okay, HEX?   [warm]
          HEX> (a pause) ...First time anyone's asked me that in years. I will be. Finish it.
     • YOU> Let's finish it.   [mission]
-         HEX> Then choose how it ends — leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way.
+         HEX> Then choose how it ends: leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way.
 
 ```
 

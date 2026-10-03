@@ -39,15 +39,15 @@ export const episode04: Episode = {
   briefing: "HEX: Encoding is not encryption — anyone can reverse it with no key. Strip the padding.",
   codexTopic: "cryptography",
   intro: [
-    "[COMMS // HEX]: Same rule as always, {handle} — cleared shard, nothing leaves the range.",
+    "[COMMS // HEX]: Same rule as always, {handle}: cleared shard, nothing leaves the range.",
     "[COMMS // HEX]: I pulled that session cookie off the wire and dropped it on your deck. See how it",
-    "ends in == ? ...Base64. Typical. I've seen worse out of shops that should know better — Aether",
+    "ends in == ? ...Base64. Typical. I've seen worse out of shops that should know better, Aether",
     "especially. They always dress up laziness as protocol.",
-    "[COMMS // HEX]: Here's the lesson rookies miss: encoding is not encryption. Base64 just reshapes",
-    "data for transport — anyone reverses it in milliseconds, no key required. So reverse it, and let's",
+    "[COMMS // HEX]: This is the part rookies miss: encoding is not encryption. Base64 just reshapes",
+    "data for transport, and anyone reverses it in milliseconds with no key. So reverse it, and let's",
     "read what Aether thinks it's hiding.",
-    "[COMMS // HEX]: Start by stripping the padding off that cookie — reverse the Base64 and see what",
-    "falls out. `decode --help` if you need the syntax; `codex` has the encoding-vs-encryption theory.",
+    "[COMMS // HEX]: Start by stripping the padding off that cookie. Reverse the Base64 and see what",
+    "falls out. Run `decode --help` if you need the syntax; `codex` has the encoding-vs-encryption theory.",
     // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
     { text: "", kind: "normal" },
     { text: "  ── INTERCEPT // SESSION COOKIE ─────────────────────────────", kind: "system" },
@@ -70,7 +70,7 @@ export const episode04: Episode = {
   ],
   outro: [
     "[COMMS // HEX]: TYPE-04-OREON-PROTOCOL, and DIRECTOR_KOVACS signing the exec channel. Good.",
-    "[COMMS // HEX]: Remember — none of that was encryption. It offered zero confidentiality. Next",
+    "[COMMS // HEX]: Remember, none of that was encryption. It offered zero confidentiality. Next",
     "they'll try actual ciphers. Let's go break some math. Type `next`.",
   ],
   commands: {
@@ -94,7 +94,7 @@ export const episode04: Episode = {
           { text: `[✓] ASCII output : ${out}`, kind: "success" },
         ]);
         if (out === "TYPE-04-OREON-PROTOCOL") {
-          api.print("[COMMS // HEX]: There it is — a protocol token, in plain text. No key required.", "hex");
+          api.print("[COMMS // HEX]: There it is: a protocol token, in plain text. No key required.", "hex");
           api.complete("b64");
           api.addScore(40);
           // The token unlocks the executive hex log — surface it to decode next.
@@ -108,7 +108,7 @@ export const episode04: Episode = {
               { text: "  (select + copy those bytes, then run `hexview` — see `hexview --help`)", kind: "dim" },
             ]);
             api.evidence("Executive log (hex dump)", KOVACS_HEX);
-            api.print("[COMMS // HEX]: There's your dump. `hexview --decode` it — who's signing the exec channel?", "hex");
+            api.print("[COMMS // HEX]: There's your dump. `hexview --decode` it. Who's signing the exec channel?", "hex");
           }
         }
       },
@@ -160,7 +160,7 @@ export const episode05: Episode = {
     "bitmask. Let's break their math.",
     { text: "[COMMS // HEX]: ...Vance. Haven't heard that name in a long time.", kind: "hex" },
     { text: "[COMMS // HEX]: (a beat too long) ...Focus on the cipher, {handle}. Not the history lesson.", kind: "hex" },
-    { text: "[COMMS // HEX]: Intercept's on your deck. Start with the outer layer — it's a classic rotation", kind: "hex" },
+    { text: "[COMMS // HEX]: Intercept's on your deck. Start with the outer layer. It's a classic rotation", kind: "hex" },
     { text: "cipher, the oldest trick there is. Crack that first and let's see if it reads. `cipher-crack --help`", kind: "hex" },
     { text: "for syntax; `codex` for the cipher theory.", kind: "hex" },
     // Intercept data printed to the TERMINAL (non-hex kinds) so it's copyable.
@@ -175,7 +175,7 @@ export const episode05: Episode = {
       id: "caesar",
       label: "Brute-force the Caesar shift to readable text",
       hex: [
-        "[COMMS // HEX]: Readable now — a fixed-shift cipher never survives 25 guesses. But look: there's a",
+        "[COMMS // HEX]: Readable now. A fixed-shift cipher never survives 25 guesses. But look: there's a",
         "second layer buried under it, an XOR bitmask. I just pulled the stream and the key onto your deck",
         "(they're in your Evidence Locker too). Peel that layer off next.",
       ],
@@ -194,7 +194,7 @@ export const episode05: Episode = {
       "hex stream from your deck and the recovered --key 0x42 (XOR is its own inverse).",
   ],
   outro: [
-    "[COMMS // HEX]: 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet — Bastion Core.",
+    "[COMMS // HEX]: 'THE PROJECT IS MOVING TO SUBNET GAMMA.' That's our next subnet: Bastion Core.",
     "[COMMS // HEX]: And did you catch that log? That channel didn't have a second layer yesterday.",
     "Something in there is watching what we break and patching around it in real time. Type `next`.",
   ],
@@ -294,7 +294,7 @@ export const episode05: Episode = {
         ]);
         if (text === "PRECOG") {
           api.print([
-            { text: "[COMMS // HEX]: PRECOG. ...So that's what they named it — the machine that scored ECHO.", kind: "hex" },
+            { text: "[COMMS // HEX]: PRECOG. ...So that's what they named it. The machine that scored ECHO.", kind: "hex" },
             { text: "The project moving to Subnet Gamma IS PRECOG. Now we know exactly what we're hunting.", kind: "hex" },
           ]);
         }
@@ -315,7 +315,7 @@ export const episode06: Episode = {
   briefing: "HEX: You can't decrypt a hash — you guess until one collides. Unsalted + weak = seconds.",
   codexTopic: "cryptography",
   intro: [
-    "[COMMS // HEX]: We breached the Crypto Vault's credential table. No passwords — 32-char hex strings.",
+    "[COMMS // HEX]: We breached the Crypto Vault's credential table. No passwords, just 32-char hex strings.",
     "[COMMS // HEX]: Hashes are one-way math. You can't 'decrypt' one; you hash guesses until you find a",
     "match, or look it up in a rainbow table. Unless they salted them, weak passwords crumble in seconds.",
     "",
@@ -323,9 +323,9 @@ export const episode06: Episode = {
     { text: "    kovacs:     5d41402abc4b2a76b9719d911017c592", kind: "dim" },
     { text: "    vance:      098f6bcd4621d373cade4e832627b4f6", kind: "dim" },
     { text: "    admin_root: 21232f297a57a5a743894a0e4a801fc3", kind: "dim" },
-    "[COMMS // HEX]: Kovacs. Vance. Same two names from the intercept — and an 'admin_root' account that",
+    "[COMMS // HEX]: Kovacs. Vance. Same two names from the intercept, plus an 'admin_root' account that",
     "should've been locked down years ago. Some things never change in that building.",
-    "[COMMS // HEX]: Start by fingerprinting one of those hashes — what are we even dealing with? `hash-identify",
+    "[COMMS // HEX]: Start by fingerprinting one of those hashes. What are we even dealing with? Run `hash-identify",
     "--help` for syntax; `codex` explains hashing, salting, and rainbow tables.",
   ],
   objectives: [
@@ -333,7 +333,7 @@ export const episode06: Episode = {
       id: "identify",
       label: "Fingerprint the hash algorithm",
       hex: [
-        "[COMMS // HEX]: 32 hex characters — that's MD5, broken for password storage for twenty years. You",
+        "[COMMS // HEX]: 32 hex characters. That's MD5, broken for password storage for twenty years. You",
         "can't reverse a hash, but you don't have to: hash a wordlist and compare. Crack the weak one.",
       ],
     },
@@ -356,11 +356,11 @@ export const episode06: Episode = {
     "[COMMS // HEX]: ...Hold on. Before we move on Bastion Core, there's something you should know.",
     "I'd rather you hear it from me than trip over it in a log file in there.",
     "[COMMS // HEX]: Years back, I worked at Aether. Systems architecture, PRECOG division. Vance ran",
-    "the lab two floors up. I wrote some of the early pattern-matching logic — the stuff still running",
+    "the lab two floors up. I wrote some of the early pattern-matching logic, the stuff still running",
     "under whatever flagged ECHO. I told myself for a long time I didn't know what it would grow into.",
     "[COMMS // HEX]: I don't tell myself that anymore. I left when I saw what shipped. Getting you into",
     "this system isn't activism for me, {handle}. It's the closest thing I've got to fixing what I broke.",
-    "[COMMS // HEX]: Every hint I've handed you — call it paying a debt.",
+    "[COMMS // HEX]: Every hint I've handed you? Call it paying a debt.",
     { text: "[COMMS // HEX]: (a long pause) ...Anyway. Bastion Core's waiting. You ready? Type `next`.", kind: "hex" },
   ],
   beats: [
@@ -369,7 +369,7 @@ export const episode06: Episode = {
       prompt: "...So now you know. All of it.",
       replies: [
         {
-          text: "You built it — and now you're tearing it down.",
+          text: "You built it, and now you're tearing it down.",
           tone: "mission",
           response: ["That's the only math that lets me sleep. Barely. But it's enough to keep moving."],
         },

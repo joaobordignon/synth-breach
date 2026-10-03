@@ -64,8 +64,8 @@ export const episode00: Episode = {
     dismissLabel: "JACK IN ▸",
   },
   intro: [
-    "[COMMS // HEX]: Signal's clean. You're jacked in, {handle} — I read you five by five.",
-    "[COMMS // HEX]: First things first: let's see if you can drive this rig. Type `help`, and I'll show",
+    "[COMMS // HEX]: Signal's clean. You're jacked in, {handle}. I read you five by five.",
+    "[COMMS // HEX]: Let's see if you can drive this rig. Type `help` and I'll show",
     "you what you're working with.",
   ],
   objectives: [
@@ -73,8 +73,8 @@ export const episode00: Episode = {
       id: "help",
       label: "Run `help` to see your toolkit",
       hex: [
-        "[COMMS // HEX]: Nice — that's your whole toolkit. Every line there is a command you can run.",
-        "[COMMS // HEX]: Want to know more about any of it? That's what the `codex` is for — our reference",
+        "[COMMS // HEX]: Nice. That's your whole toolkit. Every line there is a command you can run.",
+        "[COMMS // HEX]: Want to know more about any of it? That's what the `codex` is for. Our reference",
         "library, and it's always free. Go on, open it up.",
       ],
     },
@@ -100,15 +100,15 @@ export const episode00: Episode = {
       trigger: "intro",
       prompt: "You still with me, {handle}? First run's always the one that sticks.",
       replies: [
-        { text: "Ready. Point me at it.", response: ["Good. No hesitation — that's the right kind of scared. Start with `help`."] },
+        { text: "Ready. Point me at it.", response: ["Good. A little scared is the right kind of scared. Start with `help`."] },
         {
           text: "...This is really all simulated?",
-          response: ["Every byte. Air-gapped shard. Out there it's a felony; in here it's a classroom. Breathe — then `help`."],
+          response: ["Every byte. It's an air-gapped shard. Out there this is a felony. In here it's a classroom. Breathe, then `help`."],
         },
         {
           text: "Why me?",
           tone: "warm",
-          response: ["Because you've got a reason. People with reasons don't quit at the first locked door. Now — `help`."],
+          response: ["Because you've got a reason. People with reasons don't quit at the first locked door. Now go on, `help`."],
         },
       ],
     },
@@ -128,16 +128,16 @@ export const episode00: Episode = {
       run: (args, api) => {
         // One step at a time: `help` comes first so the toolkit is in view.
         if (!api.isComplete("help")) {
-          return api.print("[COMMS // HEX]: Hold up — run `help` first, so you can see the kit you're working with. Then open the `codex`.", "hex");
+          return api.print("[COMMS // HEX]: Hold up. Run `help` first, so you can see the kit you're working with, then open the `codex`.", "hex");
         }
         const query = args.join(" ").trim();
         api.print(`[*] Opening CODEX reference library${query ? ` → ${query}` : ""}... (free, no penalty)`, "system");
         api.openCodex(query || undefined);
         api.complete("codex");
-        api.print("[COMMS // HEX]: Good — the codex is your friend. Pop it open any time you're stuck.", "hex");
+        api.print("[COMMS // HEX]: Good. The codex is your friend. Pop it open any time you're stuck.", "hex");
         api.print([
           { text: "[COMMS // HEX]: Now the one thing that matters more than any command: our code of conduct.", kind: "hex" },
-          { text: "We only ever break into what we're cleared to break into — and this whole range is practice,", kind: "hex" },
+          { text: "We only break into what we're cleared to break into, and this whole range is practice,", kind: "hex" },
           { text: "nothing real. Here it is:", kind: "hex" },
         ]);
         api.print([{ text: "", kind: "normal" }, ...OPERATING_CODE, { text: "", kind: "normal" }]);
@@ -150,7 +150,7 @@ export const episode00: Episode = {
       run: (_args, api) => {
         // Enforce the order: you can't sign the Code before you've opened it.
         if (!api.isComplete("codex")) {
-          return api.print("[COMMS // HEX]: Not yet — open the `codex` first and read the Operating Code. Then you can sign it.", "hex");
+          return api.print("[COMMS // HEX]: Not yet. Open the `codex` first and read the Operating Code, then you can sign it.", "hex");
         }
         // Always reprint the Code at the moment of signing — so it's on screen
         // right here, never scrolled away by the help listing.

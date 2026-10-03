@@ -23,11 +23,11 @@ export const episode10: Episode = {
   briefing: "HEX: Their login stitches user input straight into SQL. Make the database your puppet.",
   codexTopic: "webSecurity",
   intro: [
-    "[COMMS // HEX]: Same rule as always, {handle} — cleared shard, this stays on the range. This one",
-    "matters most, because this is Kovacs' house. But Bastion isn't the brain — the surveillance core",
+    "[COMMS // HEX]: Same rule as always, {handle}: cleared shard, this stays on the range. This one",
+    "matters most, because this is Kovacs' house. But Bastion isn't the brain. The surveillance core",
     "runs somewhere in their cloud, and we don't have the address yet.",
     "[COMMS // HEX]: You still own the Bastion box. A machine that talks to the cloud has to know where",
-    "the cloud IS — so read its config. `ls` what root can see, `cat` whatever names the backend. Find",
+    "the cloud IS, so read its config. `ls` what root can see, `cat` whatever names the backend. Find",
     "me that host, then we take its login apart.",
   ],
   objectives: [
@@ -57,7 +57,7 @@ export const episode10: Episode = {
         completes: "locate",
         score: 30,
         hex: [
-          "[COMMS // HEX]: cloud.aetherdyn.internal. That's it — that's where PRECOG actually lives, and",
+          "[COMMS // HEX]: cloud.aetherdyn.internal. That's it. That's where PRECOG actually lives, and",
           "where it scored ECHO. Their login gate stitches user input straight into SQL. Intercept it, then",
           "make the database your puppet.",
         ],
@@ -89,7 +89,7 @@ export const episode10: Episode = {
           text: "You don't have to go in with me.",
           tone: "warm",
           response: [
-            "(quiet) Yeah — I do. I helped build the locks on this place. Only right I'm here when they come " +
+            "(quiet) Yeah, I do. I helped build the locks on this place. Only right I'm here when they come " +
               "off. Keep moving, {handle}.",
           ],
         },
@@ -104,7 +104,7 @@ export const episode10: Episode = {
         {
           text: "Then let's take it apart.",
           tone: "mission",
-          response: ["Brick by brick. Their access control's next — and it's worse than their login. Type `next`."],
+          response: ["Brick by brick. Their access control's next, and it's worse than their login. Type `next`."],
         },
       ],
     },
@@ -191,8 +191,8 @@ export const episode11: Episode = {
   intro: [
     "[COMMS // HEX]: You're logged in on an operator token, but locked out of the classified index.",
     "Watch the API calls. Many backends authenticate WHO you are but forget to authorize WHAT you can",
-    "view — they pass object IDs in the URL and blindly trust the client.",
-    "[COMMS // HEX]: Start by baselining the profile API with your own token — see what a normal, honest",
+    "view. They pass object IDs in the URL and blindly trust the client.",
+    "[COMMS // HEX]: Start by baselining the profile API with your own token. See what a normal, honest",
     "request even looks like, and what it gives back. `api-probe --help` for syntax; `codex` for IDOR and",
     "access control. Once we see the shape of it, the hole shows itself.",
   ],
@@ -210,7 +210,7 @@ export const episode11: Episode = {
   ],
   outro: [
     "[COMMS // HEX]: 'RE: PRECOG DEPLOYMENT — ETHICS REVIEW OVERRIDE,' signed Kovacs. Someone below him",
-    "flagged exactly this — no appeals process, no oversight. Same hole ECHO fell through.",
+    "flagged exactly this: no appeals process, no oversight. Same hole ECHO fell through.",
     "[COMMS // HEX]: And he signed off anyway. That's not a rogue AI making a mistake, {handle}. That's a",
     "person who read the warning and shipped it. ...It just armed something, too. We don't slow-walk",
     "what's next. Type `next`.",
@@ -222,7 +222,7 @@ export const episode11: Episode = {
       replies: [
         {
           text: "Kovacs knew exactly what he shipped.",
-          response: ["Read the warning. Signed it anyway. That's not negligence, {handle} — that's a decision."],
+          response: ["Read the warning. Signed it anyway. That's not negligence, {handle}. That's a decision."],
         },
         {
           text: "This is bigger than ECHO now.",
@@ -326,12 +326,12 @@ export const episode12: Episode = {
   intro: [
     "[COMMS // HEX]: This is the endgame. The file viewer is vulnerable to path traversal. Break out of",
     "the web root, extract the master signing key, and compile a dossier that shuts Aether down.",
-    "[COMMS // HEX]: The Warden knows we're here — it won't sit still. Neither am I. First thing I've",
+    "[COMMS // HEX]: The Warden knows we're here, and it won't sit still. Neither am I. First thing I've",
     "built in years that might fix something instead of break it. Whatever happens, ECHO's record gets",
     "a chance. That's the only ending I care about. Let's finish it.",
     "",
     "[COMMS // HEX]: Walk the file viewer out of its web root to the master key. The Warden plants a",
-    "decoy, so verify the real one against my memo checksum before the trace lands — then compile the",
+    "decoy, so verify the real one against my memo checksum before the trace lands, then compile the",
     "advisory. `fetch-file --help` / `verify-key --help` for syntax; `codex` for path traversal.",
   ],
   objectives: [
@@ -360,7 +360,7 @@ export const episode12: Episode = {
         {
           text: "Whatever happens, this was worth it.",
           tone: "warm",
-          response: ["It was. Whatever you choose next — I'm glad it was you on the other end of this channel."],
+          response: ["It was. Whatever you choose next, I'm glad it was you on the other end of this channel."],
         },
         {
           text: "Are you okay, HEX?",
@@ -370,7 +370,7 @@ export const episode12: Episode = {
         {
           text: "Let's finish it.",
           tone: "mission",
-          response: ["Then choose how it ends — leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way."],
+          response: ["Then choose how it ends: leak it to the world, or disclose it clean. Both shut Aether down. Only one clears ECHO's name the right way."],
         },
       ],
     },
@@ -468,7 +468,7 @@ export const episode12: Episode = {
         } else {
           api.print([
             { text: "[!] CHECKSUM MISMATCH — that's the WARDEN decoy. Grabbing it cost you time.", kind: "error" },
-            { text: "[COMMS // HEX]: Bait. Same trick as the Bastion honeypot. Try the other candidate — quickly.", kind: "hex" },
+            { text: "[COMMS // HEX]: Bait. Same trick as the Bastion honeypot. Try the other candidate, quickly.", kind: "hex" },
           ]);
         }
       },
@@ -496,7 +496,7 @@ export const episode12: Episode = {
         ]);
         api.print([
           { text: "[COMMS // HEX]: That's the whole chain, scored and documented. Now the only question left:", kind: "hex" },
-          { text: "how does this end? Two ways, {handle} — and they are NOT the same.", kind: "hex" },
+          { text: "how does this end? Two ways, {handle}, and they are NOT the same.", kind: "hex" },
           { text: "  broadcast-leak --mode=public            -> Full Exposure (Vigilante)", kind: "warn" },
           { text: "  bounty-report --submit --responsible    -> Coordinated Disclosure (Whitehat)", kind: "success" },
         ]);
@@ -532,7 +532,7 @@ function rapportCoda(api: Api): Line[] {
       { text: "", kind: "normal" },
       { text: "[COMMS // HEX]: ...One more thing, before I drop this channel for good. You talked to me", kind: "hex" },
       { text: "like I was a person, not a voice in your ear. I'd forgotten what that was like. Thank you", kind: "hex" },
-      { text: "for that, {handle} — more than for any of the rest of it. Don't be a stranger out there.", kind: "hex" },
+      { text: "for that, {handle}, more than for any of the rest of it. Don't be a stranger out there.", kind: "hex" },
     ];
   }
   if (r >= 1) {
@@ -544,7 +544,7 @@ function rapportCoda(api: Api): Line[] {
   }
   return [
     { text: "", kind: "normal" },
-    { text: "[COMMS // HEX]: You kept it all business, start to finish. No complaints — the work got done,", kind: "hex" },
+    { text: "[COMMS // HEX]: You kept it all business, start to finish. No complaints; the work got done,", kind: "hex" },
     { text: "and done clean. Watch your back out there, operator. HEX, signing off.", kind: "hex" },
   ];
 }
@@ -567,7 +567,7 @@ function runVigilanteEnding(api: import("../../engine/types").EngineApi) {
   endingBanner(api, "VIGILANTE OPERATOR");
   api.print([
     { text: "[*] broadcast-leak: entire Aether dossier dumped to every public relay, uncensored.", kind: "warn" },
-    { text: "[COMMS // HEX]: It's done. Aether's gone — fast. No remediation window, no mercy.", kind: "hex" },
+    { text: "[COMMS // HEX]: It's done. Aether's gone. Fast. No remediation window, no mercy.", kind: "hex" },
     { text: "", kind: "normal" },
     { text: "  EPILOGUE — Aether collapses within days. But PRECOG's victim data leaked alongside", kind: "dim" },
     { text: "  everything else: ECHO's records are exposed to the world, with no clean legal process", kind: "dim" },
@@ -589,9 +589,9 @@ function runWhitehatEnding(api: import("../../engine/types").EngineApi) {
     { text: "[COMMS // HEX]: Slower. Harder. But it's the ending that actually fixes something.", kind: "hex" },
     { text: "", kind: "normal" },
     { text: "  EPILOGUE — A formal audit forces systemic reform: PRECOG is dismantled with oversight,", kind: "dim" },
-    { text: "  an appeals process is mandated, and — the part that matters — ECHO's record is legally", kind: "dim" },
+    { text: "  an appeals process is mandated, and (the part that matters) ECHO's record is legally", kind: "dim" },
     { text: "  and cleanly expunged. No leak, no collateral. Just a name, returned.", kind: "dim" },
-    { text: "[COMMS // HEX]: That's the one I cared about, {handle}. Debt paid — by both of us. Thank you.", kind: "hex" },
+    { text: "[COMMS // HEX]: That's the one I cared about, {handle}. Debt paid, by both of us. Thank you.", kind: "hex" },
   ]);
   api.print(rapportCoda(api));
   api.addScore(150);
